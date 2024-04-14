@@ -61,16 +61,20 @@ var role_const_1 = require("../../constants/role.const");
 var password_hash_1 = __importDefault(require("password-hash"));
 var user_helper_1 = require("../../models/user/user.helper");
 var error_1 = require("../../base/error");
+var phone_1 = __importDefault(require("phone"));
 var UserRoute = /** @class */ (function (_super) {
     __extends(UserRoute, _super);
     function UserRoute() {
         return _super.call(this) || this;
     }
     UserRoute.prototype.customRouting = function () {
+        this.router.post("/register", this.route(this.register));
         this.router.post("/login", this.route(this.login));
-        this.router.post("/getAllClient", [this.authentication], this.route(this.getAllClient));
-        this.router.post("/getOneClient/:id", [this.authentication], this.route(this.getOneClient));
-        this.router.post("/createClient", [this.authentication], this.route(this.createClient));
+        this.router.get("/getAllUser", [this.authentication], this.route(this.getAllUser));
+        this.router.get("/getOneUser/:id", [this.authentication], this.route(this.getOneUser));
+        this.router.post("/createUser", [this.authentication], this.route(this.createUser));
+        this.router.post("/updateUser", [this.authentication], this.route(this.updateUser));
+        this.router.post("/deleteOneUser", [this.authentication], this.route(this.deleteOneUser));
     };
     UserRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
@@ -94,6 +98,51 @@ var UserRoute = /** @class */ (function (_super) {
                         return [3 /*break*/, 3];
                     case 2: throw error_1.ErrorHelper.permissionDeny();
                     case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    //register
+    UserRoute.prototype.register = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, name, phoneNumber, password, phoneCheck, userCheck, key, user;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, name = _a.name, phoneNumber = _a.phoneNumber, password = _a.password;
+                        if (!name || !phoneNumber || !password) {
+                            throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
+                        }
+                        phoneCheck = (0, phone_1.default)(phoneNumber);
+                        if (!phoneCheck.isValid) {
+                            throw error_1.ErrorHelper.requestDataInvalid("phone");
+                        }
+                        return [4 /*yield*/, user_model_1.UserModel.findOne({ phone: phoneNumber })];
+                    case 1:
+                        userCheck = _b.sent();
+                        if (userCheck) {
+                            throw error_1.ErrorHelper.userExisted();
+                        }
+                        key = token_helper_1.TokenHelper.generateKey();
+                        user = new user_model_1.UserModel({
+                            name: name ? name.trim() : "",
+                            password: password_hash_1.default.generate(password),
+                            phone: phoneCheck.phoneNumber,
+                            role: role_const_1.ROLES.CLIENT,
+                            key: key,
+                        });
+                        return [4 /*yield*/, user.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    user: user,
+                                    token: new user_helper_1.UserHelper(user).getToken(key),
+                                },
+                            })];
                 }
             });
         });
@@ -134,7 +183,7 @@ var UserRoute = /** @class */ (function (_super) {
         });
     };
     //getAllUser
-    UserRoute.prototype.getAllClient = function (req, res) {
+    UserRoute.prototype.getAllUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var users;
             return __generator(this, function (_a) {
@@ -146,7 +195,6 @@ var UserRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, user_model_1.UserModel.find({})];
                     case 1:
                         users = _a.sent();
-                        console.log(users);
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
@@ -160,7 +208,7 @@ var UserRoute = /** @class */ (function (_super) {
         });
     };
     //getOneUser
-    UserRoute.prototype.getOneClient = function (req, res) {
+    UserRoute.prototype.getOneUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var user;
             return __generator(this, function (_a) {
@@ -184,7 +232,7 @@ var UserRoute = /** @class */ (function (_super) {
             });
         });
     };
-    UserRoute.prototype.createClient = function (req, res) {
+    UserRoute.prototype.createUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, username, password, name, phone, gender, address, userCheck, key, user;
             return __generator(this, function (_b) {
@@ -221,6 +269,72 @@ var UserRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: {
                                     user: user,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.updateUser = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, id, name, gender, address, email, userCheck;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        _a = req.body, id = _a.id, name = _a.name, gender = _a.gender, address = _a.address, email = _a.email;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(id)];
+                    case 1:
+                        userCheck = _b.sent();
+                        if (!userCheck) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        userCheck.name = name;
+                        userCheck.email = email;
+                        userCheck.gender = gender;
+                        userCheck.address = address;
+                        return [4 /*yield*/, userCheck.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    userCheck: userCheck,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.deleteOneUser = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, userCheck;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        id = req.body.id;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(id)];
+                    case 1:
+                        userCheck = _a.sent();
+                        if (!userCheck) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        return [4 /*yield*/, user_model_1.UserModel.deleteOne({ _id: id })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    userCheck: userCheck,
                                 },
                             })];
                 }

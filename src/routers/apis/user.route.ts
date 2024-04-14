@@ -7,26 +7,43 @@ import passwordHash from "password-hash";
 import { UserHelper } from "../../models/user/user.helper";
 import { ErrorHelper } from "../../base/error";
 import { Request, Response } from "../../base/baseRoute";
+import phone from "phone";
 class UserRoute extends BaseRoute {
   constructor() {
     super();
   }
   customRouting() {
+    this.router.post("/register", this.route(this.register));
     this.router.post("/login", this.route(this.login));
     this.router.post(
-      "/getAllClient",
+      "/getAllUser",
       [this.authentication],
-      this.route(this.getAllClient)
+      this.route(this.getAllUser)
     );
     this.router.post(
-      "/getOneClient/:id",
+      "/getOneUser/:id",
       [this.authentication],
-      this.route(this.getOneClient)
+      this.route(this.getOneUser)
     );
     this.router.post(
-      "/createClient",
+      "/createUser",
       [this.authentication],
-      this.route(this.createClient)
+      this.route(this.createUser)
+    );
+    this.router.post(
+      "/updateMe",
+      [this.authentication],
+      this.route(this.updateMe)
+    );
+    this.router.post(
+      "/updateUser",
+      [this.authentication],
+      this.route(this.updateUser)
+    );
+    this.router.post(
+      "/deleteOneUser",
+      [this.authentication],
+      this.route(this.deleteOneUser)
     );
   }
 
@@ -45,6 +62,39 @@ class UserRoute extends BaseRoute {
     } else {
       throw ErrorHelper.permissionDeny();
     }
+  }
+  //register
+  async register(req: Request, res: Response) {
+    const { name, phoneNumber, password } = req.body;
+    if (!name || !phoneNumber || !password) {
+      throw ErrorHelper.requestDataInvalid("Invalid data!");
+    }
+    let phoneCheck = phone(phoneNumber);
+    if (!phoneCheck.isValid) {
+      throw ErrorHelper.requestDataInvalid("phone");
+    }
+    let userCheck = await UserModel.findOne({ phone: phoneNumber });
+    if (userCheck) {
+      throw ErrorHelper.userExisted();
+    }
+    const key = TokenHelper.generateKey();
+    let user = new UserModel({
+      name: name ? name.trim() : "",
+      password: passwordHash.generate(password),
+      phone: phoneCheck.phoneNumber,
+      role: ROLES.CLIENT,
+      key: key,
+    });
+    await user.save();
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        user,
+        token: new UserHelper(user).getToken(key),
+      },
+    });
   }
   //login
   async login(req: Request, res: Response) {
@@ -72,12 +122,11 @@ class UserRoute extends BaseRoute {
     }
   }
   //getAllUser
-  async getAllClient(req: Request, res: Response) {
+  async getAllUser(req: Request, res: Response) {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
     const users = await UserModel.find({});
-    console.log(users);
     return res.status(200).json({
       status: 200,
       code: "200",
@@ -89,7 +138,7 @@ class UserRoute extends BaseRoute {
   }
 
   //getOneUser
-  async getOneClient(req: Request, res: Response) {
+  async getOneUser(req: Request, res: Response) {
     const user: any = await UserModel.findById(req.params.id);
     if (!user) {
       //throw lỗi không tìm thấy
@@ -104,23 +153,23 @@ class UserRoute extends BaseRoute {
       },
     });
   }
-  async createClient(req: Request, res: Response) {
+  async createUser(req: Request, res: Response) {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const { username, password, name, phone, gender, address } = req.body;
+    const { password, name, phone, gender, address, email } = req.body;
 
     let userCheck = await UserModel.findOne({
-      $or: [{ username: username }, { phone: phone }],
+      $or: [{ email: phone ?? "" }, { phone: phone ?? "" }],
     });
     if (userCheck) {
       throw ErrorHelper.forbidden("Username or phone number is existed!");
     }
     const key = TokenHelper.generateKey();
     const user = new UserModel({
-      username: username,
+      email: email,
       password: passwordHash.generate(password),
-      name: name,
+      name: name.trim(),
       gender: gender,
       phone: phone,
       address: address,
@@ -133,6 +182,70 @@ class UserRoute extends BaseRoute {
       message: "success",
       data: {
         user,
+      },
+    });
+  }
+  async updateMe(req: Request, res: Response) {
+    const { name, gender, address, email } = req.body;
+    let userCheck = await UserModel.findById(req.tokenInfo._id);
+    if (!userCheck) {
+      throw ErrorHelper.userNotExist();
+    }
+    userCheck.name = name;
+    userCheck.email = email;
+    userCheck.gender = gender;
+    userCheck.address = address;
+    await userCheck.save();
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        userCheck,
+      },
+    });
+  }
+  async updateUser(req: Request, res: Response) {
+    if (ROLES.ADMIN != req.tokenInfo.role_) {
+      throw ErrorHelper.permissionDeny();
+    }
+    const { id, name, gender, address, email } = req.body;
+
+    let userCheck = await UserModel.findById(id);
+    if (!userCheck) {
+      throw ErrorHelper.userNotExist();
+    }
+    userCheck.name = name;
+    userCheck.email = email;
+    userCheck.gender = gender;
+    userCheck.address = address;
+    await userCheck.save();
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        userCheck,
+      },
+    });
+  }
+  async deleteOneUser(req: Request, res: Response) {
+    if (ROLES.ADMIN != req.tokenInfo.role_) {
+      throw ErrorHelper.permissionDeny();
+    }
+    const { id } = req.body;
+
+    let userCheck = await UserModel.findById(id);
+    if (!userCheck) {
+      throw ErrorHelper.userNotExist();
+    }
+    await UserModel.deleteOne({ _id: id });
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        userCheck,
       },
     });
   }

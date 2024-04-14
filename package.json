@@ -8,7 +8,8 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.9",
-    "password-hash": "^1.2.2"
+    "password-hash": "^1.2.2",
+    "phone": "^3.1.42"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",

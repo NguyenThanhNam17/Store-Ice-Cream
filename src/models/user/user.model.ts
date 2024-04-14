@@ -3,11 +3,11 @@ import { BaseDocument } from "../../base/baseModel";
 
 // Định nghĩa type cho user
 export type IUser = BaseDocument & {
-  uid?: string;
   name?: string;
   username?: string;
   password?: string;
   phone?: string;
+  email?: string;
   role?: string;
   address?: string;
   gender?: string;
@@ -16,9 +16,9 @@ export type IUser = BaseDocument & {
 
 const userSchema = new mongoose.Schema(
   {
-    uid: { type: String },
     name: { type: String },
     phone: { type: String },
+    email: { type: String },
     gender: { type: String },
     address: { type: String },
     role: { type: String },
