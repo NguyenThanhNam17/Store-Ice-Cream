@@ -70,9 +70,10 @@ var UserRoute = /** @class */ (function (_super) {
     UserRoute.prototype.customRouting = function () {
         this.router.post("/register", this.route(this.register));
         this.router.post("/login", this.route(this.login));
-        this.router.get("/getAllUser", [this.authentication], this.route(this.getAllUser));
-        this.router.get("/getOneUser/:id", [this.authentication], this.route(this.getOneUser));
+        this.router.post("/getAllUser", [this.authentication], this.route(this.getAllUser));
+        this.router.post("/getOneUser/:id", [this.authentication], this.route(this.getOneUser));
         this.router.post("/createUser", [this.authentication], this.route(this.createUser));
+        this.router.post("/updateMe", [this.authentication], this.route(this.updateMe));
         this.router.post("/updateUser", [this.authentication], this.route(this.updateUser));
         this.router.post("/deleteOneUser", [this.authentication], this.route(this.deleteOneUser));
     };
@@ -234,16 +235,16 @@ var UserRoute = /** @class */ (function (_super) {
     };
     UserRoute.prototype.createUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, username, password, name, phone, gender, address, userCheck, key, user;
+            var _a, password, name, phone, gender, address, email, userCheck, key, user;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, username = _a.username, password = _a.password, name = _a.name, phone = _a.phone, gender = _a.gender, address = _a.address;
+                        _a = req.body, password = _a.password, name = _a.name, phone = _a.phone, gender = _a.gender, address = _a.address, email = _a.email;
                         return [4 /*yield*/, user_model_1.UserModel.findOne({
-                                $or: [{ username: username }, { phone: phone }],
+                                $or: [{ email: phone !== null && phone !== void 0 ? phone : "" }, { phone: phone !== null && phone !== void 0 ? phone : "" }],
                             })];
                     case 1:
                         userCheck = _b.sent();
@@ -252,9 +253,9 @@ var UserRoute = /** @class */ (function (_super) {
                         }
                         key = token_helper_1.TokenHelper.generateKey();
                         user = new user_model_1.UserModel({
-                            username: username,
+                            email: email,
                             password: password_hash_1.default.generate(password),
-                            name: name,
+                            name: name.trim(),
                             gender: gender,
                             phone: phone,
                             address: address,
@@ -269,6 +270,38 @@ var UserRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: {
                                     user: user,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.updateMe = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, name, gender, address, email, userCheck;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, name = _a.name, gender = _a.gender, address = _a.address, email = _a.email;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
+                    case 1:
+                        userCheck = _b.sent();
+                        if (!userCheck) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        userCheck.name = name;
+                        userCheck.email = email;
+                        userCheck.gender = gender;
+                        userCheck.address = address;
+                        return [4 /*yield*/, userCheck.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    userCheck: userCheck,
                                 },
                             })];
                 }

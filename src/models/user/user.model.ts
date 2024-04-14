@@ -35,6 +35,6 @@ userSchema.index(
 );
 
 userSchema.index({ phone: 1 }, { unique: true });
-userSchema.index({ username: 1 }, { unique: true });
+userSchema.index({ email: 1 }, { unique: true });
 const UserModel = mongoose.model("User", userSchema);
 export { UserModel };
