@@ -12,6 +12,7 @@ var bookSchema = new mongoose_1.default.Schema({
     description: { type: String },
     quantity: { type: Number },
     price: { type: Number },
+    images: [{ type: String }],
 }, { timestamps: true });
 // Index for search
 bookSchema.index({ name: "text", author: "text" }, { weights: { name: 4, author: 2 } });

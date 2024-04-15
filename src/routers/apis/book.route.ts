@@ -81,7 +81,8 @@ class BookRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const { name, author, category, description, price, quantity } = req.body;
+    const { name, author, category, description, price, quantity, images } =
+      req.body;
     if (!name || !author || !category || !description) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
@@ -92,6 +93,7 @@ class BookRoute extends BaseRoute {
       description: description,
       price: price,
       quantity: quantity,
+      images: images,
     });
     await book.save();
     return res.status(200).json({
@@ -107,7 +109,7 @@ class BookRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const { id, name, author, category, description, price, quantity } =
+    const { id, name, author, category, description, price, quantity, images } =
       req.body;
 
     let book = await BookModel.findById(id);
@@ -119,7 +121,8 @@ class BookRoute extends BaseRoute {
     book.category = category;
     book.description = description;
     book.price = price;
-    book.quantity;
+    book.quantity = quantity;
+    book.images = images;
     await book.save();
     return res.status(200).json({
       status: 200,

@@ -144,14 +144,14 @@ var BookRoute = /** @class */ (function (_super) {
     };
     BookRoute.prototype.createBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, name, author, category, description, price, quantity, book;
+            var _a, name, author, category, description, price, quantity, images, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, name = _a.name, author = _a.author, category = _a.category, description = _a.description, price = _a.price, quantity = _a.quantity;
+                        _a = req.body, name = _a.name, author = _a.author, category = _a.category, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images;
                         if (!name || !author || !category || !description) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
@@ -162,6 +162,7 @@ var BookRoute = /** @class */ (function (_super) {
                             description: description,
                             price: price,
                             quantity: quantity,
+                            images: images,
                         });
                         return [4 /*yield*/, book.save()];
                     case 1:
@@ -180,14 +181,14 @@ var BookRoute = /** @class */ (function (_super) {
     };
     BookRoute.prototype.updateBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, name, author, category, description, price, quantity, book;
+            var _a, id, name, author, category, description, price, quantity, images, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, id = _a.id, name = _a.name, author = _a.author, category = _a.category, description = _a.description, price = _a.price, quantity = _a.quantity;
+                        _a = req.body, id = _a.id, name = _a.name, author = _a.author, category = _a.category, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images;
                         return [4 /*yield*/, book_model_1.BookModel.findById(id)];
                     case 1:
                         book = _b.sent();
@@ -199,7 +200,8 @@ var BookRoute = /** @class */ (function (_super) {
                         book.category = category;
                         book.description = description;
                         book.price = price;
-                        book.quantity;
+                        book.quantity = quantity;
+                        book.images = images;
                         return [4 /*yield*/, book.save()];
                     case 2:
                         _b.sent();
