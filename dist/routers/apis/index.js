@@ -6,8 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var user_route_1 = __importDefault(require("./user.route"));
 var book_route_1 = __importDefault(require("./book.route"));
+var bookCategory_route_1 = __importDefault(require("./bookCategory.route"));
 var router = express_1.default.Router();
 router.use("/user", user_route_1.default);
 router.use("/book", book_route_1.default);
+router.use("/bookCategory", bookCategory_route_1.default);
 exports.default = router;
 //# sourceMappingURL=index.js.map
