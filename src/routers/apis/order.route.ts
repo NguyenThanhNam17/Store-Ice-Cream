@@ -38,6 +38,16 @@ class OrderRoute extends BaseRoute {
       this.route(this.createOrder)
     );
     this.router.post(
+      "/addToCart",
+      [this.authentication],
+      this.route(this.addToCart)
+    );
+    this.router.post(
+      "/paymentOrderForCart",
+      [this.authentication],
+      this.route(this.paymentOrderForCart)
+    );
+    this.router.post(
       "/updateQuantityBook",
       [this.authentication],
       this.route(this.updateQuantityBook)
