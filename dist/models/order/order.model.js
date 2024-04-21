@@ -32,6 +32,7 @@ var orderSchema = new mongoose_1.default.Schema({
     quantity: { type: Number },
     initialCost: { type: Number },
     discountAmount: { type: String },
+    shippingFee: { type: Number },
     finalCost: { type: Number },
     status: {
         type: String,

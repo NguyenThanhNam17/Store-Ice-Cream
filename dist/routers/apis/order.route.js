@@ -71,7 +71,7 @@ var OrderRoute = /** @class */ (function (_super) {
         this.router.post("/getAllOrderForAdmin", [this.authentication], this.route(this.getAllOrderForAdmin));
         this.router.post("/getOneOrder/:id", [this.authentication], this.route(this.getOneOrder));
         this.router.post("/createOrder", [this.authentication], this.route(this.createOrder));
-        this.router.post("/addToCart", [this.authentication], this.route(this.addToCart));
+        this.router.post("/addBookToCart", [this.authentication], this.route(this.addBookToCart));
         this.router.post("/paymentOrderForCart", [this.authentication], this.route(this.paymentOrderForCart));
         this.router.post("/updateQuantityBook", [this.authentication], this.route(this.updateQuantityBook));
         this.router.post("/deleteOneOrder", [this.authentication], this.route(this.deleteOneOrder));
@@ -229,7 +229,7 @@ var OrderRoute = /** @class */ (function (_super) {
             });
         });
     };
-    OrderRoute.prototype.addToCart = function (req, res) {
+    OrderRoute.prototype.addBookToCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var tokenData, _a, bookId, quantity, book, order;
             return __generator(this, function (_b) {
@@ -249,23 +249,41 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (book.quantity < quantity) {
                             throw error_1.ErrorHelper.forbidden("Out of stock!");
                         }
+                        return [4 /*yield*/, order_model_1.OrderModel.findOne({
+                                userId: tokenData._id,
+                                bookId: bookId,
+                                status: model_const_1.OrderStatusEnum.IN_CART,
+                            })];
+                    case 2:
+                        order = _b.sent();
+                        if (!order) return [3 /*break*/, 4];
+                        order.quantity += quantity;
+                        order.initialCost += book.price * quantity;
+                        order.finalCost += book.price * quantity;
+                        return [4 /*yield*/, order.save()];
+                    case 3:
+                        _b.sent();
+                        return [3 /*break*/, 6];
+                    case 4:
                         order = new order_model_1.OrderModel({
                             bookId: bookId,
                             quantity: quantity,
                             initialCost: book.price * quantity,
                             discountAmount: 0,
-                            finalCost: book.price * quantity,
+                            finalCost: book.price * quantity + 30000,
                             userId: tokenData._id,
+                            shippingFee: 30000,
                         });
                         return [4 /*yield*/, order.save()];
-                    case 2:
+                    case 5:
                         _b.sent();
-                        return [4 /*yield*/, book_service_1.bookService.updateOne(book._id, {
-                                $inc: {
-                                    quantity: -quantity,
-                                },
-                            })];
-                    case 3:
+                        _b.label = 6;
+                    case 6: return [4 /*yield*/, book_service_1.bookService.updateOne(book._id, {
+                            $inc: {
+                                quantity: -quantity,
+                            },
+                        })];
+                    case 7:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
@@ -345,11 +363,12 @@ var OrderRoute = /** @class */ (function (_super) {
                             note: note || "",
                             initialCost: book.price * quantity,
                             discountAmount: 0,
-                            finalCost: book.price * quantity,
+                            finalCost: book.price * quantity + 30000,
                             userId: tokenData._id,
                             phone: phoneNumber,
                             paymentMethod: paymentMethod,
                             isPaid: true,
+                            shippingFee: 30000,
                         });
                         return [4 /*yield*/, order.save()];
                     case 2:
@@ -375,46 +394,52 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.updateQuantityBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, order, book;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, id, isIncrease, quantity, order, book;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        id = req.body.id;
+                        _a = req.body, id = _a.id, isIncrease = _a.isIncrease;
+                        quantity = 1;
                         return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
                     case 1:
-                        order = _a.sent();
+                        order = _b.sent();
                         if (!order) {
                             throw error_1.ErrorHelper.recoredNotFound("order!");
                         }
                         return [4 /*yield*/, book_model_1.BookModel.findById(order.bookId)];
                     case 2:
-                        book = _a.sent();
+                        book = _b.sent();
                         if (!book) {
                             throw error_1.ErrorHelper.recoredNotFound("book!");
                         }
+                        if (!(isIncrease == false)) return [3 /*break*/, 4];
+                        quantity = -1;
                         if (!(order.quantity == 1)) return [3 /*break*/, 4];
                         return [4 /*yield*/, order_model_1.OrderModel.deleteOne(order._id)];
                     case 3:
-                        _a.sent();
-                        return [3 /*break*/, 6];
+                        _b.sent();
+                        _b.label = 4;
                     case 4: return [4 /*yield*/, order_service_1.orderService.updateOne(order._id, {
                             $inc: {
-                                quantity: -1,
+                                quantity: quantity,
                             },
-                            initialCost: order.initialCost - book.price,
-                            finalCost: order.initialCost - book.price,
+                            initialCost: quantity == -1
+                                ? order.initialCost - book.price
+                                : order.initialCost + book.price,
+                            finalCost: quantity == -1
+                                ? order.initialCost - book.price
+                                : order.initialCost + book.price,
                         })];
                     case 5:
-                        _a.sent();
-                        _a.label = 6;
-                    case 6: return [2 /*return*/, res.status(200).json({
-                            status: 200,
-                            code: "200",
-                            message: "success",
-                            data: {
-                                order: order,
-                            },
-                        })];
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    order: order,
+                                },
+                            })];
                 }
             });
         });

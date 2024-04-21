@@ -10,9 +10,10 @@ export type IOrder = BaseDocument & {
   userId?: string;
   bookId?: string;
   quantity?: number;
-  initialCost?: string;
+  initialCost?: number;
   discountAmount?: string;
-  finalCost?: string;
+  shippingFee?: number;
+  finalCost?: number;
   status?: string;
   note?: string;
   address?: string;
@@ -28,6 +29,7 @@ const orderSchema = new mongoose.Schema(
     quantity: { type: Number },
     initialCost: { type: Number },
     discountAmount: { type: String },
+    shippingFee: { type: Number },
     finalCost: { type: Number },
     status: {
       type: String,

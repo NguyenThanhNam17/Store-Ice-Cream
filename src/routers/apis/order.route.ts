@@ -38,9 +38,9 @@ class OrderRoute extends BaseRoute {
       this.route(this.createOrder)
     );
     this.router.post(
-      "/addToCart",
+      "/addBookToCart",
       [this.authentication],
-      this.route(this.addToCart)
+      this.route(this.addBookToCart)
     );
     this.router.post(
       "/paymentOrderForCart",
@@ -174,7 +174,7 @@ class OrderRoute extends BaseRoute {
       },
     });
   }
-  async addToCart(req: Request, res: Response) {
+  async addBookToCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
     const { bookId, quantity } = req.body;
     if (!bookId || !quantity) {
@@ -187,15 +187,28 @@ class OrderRoute extends BaseRoute {
     if (book.quantity < quantity) {
       throw ErrorHelper.forbidden("Out of stock!");
     }
-    const order = new OrderModel({
-      bookId: bookId,
-      quantity: quantity,
-      initialCost: book.price * quantity,
-      discountAmount: 0,
-      finalCost: book.price * quantity,
+    let order = await OrderModel.findOne({
       userId: tokenData._id,
+      bookId: bookId,
+      status: OrderStatusEnum.IN_CART,
     });
-    await order.save();
+    if (order) {
+      order.quantity += quantity;
+      order.initialCost += book.price * quantity;
+      order.finalCost += book.price * quantity;
+      await order.save();
+    } else {
+      order = new OrderModel({
+        bookId: bookId,
+        quantity: quantity,
+        initialCost: book.price * quantity,
+        discountAmount: 0,
+        finalCost: book.price * quantity + 30000,
+        userId: tokenData._id,
+        shippingFee: 30000,
+      });
+      await order.save();
+    }
     await bookService.updateOne(book._id, {
       $inc: {
         quantity: -quantity,
@@ -259,11 +272,12 @@ class OrderRoute extends BaseRoute {
       note: note || "",
       initialCost: book.price * quantity,
       discountAmount: 0,
-      finalCost: book.price * quantity,
+      finalCost: book.price * quantity + 30000,
       userId: tokenData._id,
       phone: phoneNumber,
       paymentMethod: paymentMethod,
       isPaid: true,
+      shippingFee: 30000,
     });
     await order.save();
     await bookService.updateOne(book._id, {
@@ -281,7 +295,9 @@ class OrderRoute extends BaseRoute {
     });
   }
   async updateQuantityBook(req: Request, res: Response) {
-    const { id } = req.body;
+    const { id, isIncrease } = req.body;
+    let quantity = 1;
+
     let order: any = await OrderModel.findById(id);
     if (!order) {
       throw ErrorHelper.recoredNotFound("order!");
@@ -290,17 +306,26 @@ class OrderRoute extends BaseRoute {
     if (!book) {
       throw ErrorHelper.recoredNotFound("book!");
     }
-    if (order.quantity == 1) {
-      await OrderModel.deleteOne(order._id);
-    } else {
-      await orderService.updateOne(order._id, {
-        $inc: {
-          quantity: -1,
-        },
-        initialCost: order.initialCost - book.price,
-        finalCost: order.initialCost - book.price,
-      });
+    if (isIncrease == false) {
+      quantity = -1;
+      if (order.quantity == 1) {
+        await OrderModel.deleteOne(order._id);
+      }
     }
+    await orderService.updateOne(order._id, {
+      $inc: {
+        quantity: quantity,
+      },
+      initialCost:
+        quantity == -1
+          ? order.initialCost - book.price
+          : order.initialCost + book.price,
+      finalCost:
+        quantity == -1
+          ? order.initialCost - book.price
+          : order.initialCost + book.price,
+    });
+
     return res.status(200).json({
       status: 200,
       code: "200",
