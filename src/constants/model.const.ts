@@ -3,3 +3,17 @@ export enum UserRoleEnum {
   CLIENT = "CLIENT",
   STAFF = "STAFF",
 }
+export enum OrderStatusEnum {
+  PENDING = "PENDING",
+  PROCESSING = "PROCESSING",
+  DELIVERING = "DELIVERING",
+  SUCCESS = "SUCCESS",
+  CANCEL = "CANCEL",
+  IN_CART = "IN_CART",
+}
+
+export enum paymentMethodEnum {
+  CASH = "CASH",
+  BANK_TRANSFER = "BANK_TRANSFER",
+  WALLET = "WALLET",
+}

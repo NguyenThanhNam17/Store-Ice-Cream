@@ -69,6 +69,7 @@ exports.CrudService = void 0;
 var baseService_1 = require("./baseService");
 var moment_timezone_1 = __importDefault(require("moment-timezone"));
 var lodash_1 = __importDefault(require("lodash"));
+var error_1 = require("./error");
 var CrudService = /** @class */ (function (_super) {
     __extends(CrudService, _super);
     function CrudService(model) {
@@ -77,7 +78,6 @@ var CrudService = /** @class */ (function (_super) {
         return _this;
     }
     CrudService.prototype.fetch = function (queryInput, populates) {
-        if (populates === void 0) { populates = []; }
         return __awaiter(this, void 0, void 0, function () {
             var limit, skip, order, search, timestamp, timeSort, query, q, time, textSearchIndex, or_1, query_1, filter, query4Count, countQuery, _i, populates_1, populate;
             return __generator(this, function (_a) {
@@ -172,6 +172,47 @@ var CrudService = /** @class */ (function (_super) {
                                 };
                             })];
                     case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    CrudService.prototype.findOne = function (filter) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.findOne(filter)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    CrudService.prototype.create = function (data) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.create(data)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    CrudService.prototype.updateOne = function (id, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var record;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.model.updateOne({ _id: id }, data, {
+                            runValidators: true,
+                            context: "query",
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.model.findOne({ _id: id })];
+                    case 2:
+                        record = _a.sent();
+                        if (!record)
+                            throw error_1.ErrorHelper.recoredNotFound("Không tìm thấy dữ liệu");
+                        return [2 /*return*/, record];
                 }
             });
         });

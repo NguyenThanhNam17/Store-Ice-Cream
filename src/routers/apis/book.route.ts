@@ -17,7 +17,7 @@ class BookRoute extends BaseRoute {
   }
   customRouting() {
     this.router.post("/getAllBook", this.route(this.getAllBook));
-    this.router.post("/getOneBook/:id", this.route(this.getOneBook));
+    this.router.get("/getOneBook/:id", this.route(this.getOneBook));
     this.router.post(
       "/createBook",
       [this.authentication],
@@ -70,7 +70,7 @@ class BookRoute extends BaseRoute {
     if (!page) {
       page = 1;
     }
-    const data = await bookService.fetch(
+    const books = await bookService.fetch(
       {
         filter: filter,
         search: search,
@@ -83,13 +83,14 @@ class BookRoute extends BaseRoute {
       status: 200,
       code: "200",
       message: "success",
-      data: data,
+      data: books,
     });
   }
 
   //getOneBook
   async getOneBook(req: Request, res: Response) {
-    const book: any = await UserModel.findById(req.params.id);
+    let { id } = req.params;
+    const book: any = await BookModel.findById(id);
     if (!book) {
       //throw lỗi không tìm thấy
       throw ErrorHelper.recoredNotFound("Book!");
