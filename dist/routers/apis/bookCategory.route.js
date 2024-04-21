@@ -59,7 +59,7 @@ var BookCategoryRoute = /** @class */ (function (_super) {
         return _super.call(this) || this;
     }
     BookCategoryRoute.prototype.customRouting = function () {
-        this.router.post("/getAllBookCartegory", this.route(this.getAllBookCategory));
+        this.router.post("/getAllBookCategory", this.route(this.getAllBookCategory));
     };
     //getAllBookCategory
     BookCategoryRoute.prototype.getAllBookCategory = function (req, res) {

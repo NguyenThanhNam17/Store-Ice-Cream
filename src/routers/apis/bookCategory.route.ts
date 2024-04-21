@@ -7,7 +7,7 @@ class BookCategoryRoute extends BaseRoute {
   }
   customRouting() {
     this.router.post(
-      "/getAllBookCartegory",
+      "/getAllBookCategory",
       this.route(this.getAllBookCategory)
     );
   }

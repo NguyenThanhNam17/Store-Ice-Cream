@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { BaseDocument } from "../../base/baseModel";
 
 // Định nghĩa type cho user
@@ -13,5 +13,9 @@ const bookCategorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const BookCategoryModel = mongoose.model("BookCategory", bookCategorySchema);
+const BookCategoryModel = mongoose.model<IBookCategory>(
+  "BookCategory",
+  bookCategorySchema
+);
+
 export { BookCategoryModel };

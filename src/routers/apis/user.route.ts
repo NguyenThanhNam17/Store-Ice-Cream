@@ -8,6 +8,7 @@ import { UserHelper } from "../../models/user/user.helper";
 import { ErrorHelper } from "../../base/error";
 import { Request, Response } from "../../base/baseRoute";
 import phone from "phone";
+import { userService } from "../../models/user/user.service";
 class UserRoute extends BaseRoute {
   constructor() {
     super();
@@ -126,7 +127,29 @@ class UserRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const users = await UserModel.find({});
+    try {
+      req.body.limit = parseInt(req.body.limit);
+    } catch (err) {
+      throw ErrorHelper.requestDataInvalid("limit");
+    }
+    try {
+      req.body.page = parseInt(req.body.page);
+    } catch (err) {
+      throw ErrorHelper.requestDataInvalid("page");
+    }
+    var { limit, page, search, filter } = req.body;
+    if (!limit) {
+      limit = 10;
+    }
+    if (!page) {
+      page = 1;
+    }
+    const users = await userService.fetch({
+      filter: filter,
+      search: search,
+      limit: limit,
+      page: page,
+    });
     return res.status(200).json({
       status: 200,
       code: "200",
@@ -139,6 +162,9 @@ class UserRoute extends BaseRoute {
 
   //getOneUser
   async getOneUser(req: Request, res: Response) {
+    if (ROLES.ADMIN != req.tokenInfo.role_) {
+      throw ErrorHelper.permissionDeny();
+    }
     const user: any = await UserModel.findById(req.params.id);
     if (!user) {
       //throw lỗi không tìm thấy

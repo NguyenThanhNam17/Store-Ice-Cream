@@ -57,6 +57,7 @@ var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var error_1 = require("../../base/error");
 var book_model_1 = require("../../models/book/book.model");
+var book_service_1 = require("../../models/book/book.service");
 var BookRoute = /** @class */ (function (_super) {
     __extends(BookRoute, _super);
     function BookRoute() {
@@ -99,19 +100,42 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var books;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, book_model_1.BookModel.find({})];
+            var _a, limit, page, search, filter, data;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        try {
+                            req.body.limit = parseInt(req.body.limit);
+                        }
+                        catch (err) {
+                            throw error_1.ErrorHelper.requestDataInvalid("limit");
+                        }
+                        try {
+                            req.body.page = parseInt(req.body.page);
+                        }
+                        catch (err) {
+                            throw error_1.ErrorHelper.requestDataInvalid("page");
+                        }
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
+                        if (!limit) {
+                            limit = 10;
+                        }
+                        if (!page) {
+                            page = 1;
+                        }
+                        return [4 /*yield*/, book_service_1.bookService.fetch({
+                                filter: filter,
+                                search: search,
+                                limit: limit,
+                                page: page,
+                            }, ["category"])];
                     case 1:
-                        books = _a.sent();
+                        data = _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: {
-                                    books: books,
-                                },
+                                data: data,
                             })];
                 }
             });
@@ -144,21 +168,21 @@ var BookRoute = /** @class */ (function (_super) {
     };
     BookRoute.prototype.createBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, name, author, category, description, price, quantity, images, book;
+            var _a, name, author, categoryId, description, price, quantity, images, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, name = _a.name, author = _a.author, category = _a.category, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images;
-                        if (!name || !author || !category || !description) {
+                        _a = req.body, name = _a.name, author = _a.author, categoryId = _a.categoryId, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images;
+                        if (!name || !author || !categoryId || !description) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
                         book = new book_model_1.BookModel({
                             name: name,
                             author: author,
-                            category: category,
+                            categoryId: categoryId,
                             description: description,
                             price: price,
                             quantity: quantity,
@@ -181,14 +205,14 @@ var BookRoute = /** @class */ (function (_super) {
     };
     BookRoute.prototype.updateBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, name, author, category, description, price, quantity, images, book;
+            var _a, id, name, author, categoryId, description, price, quantity, images, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, id = _a.id, name = _a.name, author = _a.author, category = _a.category, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images;
+                        _a = req.body, id = _a.id, name = _a.name, author = _a.author, categoryId = _a.categoryId, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images;
                         return [4 /*yield*/, book_model_1.BookModel.findById(id)];
                     case 1:
                         book = _b.sent();
@@ -197,7 +221,7 @@ var BookRoute = /** @class */ (function (_super) {
                         }
                         book.name = name;
                         book.author = author;
-                        book.category = category;
+                        book.categoryId = categoryId;
                         book.description = description;
                         book.price = price;
                         book.quantity = quantity;

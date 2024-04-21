@@ -8,6 +8,9 @@ import passwordHash from "password-hash";
 import { ErrorHelper } from "../../base/error";
 import { Request, Response } from "../../base/baseRoute";
 import { BookModel } from "../../models/book/book.model";
+import moment from "moment";
+import _ from "lodash";
+import { bookService } from "../../models/book/book.service";
 class BookRoute extends BaseRoute {
   constructor() {
     super();
@@ -50,14 +53,37 @@ class BookRoute extends BaseRoute {
   }
   //getAllBook
   async getAllBook(req: Request, res: Response) {
-    const books = await BookModel.find({});
+    try {
+      req.body.limit = parseInt(req.body.limit);
+    } catch (err) {
+      throw ErrorHelper.requestDataInvalid("limit");
+    }
+    try {
+      req.body.page = parseInt(req.body.page);
+    } catch (err) {
+      throw ErrorHelper.requestDataInvalid("page");
+    }
+    var { limit, page, search, filter } = req.body;
+    if (!limit) {
+      limit = 10;
+    }
+    if (!page) {
+      page = 1;
+    }
+    const data = await bookService.fetch(
+      {
+        filter: filter,
+        search: search,
+        limit: limit,
+        page: page,
+      },
+      ["category"]
+    );
     return res.status(200).json({
       status: 200,
       code: "200",
       message: "success",
-      data: {
-        books,
-      },
+      data: data,
     });
   }
 
@@ -81,15 +107,15 @@ class BookRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const { name, author, category, description, price, quantity, images } =
+    const { name, author, categoryId, description, price, quantity, images } =
       req.body;
-    if (!name || !author || !category || !description) {
+    if (!name || !author || !categoryId || !description) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
     const book = new BookModel({
       name: name,
       author: author,
-      category: category,
+      categoryId: categoryId,
       description: description,
       price: price,
       quantity: quantity,
@@ -109,8 +135,16 @@ class BookRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const { id, name, author, category, description, price, quantity, images } =
-      req.body;
+    const {
+      id,
+      name,
+      author,
+      categoryId,
+      description,
+      price,
+      quantity,
+      images,
+    } = req.body;
 
     let book = await BookModel.findById(id);
     if (!book) {
@@ -118,7 +152,7 @@ class BookRoute extends BaseRoute {
     }
     book.name = name;
     book.author = author;
-    book.category = category;
+    book.categoryId = categoryId;
     book.description = description;
     book.price = price;
     book.quantity = quantity;

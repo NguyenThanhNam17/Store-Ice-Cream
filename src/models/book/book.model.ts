@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { BaseDocument } from "../../base/baseModel";
 
 // Định nghĩa type cho user
 export type IBook = BaseDocument & {
   name?: string;
   author?: string;
-  category?: string;
+  categoryId?: string;
   description?: string;
   quantity?: number;
   price?: number;
@@ -16,7 +16,7 @@ const bookSchema = new mongoose.Schema(
   {
     name: { type: String },
     author: { type: String },
-    category: { type: String },
+    categoryId: { type: Schema.Types.ObjectId, ref: "BookCategory" },
     description: { type: String },
     quantity: { type: Number },
     price: { type: Number },
@@ -29,6 +29,13 @@ bookSchema.index(
   { name: "text", author: "text" },
   { weights: { name: 4, author: 2 } }
 );
-
-const BookModel = mongoose.model("Book", bookSchema);
+//virtual populate
+bookSchema.set("toObject", { virtuals: true });
+bookSchema.set("toJSON", { virtuals: true });
+bookSchema.virtual("category", {
+  ref: "BookCategory",
+  localField: "categoryId",
+  foreignField: "_id",
+});
+const BookModel = mongoose.model<IBook>("Book", bookSchema);
 export { BookModel };

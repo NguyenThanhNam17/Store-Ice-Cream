@@ -62,6 +62,7 @@ var password_hash_1 = __importDefault(require("password-hash"));
 var user_helper_1 = require("../../models/user/user.helper");
 var error_1 = require("../../base/error");
 var phone_1 = __importDefault(require("phone"));
+var user_service_1 = require("../../models/user/user.service");
 var UserRoute = /** @class */ (function (_super) {
     __extends(UserRoute, _super);
     function UserRoute() {
@@ -186,16 +187,40 @@ var UserRoute = /** @class */ (function (_super) {
     //getAllUser
     UserRoute.prototype.getAllUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var users;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, limit, page, search, filter, users;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        return [4 /*yield*/, user_model_1.UserModel.find({})];
+                        try {
+                            req.body.limit = parseInt(req.body.limit);
+                        }
+                        catch (err) {
+                            throw error_1.ErrorHelper.requestDataInvalid("limit");
+                        }
+                        try {
+                            req.body.page = parseInt(req.body.page);
+                        }
+                        catch (err) {
+                            throw error_1.ErrorHelper.requestDataInvalid("page");
+                        }
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
+                        if (!limit) {
+                            limit = 10;
+                        }
+                        if (!page) {
+                            page = 1;
+                        }
+                        return [4 /*yield*/, user_service_1.userService.fetch({
+                                filter: filter,
+                                search: search,
+                                limit: limit,
+                                page: page,
+                            })];
                     case 1:
-                        users = _a.sent();
+                        users = _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
@@ -214,7 +239,11 @@ var UserRoute = /** @class */ (function (_super) {
             var user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, user_model_1.UserModel.findById(req.params.id)];
+                    case 0:
+                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        return [4 /*yield*/, user_model_1.UserModel.findById(req.params.id)];
                     case 1:
                         user = _a.sent();
                         if (!user) {
