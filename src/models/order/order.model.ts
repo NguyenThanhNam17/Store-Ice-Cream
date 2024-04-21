@@ -1,9 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 import { BaseDocument } from "../../base/baseModel";
+<<<<<<< HEAD
 import {
   OrderStatusEnum,
   paymentMethodEnum,
 } from "../../constants/model.const";
+=======
+import { OrderStatusEnum } from "../../constants/model.const";
+>>>>>>> 55f1703fb6b37d0fe0bdd90008ef46ca7fecbac6
 
 // Định nghĩa type cho user
 export type IOrder = BaseDocument & {
@@ -16,9 +20,13 @@ export type IOrder = BaseDocument & {
   status?: string;
   note?: string;
   address?: string;
+<<<<<<< HEAD
   phone?: string;
   isPaid?: boolean;
   paymentMethod?: string;
+=======
+  isPaid?: boolean;
+>>>>>>> 55f1703fb6b37d0fe0bdd90008ef46ca7fecbac6
 };
 
 const orderSchema = new mongoose.Schema(
@@ -32,6 +40,7 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: Object.values(OrderStatusEnum),
+<<<<<<< HEAD
       default: OrderStatusEnum.IN_CART,
     },
     note: { type: String },
@@ -43,6 +52,13 @@ const orderSchema = new mongoose.Schema(
       enum: Object.values(paymentMethodEnum),
       default: paymentMethodEnum.CASH,
     },
+=======
+      default: OrderStatusEnum.PENDING,
+    },
+    note: { type: String },
+    address: { type: String },
+    isPaid: { type: Boolean, default: false },
+>>>>>>> 55f1703fb6b37d0fe0bdd90008ef46ca7fecbac6
   },
   { timestamps: true }
   //virtual populate

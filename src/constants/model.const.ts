@@ -9,6 +9,7 @@ export enum OrderStatusEnum {
   DELIVERING = "DELIVERING",
   SUCCESS = "SUCCESS",
   CANCEL = "CANCEL",
+<<<<<<< HEAD
   IN_CART = "IN_CART",
 }
 
@@ -16,4 +17,6 @@ export enum paymentMethodEnum {
   CASH = "CASH",
   BANK_TRANSFER = "BANK_TRANSFER",
   WALLET = "WALLET",
+=======
+>>>>>>> 55f1703fb6b37d0fe0bdd90008ef46ca7fecbac6
 }

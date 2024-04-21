@@ -36,16 +36,23 @@ var orderSchema = new mongoose_1.default.Schema({
     status: {
         type: String,
         enum: Object.values(model_const_1.OrderStatusEnum),
+<<<<<<< HEAD
         default: model_const_1.OrderStatusEnum.IN_CART,
+=======
+        default: model_const_1.OrderStatusEnum.PENDING,
+>>>>>>> 55f1703fb6b37d0fe0bdd90008ef46ca7fecbac6
     },
     note: { type: String },
     address: { type: String },
     isPaid: { type: Boolean, default: false },
+<<<<<<< HEAD
     paymentMethod: {
         type: String,
         enum: Object.values(model_const_1.paymentMethodEnum),
         default: model_const_1.paymentMethodEnum.CASH,
     },
+=======
+>>>>>>> 55f1703fb6b37d0fe0bdd90008ef46ca7fecbac6
 }, { timestamps: true }
 //virtual populate
 );
