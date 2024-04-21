@@ -210,7 +210,9 @@ var OrderRoute = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         id = req.params.id;
-                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
+                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)
+                                .populate("user")
+                                .populate("book")];
                     case 1:
                         order = _a.sent();
                         if (!order) {

@@ -149,7 +149,7 @@ var BookRoute = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         id = req.params.id;
-                        return [4 /*yield*/, book_model_1.BookModel.findById(id)];
+                        return [4 /*yield*/, book_model_1.BookModel.findById(id).populate("category")];
                     case 1:
                         book = _a.sent();
                         if (!book) {

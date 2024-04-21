@@ -160,7 +160,9 @@ class OrderRoute extends BaseRoute {
   //getOneOrder
   async getOneOrder(req: Request, res: Response) {
     let { id } = req.params;
-    const order = await OrderModel.findById(id);
+    const order = await OrderModel.findById(id)
+      .populate("user")
+      .populate("book");
     if (!order) {
       //throw lỗi không tìm thấy
       throw ErrorHelper.recoredNotFound("order!");

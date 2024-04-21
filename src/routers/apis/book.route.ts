@@ -90,7 +90,7 @@ class BookRoute extends BaseRoute {
   //getOneBook
   async getOneBook(req: Request, res: Response) {
     let { id } = req.params;
-    const book: any = await BookModel.findById(id);
+    const book: any = await BookModel.findById(id).populate("category");
     if (!book) {
       //throw lỗi không tìm thấy
       throw ErrorHelper.recoredNotFound("Book!");
