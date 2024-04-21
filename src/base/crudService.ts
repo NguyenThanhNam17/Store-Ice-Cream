@@ -2,6 +2,7 @@ import { BaseService } from "./baseService";
 import moment from "moment-timezone";
 import { Document, Model } from "mongoose";
 import _ from "lodash";
+import { ErrorHelper } from "./error";
 
 export interface IQueryOptions {}
 
@@ -111,5 +112,22 @@ export abstract class CrudService<
         },
       };
     });
+  }
+  async findOne(filter: any) {
+    return await this.model.findOne(filter);
+  }
+
+  async create(data: any) {
+    return await this.model.create(data);
+  }
+
+  async updateOne(id: string, data: any) {
+    await this.model.updateOne({ _id: id }, data, {
+      runValidators: true,
+      context: "query",
+    });
+    let record = await this.model.findOne({ _id: id });
+    if (!record) throw ErrorHelper.recoredNotFound("Không tìm thấy dữ liệu");
+    return record;
   }
 }

@@ -165,7 +165,8 @@ class UserRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const user: any = await UserModel.findById(req.params.id);
+    let { id } = req.params;
+    const user: any = await UserModel.findById(id);
     if (!user) {
       //throw lỗi không tìm thấy
       throw ErrorHelper.userNotExist();

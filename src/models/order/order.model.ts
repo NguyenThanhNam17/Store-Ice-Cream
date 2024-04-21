@@ -1,0 +1,53 @@
+import mongoose, { Schema } from "mongoose";
+import { BaseDocument } from "../../base/baseModel";
+import { OrderStatusEnum } from "../../constants/model.const";
+
+// Định nghĩa type cho user
+export type IOrder = BaseDocument & {
+  userId?: string;
+  bookId?: string;
+  quantity?: number;
+  initialCost?: string;
+  discountAmount?: string;
+  finalCost?: string;
+  status?: string;
+  note?: string;
+  address?: string;
+  isPaid?: boolean;
+};
+
+const orderSchema = new mongoose.Schema(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User" },
+    bookId: { type: Schema.Types.ObjectId, ref: "Book" },
+    quantity: { type: Number },
+    initialCost: { type: Number },
+    discountAmount: { type: String },
+    finalCost: { type: Number },
+    status: {
+      type: String,
+      enum: Object.values(OrderStatusEnum),
+      default: OrderStatusEnum.PENDING,
+    },
+    note: { type: String },
+    address: { type: String },
+    isPaid: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+  //virtual populate
+);
+orderSchema.set("toObject", { virtuals: true });
+orderSchema.set("toJSON", { virtuals: true });
+orderSchema.virtual("user", {
+  ref: "User",
+  localField: "userId",
+  foreignField: "_id",
+});
+orderSchema.virtual("book", {
+  ref: "Book",
+  localField: "bookId",
+  foreignField: "_id",
+});
+const OrderModel = mongoose.model<IOrder>("Order", orderSchema);
+
+export { OrderModel };

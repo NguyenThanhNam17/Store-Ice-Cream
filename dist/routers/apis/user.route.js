@@ -236,14 +236,15 @@ var UserRoute = /** @class */ (function (_super) {
     //getOneUser
     UserRoute.prototype.getOneUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var user;
+            var id, user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        return [4 /*yield*/, user_model_1.UserModel.findById(req.params.id)];
+                        id = req.params.id;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(id)];
                     case 1:
                         user = _a.sent();
                         if (!user) {
