@@ -73,7 +73,7 @@ var OrderRoute = /** @class */ (function (_super) {
         this.router.post("/createOrder", [this.authentication], this.route(this.createOrder));
         this.router.post("/addBookToCart", [this.authentication], this.route(this.addBookToCart));
         this.router.post("/paymentOrderForCart", [this.authentication], this.route(this.paymentOrderForCart));
-        this.router.post("/updateQuantityBook", [this.authentication], this.route(this.updateQuantityBook));
+        this.router.post("/updateQuantityForOrder", [this.authentication], this.route(this.updateQuantityForOrder));
         this.router.post("/deleteOneOrder", [this.authentication], this.route(this.deleteOneOrder));
     };
     //Auth
@@ -394,15 +394,15 @@ var OrderRoute = /** @class */ (function (_super) {
             });
         });
     };
-    OrderRoute.prototype.updateQuantityBook = function (req, res) {
+    OrderRoute.prototype.updateQuantityForOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, isIncrease, quantity, order, book;
+            var _a, orderId, isIncrease, quantity, order, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = req.body, id = _a.id, isIncrease = _a.isIncrease;
+                        _a = req.body, orderId = _a.orderId, isIncrease = _a.isIncrease;
                         quantity = 1;
-                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
+                        return [4 /*yield*/, order_model_1.OrderModel.findById(orderId)];
                     case 1:
                         order = _b.sent();
                         if (!order) {

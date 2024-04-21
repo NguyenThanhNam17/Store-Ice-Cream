@@ -48,9 +48,9 @@ class OrderRoute extends BaseRoute {
       this.route(this.paymentOrderForCart)
     );
     this.router.post(
-      "/updateQuantityBook",
+      "/updateQuantityForOrder",
       [this.authentication],
-      this.route(this.updateQuantityBook)
+      this.route(this.updateQuantityForOrder)
     );
     this.router.post(
       "/deleteOneOrder",
@@ -296,11 +296,11 @@ class OrderRoute extends BaseRoute {
       },
     });
   }
-  async updateQuantityBook(req: Request, res: Response) {
-    const { id, isIncrease } = req.body;
+  async updateQuantityForOrder(req: Request, res: Response) {
+    const { orderId, isIncrease } = req.body;
     let quantity = 1;
 
-    let order: any = await OrderModel.findById(id);
+    let order: any = await OrderModel.findById(orderId);
     if (!order) {
       throw ErrorHelper.recoredNotFound("order!");
     }
