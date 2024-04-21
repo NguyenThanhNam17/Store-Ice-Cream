@@ -33,6 +33,11 @@ class OrderRoute extends BaseRoute {
       this.route(this.getOneOrder)
     );
     this.router.post(
+      "/getBill",
+      [this.authentication],
+      this.route(this.getBill)
+    );
+    this.router.post(
       "/createOrder",
       [this.authentication],
       this.route(this.createOrder)
@@ -43,9 +48,9 @@ class OrderRoute extends BaseRoute {
       this.route(this.addBookToCart)
     );
     this.router.post(
-      "/paymentOrderForCart",
+      "/paymentOrdersInCart",
       [this.authentication],
-      this.route(this.paymentOrderForCart)
+      this.route(this.paymentOrdersInCart)
     );
     this.router.post(
       "/updateQuantityForOrder",
@@ -176,6 +181,30 @@ class OrderRoute extends BaseRoute {
       },
     });
   }
+  //get bill
+  async getBill(req: Request, res: Response) {
+    let { orderIds } = req.body;
+    const orders = await OrderModel.find({ _id: { $in: orderIds } });
+    let initialCost = 0;
+    if (orders.length < 1) {
+      //throw lỗi không tìm thấy
+      throw ErrorHelper.recoredNotFound("order!");
+    }
+    orders.map((order) => {
+      initialCost += order.initialCost;
+    });
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        initialCost: initialCost,
+        shippingFee: 30000,
+        finalCost: initialCost + 30000,
+      },
+    });
+  }
+
   async addBookToCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
     const { bookId, quantity } = req.body;
@@ -225,31 +254,29 @@ class OrderRoute extends BaseRoute {
       },
     });
   }
-  async paymentOrderForCart(req: Request, res: Response) {
+  async paymentOrdersInCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    const { orderId, address, note, phoneNumber } = req.body;
-    if (!orderId || !phoneNumber || !address) {
+    const { orderIds, address, note, phoneNumber } = req.body;
+    if (!orderIds || orderIds.length < 1 || !phoneNumber || !address) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
-    let order = await OrderModel.findById(orderId);
-    if (!order) {
+    let orders = await OrderModel.find({ _id: { $in: orderIds } });
+    if (orders.length < 1) {
       throw ErrorHelper.recoredNotFound("order!");
     }
-    if (tokenData._id != order.userId) {
-      throw ErrorHelper.somethingWentWrong();
-    }
-    order.note = note;
-    order.phone = phoneNumber;
-    order.status = OrderStatusEnum.PENDING;
-    order.isPaid = true;
-    await order.save();
+    orders.map(async (order) => {
+      order.note = note;
+      order.phone = phoneNumber;
+      order.status = OrderStatusEnum.PENDING;
+      order.isPaid = true;
+      await order.save();
+    });
+
     return res.status(200).json({
       status: 200,
       code: "200",
       message: "success",
-      data: {
-        order,
-      },
+      data: "success",
     });
   }
 

@@ -70,9 +70,10 @@ var OrderRoute = /** @class */ (function (_super) {
         this.router.post("/getAllOrder", [this.authentication], this.route(this.getAllOrder));
         this.router.post("/getAllOrderForAdmin", [this.authentication], this.route(this.getAllOrderForAdmin));
         this.router.post("/getOneOrder/:id", [this.authentication], this.route(this.getOneOrder));
+        this.router.post("/getBill", [this.authentication], this.route(this.getBill));
         this.router.post("/createOrder", [this.authentication], this.route(this.createOrder));
         this.router.post("/addBookToCart", [this.authentication], this.route(this.addBookToCart));
-        this.router.post("/paymentOrderForCart", [this.authentication], this.route(this.paymentOrderForCart));
+        this.router.post("/paymentOrdersInCart", [this.authentication], this.route(this.paymentOrdersInCart));
         this.router.post("/updateQuantityForOrder", [this.authentication], this.route(this.updateQuantityForOrder));
         this.router.post("/deleteOneOrder", [this.authentication], this.route(this.deleteOneOrder));
     };
@@ -231,6 +232,39 @@ var OrderRoute = /** @class */ (function (_super) {
             });
         });
     };
+    //get bill
+    OrderRoute.prototype.getBill = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var orderIds, orders, initialCost;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        orderIds = req.body.orderIds;
+                        return [4 /*yield*/, order_model_1.OrderModel.find({ _id: { $in: orderIds } })];
+                    case 1:
+                        orders = _a.sent();
+                        initialCost = 0;
+                        if (orders.length < 1) {
+                            //throw lỗi không tìm thấy
+                            throw error_1.ErrorHelper.recoredNotFound("order!");
+                        }
+                        orders.map(function (order) {
+                            initialCost += order.initialCost;
+                        });
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    initialCost: initialCost,
+                                    shippingFee: 30000,
+                                    finalCost: initialCost + 30000,
+                                },
+                            })];
+                }
+            });
+        });
+    };
     OrderRoute.prototype.addBookToCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var tokenData, _a, bookId, quantity, book, order;
@@ -299,40 +333,44 @@ var OrderRoute = /** @class */ (function (_super) {
             });
         });
     };
-    OrderRoute.prototype.paymentOrderForCart = function (req, res) {
+    OrderRoute.prototype.paymentOrdersInCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, orderId, address, note, phoneNumber, order;
+            var tokenData, _a, orderIds, address, note, phoneNumber, orders;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        _a = req.body, orderId = _a.orderId, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber;
-                        if (!orderId || !phoneNumber || !address) {
+                        _a = req.body, orderIds = _a.orderIds, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber;
+                        if (!orderIds || orderIds.length < 1 || !phoneNumber || !address) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
-                        return [4 /*yield*/, order_model_1.OrderModel.findById(orderId)];
+                        return [4 /*yield*/, order_model_1.OrderModel.find({ _id: { $in: orderIds } })];
                     case 1:
-                        order = _b.sent();
-                        if (!order) {
+                        orders = _b.sent();
+                        if (orders.length < 1) {
                             throw error_1.ErrorHelper.recoredNotFound("order!");
                         }
-                        if (tokenData._id != order.userId) {
-                            throw error_1.ErrorHelper.somethingWentWrong();
-                        }
-                        order.note = note;
-                        order.phone = phoneNumber;
-                        order.status = model_const_1.OrderStatusEnum.PENDING;
-                        order.isPaid = true;
-                        return [4 /*yield*/, order.save()];
-                    case 2:
-                        _b.sent();
+                        orders.map(function (order) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        order.note = note;
+                                        order.phone = phoneNumber;
+                                        order.status = model_const_1.OrderStatusEnum.PENDING;
+                                        order.isPaid = true;
+                                        return [4 /*yield*/, order.save()];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: {
-                                    order: order,
-                                },
+                                data: "success",
                             })];
                 }
             });
