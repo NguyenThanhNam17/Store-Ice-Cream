@@ -56,6 +56,7 @@ var baseRoute_1 = require("../../base/baseRoute");
 var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var error_1 = require("../../base/error");
+var book_model_1 = require("../../models/book/book.model");
 var order_service_1 = require("../..//models/order/order.service");
 var order_model_1 = require("../../models/order/order.model");
 var model_const_1 = require("../../constants/model.const");
@@ -231,21 +232,23 @@ var OrderRoute = /** @class */ (function (_super) {
     //get bill
     OrderRoute.prototype.getBill = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var orderIds, orders, initialCost;
+            var shoppingCartIds, shoppingCarts, initialCost;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        orderIds = req.body.orderIds;
-                        return [4 /*yield*/, order_model_1.OrderModel.find({ _id: { $in: orderIds } })];
+                        shoppingCartIds = req.body.shoppingCartIds;
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
+                                _id: { $in: shoppingCartIds },
+                            })];
                     case 1:
-                        orders = _a.sent();
+                        shoppingCarts = _a.sent();
                         initialCost = 0;
-                        if (orders.length < 1) {
+                        if (shoppingCarts.length < 1) {
                             //throw lỗi không tìm thấy
-                            throw error_1.ErrorHelper.recoredNotFound("order!");
+                            throw error_1.ErrorHelper.recoredNotFound("shoppingCart!");
                         }
-                        orders.map(function (order) {
-                            initialCost += order.initialCost;
+                        shoppingCarts.map(function (shoppingCart) {
+                            initialCost += shoppingCart.initialCost;
                         });
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
@@ -263,34 +266,33 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.createOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, shoppingCartIds, quantity, address, note, phoneNumber, paymentMethod, shoppingCarts, initialCost, order;
-            var _this = this;
+            var tokenData, _a, bookId, quantity, address, note, phoneNumber, book, initialCost, shoppingCart, order;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        _a = req.body, shoppingCartIds = _a.shoppingCartIds, quantity = _a.quantity, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber, paymentMethod = _a.paymentMethod;
-                        if (!shoppingCartIds || !quantity || !address || !phoneNumber) {
+                        _a = req.body, bookId = _a.bookId, quantity = _a.quantity, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber;
+                        if (!bookId || !quantity || !address || !phoneNumber) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
-                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
-                                _id: { $in: shoppingCartIds },
-                            })];
+                        return [4 /*yield*/, book_model_1.BookModel.findById(bookId)];
                     case 1:
-                        shoppingCarts = _b.sent();
-                        if (shoppingCarts.length < 1) {
+                        book = _b.sent();
+                        if (book) {
                             throw error_1.ErrorHelper.recoredNotFound("order!");
                         }
-                        initialCost = 0;
-                        shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
-                            return __generator(this, function (_a) {
-                                initialCost += shoppingCart.initialCost;
-                                shoppingCart.status = model_const_1.ShoppingCartStatusEnum.SUCCESS;
-                                return [2 /*return*/];
-                            });
-                        }); });
+                        initialCost = book.price * quantity;
+                        shoppingCart = new shoppingCart_model_1.ShoppingCartModel({
+                            bookId: book._id,
+                            quantity: quantity,
+                            initialCost: initialCost,
+                            status: model_const_1.ShoppingCartStatusEnum.SUCCESS,
+                        });
+                        return [4 /*yield*/, shoppingCart.save()];
+                    case 2:
+                        _b.sent();
                         order = new order_model_1.OrderModel({
-                            shoppingCartIds: shoppingCartIds,
+                            shoppingCartIds: [shoppingCart._id],
                             quantity: quantity,
                             address: address,
                             note: note || "",
@@ -299,12 +301,11 @@ var OrderRoute = /** @class */ (function (_super) {
                             finalCost: initialCost + 30000,
                             userId: tokenData._id,
                             phone: phoneNumber,
-                            paymentMethod: paymentMethod,
                             isPaid: true,
                             shippingFee: 30000,
                         });
                         return [4 /*yield*/, order.save()];
-                    case 2:
+                    case 3:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,

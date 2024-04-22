@@ -172,15 +172,17 @@ class OrderRoute extends BaseRoute {
   }
   //get bill
   async getBill(req: Request, res: Response) {
-    let { orderIds } = req.body;
-    const orders = await OrderModel.find({ _id: { $in: orderIds } });
+    let { shoppingCartIds } = req.body;
+    const shoppingCarts = await ShoppingCartModel.find({
+      _id: { $in: shoppingCartIds },
+    });
     let initialCost = 0;
-    if (orders.length < 1) {
+    if (shoppingCarts.length < 1) {
       //throw lỗi không tìm thấy
-      throw ErrorHelper.recoredNotFound("order!");
+      throw ErrorHelper.recoredNotFound("shoppingCart!");
     }
-    orders.map((order) => {
-      initialCost += order.initialCost;
+    shoppingCarts.map((shoppingCart) => {
+      initialCost += shoppingCart.initialCost;
     });
     return res.status(200).json({
       status: 200,
@@ -196,30 +198,24 @@ class OrderRoute extends BaseRoute {
 
   async createOrder(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    const {
-      shoppingCartIds,
-      quantity,
-      address,
-      note,
-      phoneNumber,
-      paymentMethod,
-    } = req.body;
-    if (!shoppingCartIds || !quantity || !address || !phoneNumber) {
+    const { bookId, quantity, address, note, phoneNumber } = req.body;
+    if (!bookId || !quantity || !address || !phoneNumber) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
-    let shoppingCarts = await ShoppingCartModel.find({
-      _id: { $in: shoppingCartIds },
-    });
-    if (shoppingCarts.length < 1) {
+    let book = await BookModel.findById(bookId);
+    if (book) {
       throw ErrorHelper.recoredNotFound("order!");
     }
-    let initialCost = 0;
-    shoppingCarts.map(async (shoppingCart: any) => {
-      initialCost += shoppingCart.initialCost;
-      shoppingCart.status = ShoppingCartStatusEnum.SUCCESS;
+    let initialCost = book.price * quantity;
+    let shoppingCart = new ShoppingCartModel({
+      bookId: book._id,
+      quantity: quantity,
+      initialCost: initialCost,
+      status: ShoppingCartStatusEnum.SUCCESS,
     });
+    await shoppingCart.save();
     const order = new OrderModel({
-      shoppingCartIds: shoppingCartIds,
+      shoppingCartIds: [shoppingCart._id],
       quantity: quantity,
       address: address,
       note: note || "",
@@ -228,7 +224,6 @@ class OrderRoute extends BaseRoute {
       finalCost: initialCost + 30000,
       userId: tokenData._id,
       phone: phoneNumber,
-      paymentMethod: paymentMethod,
       isPaid: true,
       shippingFee: 30000,
     });
