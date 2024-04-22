@@ -17,3 +17,8 @@ export enum paymentMethodEnum {
   BANK_TRANSFER = "BANK_TRANSFER",
   WALLET = "WALLET",
 }
+
+export enum ShoppingCartStatusEnum {
+  IN_CART = "IN_CART",
+  SUCCESS = "SUCCESS",
+}

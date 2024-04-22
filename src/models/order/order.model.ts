@@ -8,7 +8,7 @@ import {
 // Định nghĩa type cho user
 export type IOrder = BaseDocument & {
   userId?: string;
-  bookId?: string;
+  shoppingCartIds?: string[];
   quantity?: number;
   initialCost?: number;
   discountAmount?: string;
@@ -25,7 +25,7 @@ export type IOrder = BaseDocument & {
 const orderSchema = new mongoose.Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User" },
-    bookId: { type: Schema.Types.ObjectId, ref: "Book" },
+    shoppingCartIds: [{ type: Schema.Types.ObjectId, ref: "ShoppingCart" }],
     quantity: { type: Number },
     initialCost: { type: Number },
     discountAmount: { type: String },
@@ -56,9 +56,9 @@ orderSchema.virtual("user", {
   localField: "userId",
   foreignField: "_id",
 });
-orderSchema.virtual("book", {
-  ref: "Book",
-  localField: "bookId",
+orderSchema.virtual("shoppingCarts", {
+  ref: "ShoppingCart",
+  localField: "shoppingCartIds",
   foreignField: "_id",
 });
 const OrderModel = mongoose.model<IOrder>("Order", orderSchema);

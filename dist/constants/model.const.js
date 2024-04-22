@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.paymentMethodEnum = exports.OrderStatusEnum = exports.UserRoleEnum = void 0;
+exports.ShoppingCartStatusEnum = exports.paymentMethodEnum = exports.OrderStatusEnum = exports.UserRoleEnum = void 0;
 var UserRoleEnum;
 (function (UserRoleEnum) {
     UserRoleEnum["ADMIN"] = "ADMIN";
@@ -22,4 +22,9 @@ var paymentMethodEnum;
     paymentMethodEnum["BANK_TRANSFER"] = "BANK_TRANSFER";
     paymentMethodEnum["WALLET"] = "WALLET";
 })(paymentMethodEnum || (exports.paymentMethodEnum = paymentMethodEnum = {}));
+var ShoppingCartStatusEnum;
+(function (ShoppingCartStatusEnum) {
+    ShoppingCartStatusEnum["IN_CART"] = "IN_CART";
+    ShoppingCartStatusEnum["SUCCESS"] = "SUCCESS";
+})(ShoppingCartStatusEnum || (exports.ShoppingCartStatusEnum = ShoppingCartStatusEnum = {}));
 //# sourceMappingURL=model.const.js.map

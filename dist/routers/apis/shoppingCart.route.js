@@ -56,25 +56,26 @@ var baseRoute_1 = require("../../base/baseRoute");
 var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var error_1 = require("../../base/error");
-var order_service_1 = require("../..//models/order/order.service");
+var book_model_1 = require("../../models/book/book.model");
+var book_service_1 = require("../../models/book/book.service");
 var order_model_1 = require("../../models/order/order.model");
 var model_const_1 = require("../../constants/model.const");
+var shoppingCart_service_1 = require("../../models/shoppingCart/shoppingCart.service");
 var shoppingCart_model_1 = require("../../models/shoppingCart/shoppingCart.model");
-var OrderRoute = /** @class */ (function (_super) {
-    __extends(OrderRoute, _super);
-    function OrderRoute() {
+var ShoppingCartRoute = /** @class */ (function (_super) {
+    __extends(ShoppingCartRoute, _super);
+    function ShoppingCartRoute() {
         return _super.call(this) || this;
     }
-    OrderRoute.prototype.customRouting = function () {
-        this.router.post("/getAllOrder", [this.authentication], this.route(this.getAllOrder));
-        this.router.post("/getAllOrderForAdmin", [this.authentication], this.route(this.getAllOrderForAdmin));
-        this.router.post("/getOneOrder/:id", [this.authentication], this.route(this.getOneOrder));
-        this.router.post("/getBill", [this.authentication], this.route(this.getBill));
-        this.router.post("/createOrder", [this.authentication], this.route(this.createOrder));
-        this.router.post("/deleteOneOrder", [this.authentication], this.route(this.deleteOneOrder));
+    ShoppingCartRoute.prototype.customRouting = function () {
+        this.router.post("/getAllShoppingCart", [this.authentication], this.route(this.getAllShoppingCart));
+        this.router.post("/getOneShoppingCart/:id", [this.authentication], this.route(this.getOneShoppingCart));
+        this.router.post("/addBookToCart", [this.authentication], this.route(this.addBookToCart));
+        this.router.post("/paymentShoppingCart", [this.authentication], this.route(this.paymentShoppingCart));
+        this.router.post("/updateQuantityBookInCart", [this.authentication], this.route(this.updateQuantityBookInCart));
     };
     //Auth
-    OrderRoute.prototype.authentication = function (req, res, next) {
+    ShoppingCartRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var tokenData, user;
             return __generator(this, function (_a) {
@@ -100,10 +101,10 @@ var OrderRoute = /** @class */ (function (_super) {
             });
         });
     };
-    //getAllOrder
-    OrderRoute.prototype.getAllOrder = function (req, res) {
+    //getAllShoppingCart
+    ShoppingCartRoute.prototype.getAllShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, orders;
+            var tokenData, _a, limit, page, search, filter, shoppingCarts;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -130,89 +131,39 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
                             filter.userId = tokenData._id;
                         }
-                        return [4 /*yield*/, order_service_1.orderService.fetch({
+                        filter.status = { $eq: model_const_1.ShoppingCartStatusEnum.IN_CART };
+                        return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.fetch({
                                 filter: filter,
                                 search: search,
                                 limit: limit,
                                 page: page,
                             }, ["user", "book"])];
                     case 1:
-                        orders = _b.sent();
+                        shoppingCarts = _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: orders,
+                                data: shoppingCarts,
                             })];
                 }
             });
         });
     };
-    //getAllOrderForAdmin
-    OrderRoute.prototype.getAllOrderForAdmin = function (req, res) {
+    //getOneShoppingCart
+    ShoppingCartRoute.prototype.getOneShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, orders;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
-                            throw error_1.ErrorHelper.permissionDeny();
-                        }
-                        try {
-                            req.body.limit = parseInt(req.body.limit);
-                        }
-                        catch (err) {
-                            throw error_1.ErrorHelper.requestDataInvalid("limit");
-                        }
-                        try {
-                            req.body.page = parseInt(req.body.page);
-                        }
-                        catch (err) {
-                            throw error_1.ErrorHelper.requestDataInvalid("page");
-                        }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
-                        if (!limit) {
-                            limit = 10;
-                        }
-                        if (!page) {
-                            page = 1;
-                        }
-                        if (filter.status) {
-                            filter.status = { $nin: [model_const_1.OrderStatusEnum.IN_CART] };
-                        }
-                        return [4 /*yield*/, order_service_1.orderService.fetch({
-                                filter: filter,
-                                search: search,
-                                limit: limit,
-                                page: page,
-                            }, ["user", "book"])];
-                    case 1:
-                        orders = _b.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: orders,
-                            })];
-                }
-            });
-        });
-    };
-    //getOneOrder
-    OrderRoute.prototype.getOneOrder = function (req, res) {
-        return __awaiter(this, void 0, void 0, function () {
-            var id, order;
+            var id, shoppingCart;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         id = req.params.id;
-                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(id)
                                 .populate("user")
                                 .populate("book")];
                     case 1:
-                        order = _a.sent();
-                        if (!order) {
+                        shoppingCart = _a.sent();
+                        if (!shoppingCart) {
                             //throw lỗi không tìm thấy
                             throw error_1.ErrorHelper.recoredNotFound("order!");
                         }
@@ -221,56 +172,90 @@ var OrderRoute = /** @class */ (function (_super) {
                                 code: "200",
                                 message: "success",
                                 data: {
-                                    order: order,
+                                    shoppingCart: shoppingCart,
                                 },
                             })];
                 }
             });
         });
     };
-    //get bill
-    OrderRoute.prototype.getBill = function (req, res) {
+    ShoppingCartRoute.prototype.addBookToCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var orderIds, orders, initialCost;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var tokenData, _a, bookId, quantity, book, shoppingCart;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        orderIds = req.body.orderIds;
-                        return [4 /*yield*/, order_model_1.OrderModel.find({ _id: { $in: orderIds } })];
-                    case 1:
-                        orders = _a.sent();
-                        initialCost = 0;
-                        if (orders.length < 1) {
-                            //throw lỗi không tìm thấy
-                            throw error_1.ErrorHelper.recoredNotFound("order!");
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        _a = req.body, bookId = _a.bookId, quantity = _a.quantity;
+                        if (!bookId || !quantity) {
+                            throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
-                        orders.map(function (order) {
-                            initialCost += order.initialCost;
+                        return [4 /*yield*/, book_model_1.BookModel.findById(bookId)];
+                    case 1:
+                        book = _b.sent();
+                        if (!book) {
+                            throw error_1.ErrorHelper.recoredNotFound("book!");
+                        }
+                        if (book.quantity < quantity) {
+                            throw error_1.ErrorHelper.forbidden("Out of stock!");
+                        }
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findOne({
+                                userId: tokenData._id,
+                                bookId: bookId,
+                                status: model_const_1.ShoppingCartStatusEnum.IN_CART,
+                            })];
+                    case 2:
+                        shoppingCart = _b.sent();
+                        if (!shoppingCart) return [3 /*break*/, 4];
+                        shoppingCart.quantity += quantity;
+                        shoppingCart.initialCost += book.price * quantity;
+                        return [4 /*yield*/, shoppingCart.save()];
+                    case 3:
+                        _b.sent();
+                        return [3 /*break*/, 6];
+                    case 4:
+                        shoppingCart = new shoppingCart_model_1.ShoppingCartModel({
+                            bookId: bookId,
+                            quantity: quantity,
+                            initialCost: book.price * quantity,
+                            userId: tokenData._id,
                         });
+                        return [4 /*yield*/, shoppingCart.save()];
+                    case 5:
+                        _b.sent();
+                        _b.label = 6;
+                    case 6: return [4 /*yield*/, book_service_1.bookService.updateOne(book._id, {
+                            $inc: {
+                                quantity: -quantity,
+                            },
+                        })];
+                    case 7:
+                        _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
                                 data: {
-                                    initialCost: initialCost,
-                                    shippingFee: 30000,
-                                    finalCost: initialCost + 30000,
+                                    shoppingCart: shoppingCart,
                                 },
                             })];
                 }
             });
         });
     };
-    OrderRoute.prototype.createOrder = function (req, res) {
+    ShoppingCartRoute.prototype.paymentShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, shoppingCartIds, quantity, address, note, phoneNumber, paymentMethod, shoppingCarts, initialCost, order;
+            var tokenData, _a, shoppingCartIds, address, note, phoneNumber, shoppingCarts, initialCost, order;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        _a = req.body, shoppingCartIds = _a.shoppingCartIds, quantity = _a.quantity, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber, paymentMethod = _a.paymentMethod;
-                        if (!shoppingCartIds || !quantity || !address || !phoneNumber) {
+                        _a = req.body, shoppingCartIds = _a.shoppingCartIds, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber;
+                        if (!shoppingCartIds ||
+                            shoppingCartIds.length < 1 ||
+                            !phoneNumber ||
+                            !address) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
@@ -290,18 +275,16 @@ var OrderRoute = /** @class */ (function (_super) {
                             });
                         }); });
                         order = new order_model_1.OrderModel({
-                            shoppingCartIds: shoppingCartIds,
-                            quantity: quantity,
-                            address: address,
-                            note: note || "",
-                            initialCost: initialCost,
-                            discountAmount: 0,
-                            finalCost: initialCost + 30000,
                             userId: tokenData._id,
+                            shoppingCartIds: shoppingCartIds,
                             phone: phoneNumber,
-                            paymentMethod: paymentMethod,
+                            address: address,
+                            note: note,
+                            status: model_const_1.OrderStatusEnum.PENDING,
                             isPaid: true,
                             shippingFee: 30000,
+                            initialCost: initialCost,
+                            finalCost: initialCost + 30000,
                         });
                         return [4 /*yield*/, order.save()];
                     case 2:
@@ -318,130 +301,68 @@ var OrderRoute = /** @class */ (function (_super) {
             });
         });
     };
-    //update order for admin
-    OrderRoute.prototype.updateOrderForAdmin = function (req, res) {
+    ShoppingCartRoute.prototype.updateQuantityBookInCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, address, note, status, phoneNumber, order;
+            var _a, shoppingCartId, isIncrease, quantity, shoppingCart, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = req.body, id = _a.id, address = _a.address, note = _a.note, status = _a.status, phoneNumber = _a.phoneNumber;
-                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
+                        _a = req.body, shoppingCartId = _a.shoppingCartId, isIncrease = _a.isIncrease;
+                        quantity = 1;
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(shoppingCartId)];
                     case 1:
-                        order = _b.sent();
-                        if (!order) {
-                            throw error_1.ErrorHelper.recoredNotFound("Book");
+                        shoppingCart = _b.sent();
+                        if (!shoppingCart) {
+                            throw error_1.ErrorHelper.recoredNotFound("shoppingCart!");
                         }
-                        return [4 /*yield*/, order_service_1.orderService.updateOne(order._id, {
-                                address: address,
-                                note: note,
-                                status: status,
-                                phone: phoneNumber,
-                            })];
+                        return [4 /*yield*/, book_model_1.BookModel.findById(shoppingCart.bookId)];
                     case 2:
+                        book = _b.sent();
+                        if (!book) {
+                            throw error_1.ErrorHelper.recoredNotFound("book!");
+                        }
+                        if (!(isIncrease == false)) return [3 /*break*/, 5];
+                        quantity = -1;
+                        if (!(shoppingCart.quantity == 1)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.deleteOne(shoppingCart._id)];
+                    case 3:
+                        _b.sent();
+                        _b.label = 4;
+                    case 4:
+                        book.quantity += 1;
+                        return [3 /*break*/, 6];
+                    case 5:
+                        book.quantity -= 1;
+                        _b.label = 6;
+                    case 6: return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.updateOne(shoppingCart._id, {
+                            $inc: {
+                                quantity: quantity,
+                            },
+                            initialCost: quantity == -1
+                                ? shoppingCart.initialCost - book.price
+                                : shoppingCart.initialCost + book.price,
+                            finalCost: quantity == -1
+                                ? shoppingCart.initialCost - book.price
+                                : shoppingCart.initialCost + book.price,
+                        })];
+                    case 7:
+                        _b.sent();
+                        return [4 /*yield*/, book.save()];
+                    case 8:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
                                 data: {
-                                    order: order,
+                                    shoppingCart: shoppingCart,
                                 },
                             })];
                 }
             });
         });
     };
-    //update status order for admin
-    OrderRoute.prototype.updateStatusOrder = function (req, res) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, id, status, order;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = req.body, id = _a.id, status = _a.status;
-                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
-                    case 1:
-                        order = _b.sent();
-                        if (!order) {
-                            throw error_1.ErrorHelper.recoredNotFound("Book");
-                        }
-                        order.status = status;
-                        order.save();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: {
-                                    order: order,
-                                },
-                            })];
-                }
-            });
-        });
-    };
-    //cancel order
-    OrderRoute.prototype.cancelOrder = function (req, res) {
-        return __awaiter(this, void 0, void 0, function () {
-            var id, order;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        id = req.body.id;
-                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
-                    case 1:
-                        order = _a.sent();
-                        if (!order) {
-                            throw error_1.ErrorHelper.recoredNotFound("Book!");
-                        }
-                        order.status = model_const_1.OrderStatusEnum.CANCEL;
-                        return [4 /*yield*/, order.save()];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: {
-                                    order: order,
-                                },
-                            })];
-                }
-            });
-        });
-    };
-    OrderRoute.prototype.deleteOneOrder = function (req, res) {
-        return __awaiter(this, void 0, void 0, function () {
-            var id, order;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
-                            throw error_1.ErrorHelper.permissionDeny();
-                        }
-                        id = req.body.id;
-                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
-                    case 1:
-                        order = _a.sent();
-                        if (!order) {
-                            throw error_1.ErrorHelper.recoredNotFound("Book!");
-                        }
-                        return [4 /*yield*/, order_model_1.OrderModel.deleteOne({ _id: id })];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: {
-                                    order: order,
-                                },
-                            })];
-                }
-            });
-        });
-    };
-    return OrderRoute;
+    return ShoppingCartRoute;
 }(baseRoute_1.BaseRoute));
-exports.default = new OrderRoute().router;
-//# sourceMappingURL=order.route.js.map
+exports.default = new ShoppingCartRoute().router;
+//# sourceMappingURL=shoppingCart.route.js.map

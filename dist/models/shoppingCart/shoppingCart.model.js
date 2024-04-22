@@ -23,46 +23,34 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderModel = void 0;
+exports.ShoppingCartModel = void 0;
 var mongoose_1 = __importStar(require("mongoose"));
 var model_const_1 = require("../../constants/model.const");
-var orderSchema = new mongoose_1.default.Schema({
+var shoppingCartSchema = new mongoose_1.default.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
-    shoppingCartIds: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "ShoppingCart" }],
+    bookId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Book" },
     quantity: { type: Number },
     initialCost: { type: Number },
-    discountAmount: { type: String },
-    shippingFee: { type: Number },
-    finalCost: { type: Number },
     status: {
         type: String,
         enum: Object.values(model_const_1.OrderStatusEnum),
         default: model_const_1.OrderStatusEnum.IN_CART,
     },
-    note: { type: String },
-    address: { type: String },
-    phone: { type: String },
-    isPaid: { type: Boolean, default: false },
-    paymentMethod: {
-        type: String,
-        enum: Object.values(model_const_1.paymentMethodEnum),
-        default: model_const_1.paymentMethodEnum.CASH,
-    },
 }, { timestamps: true }
 //virtual populate
 );
-orderSchema.set("toObject", { virtuals: true });
-orderSchema.set("toJSON", { virtuals: true });
-orderSchema.virtual("user", {
+shoppingCartSchema.set("toObject", { virtuals: true });
+shoppingCartSchema.set("toJSON", { virtuals: true });
+shoppingCartSchema.virtual("user", {
     ref: "User",
     localField: "userId",
     foreignField: "_id",
 });
-orderSchema.virtual("shoppingCarts", {
-    ref: "ShoppingCart",
-    localField: "shoppingCartIds",
+shoppingCartSchema.virtual("book", {
+    ref: "Book",
+    localField: "bookId",
     foreignField: "_id",
 });
-var OrderModel = mongoose_1.default.model("Order", orderSchema);
-exports.OrderModel = OrderModel;
-//# sourceMappingURL=order.model.js.map
+var ShoppingCartModel = mongoose_1.default.model("Order", shoppingCartSchema);
+exports.ShoppingCartModel = ShoppingCartModel;
+//# sourceMappingURL=shoppingCart.model.js.map
