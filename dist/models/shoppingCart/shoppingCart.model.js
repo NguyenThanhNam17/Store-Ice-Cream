@@ -51,6 +51,6 @@ shoppingCartSchema.virtual("book", {
     localField: "bookId",
     foreignField: "_id",
 });
-var ShoppingCartModel = mongoose_1.default.model("Order", shoppingCartSchema);
+var ShoppingCartModel = mongoose_1.default.model("ShoppingCart", shoppingCartSchema);
 exports.ShoppingCartModel = ShoppingCartModel;
 //# sourceMappingURL=shoppingCart.model.js.map

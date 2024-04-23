@@ -42,7 +42,7 @@ shoppingCartSchema.virtual("book", {
   foreignField: "_id",
 });
 const ShoppingCartModel = mongoose.model<IShoppingCart>(
-  "Order",
+  "ShoppingCart",
   shoppingCartSchema
 );
 
