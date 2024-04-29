@@ -57,16 +57,10 @@ class BookRoute extends BaseRoute {
   }
   //getAllBook
   async getAllBook(req: Request, res: Response) {
-    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    let a = await BookModel.find({});
-    a.map((item: any) => {
-      bookService.updateOne(item._id, {
-        $set: {
-          isHighlight: false,
-          soldQuantity: 10,
-        },
-      });
-    });
+    let tokenData: any;
+    if (req.get("x-token")) {
+      tokenData = TokenHelper.decodeToken(req.get("x-token"));
+    }
     try {
       req.body.limit = parseInt(req.body.limit);
     } catch (err) {
@@ -89,7 +83,6 @@ class BookRoute extends BaseRoute {
       if (!mine) {
         throw ErrorHelper.userNotExist();
       }
-      console.log(mine);
       const keywords = mine.searchs.join("|");
       _.set(req.body, "filter", {
         content: { $regex: keywords, $options: "i" },

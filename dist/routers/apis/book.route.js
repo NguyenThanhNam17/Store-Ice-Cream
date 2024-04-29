@@ -106,22 +106,13 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, a, _a, limit, page, search, filter, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
+            var tokenData, _a, limit, page, search, filter, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        return [4 /*yield*/, book_model_1.BookModel.find({})];
-                    case 1:
-                        a = _b.sent();
-                        a.map(function (item) {
-                            book_service_1.bookService.updateOne(item._id, {
-                                $set: {
-                                    isHighlight: false,
-                                    soldQuantity: 10,
-                                },
-                            });
-                        });
+                        if (req.get("x-token")) {
+                            tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        }
                         try {
                             req.body.limit = parseInt(req.body.limit);
                         }
@@ -141,14 +132,13 @@ var BookRoute = /** @class */ (function (_super) {
                         if (!page) {
                             page = 1;
                         }
-                        if (!(search && tokenData)) return [3 /*break*/, 4];
+                        if (!(search && tokenData)) return [3 /*break*/, 3];
                         return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
-                    case 2:
+                    case 1:
                         mine = _b.sent();
                         if (!mine) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        console.log(mine);
                         keywords = mine.searchs.join("|");
                         lodash_1.default.set(req.body, "filter", {
                             content: { $regex: keywords, $options: "i" },
@@ -189,16 +179,16 @@ var BookRoute = /** @class */ (function (_super) {
                                     },
                                 }),
                             ])];
-                    case 3:
+                    case 2:
                         _b.sent();
-                        _b.label = 4;
-                    case 4: return [4 /*yield*/, book_service_1.bookService.fetch({
+                        _b.label = 3;
+                    case 3: return [4 /*yield*/, book_service_1.bookService.fetch({
                             filter: filter,
                             search: search,
                             limit: limit,
                             page: page,
                         }, ["category"])];
-                    case 5:
+                    case 4:
                         books = _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
