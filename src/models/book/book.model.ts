@@ -10,6 +10,8 @@ export type IBook = BaseDocument & {
   quantity?: number;
   price?: number;
   images?: string[];
+  isHighlight?: boolean;
+  soldQuantity?: number;
 };
 
 const bookSchema = new mongoose.Schema(
@@ -21,6 +23,8 @@ const bookSchema = new mongoose.Schema(
     quantity: { type: Number },
     price: { type: Number },
     images: [{ type: String }],
+    isHighlight: { type: Boolean },
+    soldQuantity: { type: Number },
   },
   { timestamps: true }
 );

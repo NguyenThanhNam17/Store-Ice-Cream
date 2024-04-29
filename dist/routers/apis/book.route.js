@@ -50,6 +50,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var user_model_1 = require("../../models/user/user.model");
 var baseRoute_1 = require("../../base/baseRoute");
@@ -57,7 +60,9 @@ var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var error_1 = require("../../base/error");
 var book_model_1 = require("../../models/book/book.model");
+var lodash_1 = __importDefault(require("lodash"));
 var book_service_1 = require("../../models/book/book.service");
+var vntk_1 = __importDefault(require("vntk"));
 var BookRoute = /** @class */ (function (_super) {
     __extends(BookRoute, _super);
     function BookRoute() {
@@ -69,6 +74,7 @@ var BookRoute = /** @class */ (function (_super) {
         this.router.post("/createBook", [this.authentication], this.route(this.createBook));
         this.router.post("/updateBook", [this.authentication], this.route(this.updateBook));
         this.router.post("/deleteOneBook", [this.authentication], this.route(this.deleteOneBook));
+        this.router.post("/setHightlightBook", [this.authentication], this.route(this.setHightlightBook));
     };
     //Auth
     BookRoute.prototype.authentication = function (req, res, next) {
@@ -100,10 +106,22 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, limit, page, search, filter, books;
+            var tokenData, a, _a, limit, page, search, filter, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        return [4 /*yield*/, book_model_1.BookModel.find({})];
+                    case 1:
+                        a = _b.sent();
+                        a.map(function (item) {
+                            book_service_1.bookService.updateOne(item._id, {
+                                $set: {
+                                    isHighlight: false,
+                                    soldQuantity: 10,
+                                },
+                            });
+                        });
                         try {
                             req.body.limit = parseInt(req.body.limit);
                         }
@@ -123,13 +141,64 @@ var BookRoute = /** @class */ (function (_super) {
                         if (!page) {
                             page = 1;
                         }
-                        return [4 /*yield*/, book_service_1.bookService.fetch({
-                                filter: filter,
-                                search: search,
-                                limit: limit,
-                                page: page,
-                            }, ["category"])];
-                    case 1:
+                        if (!(search && tokenData)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
+                    case 2:
+                        mine = _b.sent();
+                        if (!mine) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        console.log(mine);
+                        keywords = mine.searchs.join("|");
+                        lodash_1.default.set(req.body, "filter", {
+                            content: { $regex: keywords, $options: "i" },
+                        });
+                        text = search;
+                        tokenizer = vntk_1.default.posTag();
+                        words = tokenizer.tag(text);
+                        nouns = words.filter(function (word) { return word[1] === "N" || word[1] === "M" || word[1] === "Np"; });
+                        tfidf_1 = new vntk_1.default.TfIdf();
+                        tfidf_1.addDocument(text);
+                        importantWords = nouns.map(function (word) {
+                            return {
+                                word: word[0],
+                                tfidf: tfidf_1.tfidfs(word[0], function (i, measure) {
+                                    console.log("document #" + i + " is " + measure);
+                                }),
+                            };
+                        });
+                        topKeywords = importantWords
+                            .sort(function (a, b) { return b.tfidf - a.tfidf; })
+                            .slice(0, 3);
+                        result = topKeywords.map(function (item) { return item.word; });
+                        return [4 /*yield*/, Promise.all([
+                                user_model_1.UserModel.updateOne({ _id: mine._id }, {
+                                    $addToSet: {
+                                        searchs: {
+                                            $each: result,
+                                        },
+                                    },
+                                }),
+                                //limit array size
+                                user_model_1.UserModel.updateOne({ _id: mine._id }, {
+                                    $push: {
+                                        searchs: {
+                                            $each: [],
+                                            $slice: -10,
+                                        },
+                                    },
+                                }),
+                            ])];
+                    case 3:
+                        _b.sent();
+                        _b.label = 4;
+                    case 4: return [4 /*yield*/, book_service_1.bookService.fetch({
+                            filter: filter,
+                            search: search,
+                            limit: limit,
+                            page: page,
+                        }, ["category"])];
+                    case 5:
                         books = _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
@@ -262,6 +331,41 @@ var BookRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, book_model_1.BookModel.deleteOne({ _id: id })];
                     case 2:
                         _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    book: book,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    BookRoute.prototype.setHightlightBook = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, id, isHighlight, book;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        _a = req.body, id = _a.id, isHighlight = _a.isHighlight;
+                        return [4 /*yield*/, book_model_1.BookModel.findById(id)];
+                    case 1:
+                        book = _b.sent();
+                        if (!book) {
+                            throw error_1.ErrorHelper.recoredNotFound("Book!");
+                        }
+                        return [4 /*yield*/, book_service_1.bookService.updateOne(book._id, {
+                                $set: {
+                                    isHighlight: isHighlight,
+                                },
+                            })];
+                    case 2:
+                        _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",

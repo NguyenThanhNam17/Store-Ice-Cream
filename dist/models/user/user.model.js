@@ -15,6 +15,7 @@ var userSchema = new mongoose_1.default.Schema({
     username: { type: String },
     password: { type: String },
     key: { type: String },
+    searchs: [{ type: String }],
 }, { timestamps: true });
 // Index for search
 userSchema.index({ username: "text", name: "text" }, { weights: { username: 4, name: 2 } });

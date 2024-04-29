@@ -7,6 +7,7 @@ exports.BookCategoryModel = void 0;
 var mongoose_1 = __importDefault(require("mongoose"));
 var bookCategorySchema = new mongoose_1.default.Schema({
     name: { type: String },
+    key: { type: String },
 }, { timestamps: true });
 var BookCategoryModel = mongoose_1.default.model("BookCategory", bookCategorySchema);
 exports.BookCategoryModel = BookCategoryModel;

@@ -11,7 +11,8 @@
     "moment-timezone": "^0.5.45",
     "mongoose": "^7.6.9",
     "password-hash": "^1.2.2",
-    "phone": "^3.1.42"
+    "phone": "^3.1.42",
+    "vntk": "^1.4.4"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",

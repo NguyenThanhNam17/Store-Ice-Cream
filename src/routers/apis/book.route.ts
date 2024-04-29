@@ -3,14 +3,13 @@ import { UserModel } from "../../models/user/user.model";
 import { BaseRoute } from "../../base/baseRoute";
 import { TokenHelper } from "../../helper/token.helper";
 import { ROLES } from "../../constants/role.const";
-import passwordHash from "password-hash";
-
 import { ErrorHelper } from "../../base/error";
 import { Request, Response } from "../../base/baseRoute";
 import { BookModel } from "../../models/book/book.model";
 import moment from "moment";
 import _ from "lodash";
 import { bookService } from "../../models/book/book.service";
+import vntk from "vntk";
 class BookRoute extends BaseRoute {
   constructor() {
     super();
@@ -33,6 +32,11 @@ class BookRoute extends BaseRoute {
       [this.authentication],
       this.route(this.deleteOneBook)
     );
+    this.router.post(
+      "/setHightlightBook",
+      [this.authentication],
+      this.route(this.setHightlightBook)
+    );
   }
   //Auth
   async authentication(req: Request, res: Response, next: NextFunction) {
@@ -53,6 +57,16 @@ class BookRoute extends BaseRoute {
   }
   //getAllBook
   async getAllBook(req: Request, res: Response) {
+    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    let a = await BookModel.find({});
+    a.map((item: any) => {
+      bookService.updateOne(item._id, {
+        $set: {
+          isHighlight: false,
+          soldQuantity: 10,
+        },
+      });
+    });
     try {
       req.body.limit = parseInt(req.body.limit);
     } catch (err) {
@@ -69,6 +83,65 @@ class BookRoute extends BaseRoute {
     }
     if (!page) {
       page = 1;
+    }
+    if (search && tokenData) {
+      let mine = await UserModel.findById(tokenData._id);
+      if (!mine) {
+        throw ErrorHelper.userNotExist();
+      }
+      console.log(mine);
+      const keywords = mine.searchs.join("|");
+      _.set(req.body, "filter", {
+        content: { $regex: keywords, $options: "i" },
+      });
+      const text = search;
+      const tokenizer = vntk.posTag();
+      const words: any = tokenizer.tag(text);
+
+      const nouns = words.filter(
+        (word: any) => word[1] === "N" || word[1] === "M" || word[1] === "Np"
+      );
+
+      const tfidf = new vntk.TfIdf();
+      tfidf.addDocument(text);
+      const importantWords = nouns.map((word: any) => {
+        return {
+          word: word[0],
+          tfidf: tfidf.tfidfs(word[0], function (i, measure) {
+            console.log("document #" + i + " is " + measure);
+          }),
+        };
+      });
+
+      const topKeywords = importantWords
+        .sort((a: any, b: any) => b.tfidf - a.tfidf)
+        .slice(0, 3);
+      const result = topKeywords.map((item: any) => item.word);
+
+      await Promise.all([
+        UserModel.updateOne(
+          { _id: mine._id },
+          {
+            $addToSet: {
+              searchs: {
+                $each: result,
+              },
+            },
+          }
+        ),
+        //limit array size
+        UserModel.updateOne(
+          { _id: mine._id },
+          {
+            $push: {
+              searchs: {
+                $each: [],
+                $slice: -10,
+              },
+            },
+          }
+        ),
+      ]);
     }
     const books = await bookService.fetch(
       {
@@ -179,6 +252,29 @@ class BookRoute extends BaseRoute {
       throw ErrorHelper.recoredNotFound("Book!");
     }
     await BookModel.deleteOne({ _id: id });
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        book,
+      },
+    });
+  }
+  async setHightlightBook(req: Request, res: Response) {
+    if (ROLES.ADMIN != req.tokenInfo.role_) {
+      throw ErrorHelper.permissionDeny();
+    }
+    const { id, isHighlight } = req.body;
+    let book = await BookModel.findById(id);
+    if (!book) {
+      throw ErrorHelper.recoredNotFound("Book!");
+    }
+    await bookService.updateOne(book._id, {
+      $set: {
+        isHighlight: isHighlight,
+      },
+    });
     return res.status(200).json({
       status: 200,
       code: "200",

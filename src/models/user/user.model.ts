@@ -12,6 +12,7 @@ export type IUser = BaseDocument & {
   address?: string;
   gender?: string;
   key?: string;
+  searchs?: string[];
 };
 
 const userSchema = new mongoose.Schema(
@@ -25,6 +26,7 @@ const userSchema = new mongoose.Schema(
     username: { type: String },
     password: { type: String },
     key: { type: String },
+    searchs: [{ type: String }],
   },
   { timestamps: true }
 );

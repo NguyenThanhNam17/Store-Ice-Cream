@@ -79,17 +79,19 @@ class ShoppingCartRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, filter } = req.body;
+    var { limit, page, search } = req.body;
     if (!limit) {
       limit = 10;
     }
     if (!page) {
       page = 1;
     }
-    if (tokenData.role_ != ROLES.ADMIN) {
-      filter.userId = tokenData._id;
-    }
-    filter.status = { $eq: ShoppingCartStatusEnum.IN_CART };
+    let filter: any = {
+      status: ShoppingCartStatusEnum.IN_CART,
+      userId: tokenData._id,
+    };
+
+    console.log(filter);
     const shoppingCarts = await shoppingCartService.fetch(
       {
         filter: filter,

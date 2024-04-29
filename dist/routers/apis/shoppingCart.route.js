@@ -121,17 +121,18 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search;
                         if (!limit) {
                             limit = 10;
                         }
                         if (!page) {
                             page = 1;
                         }
-                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
-                            filter.userId = tokenData._id;
-                        }
-                        filter.status = { $eq: model_const_1.ShoppingCartStatusEnum.IN_CART };
+                        filter = {
+                            status: model_const_1.ShoppingCartStatusEnum.IN_CART,
+                            userId: tokenData._id,
+                        };
+                        console.log(filter);
                         return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.fetch({
                                 filter: filter,
                                 search: search,
