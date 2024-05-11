@@ -53,6 +53,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var baseRoute_1 = require("../../base/baseRoute");
 var bookCategory_model_1 = require("../../models/bookCategory/bookCategory.model");
+var error_1 = require("../..//base/error");
 var BookCategoryRoute = /** @class */ (function (_super) {
     __extends(BookCategoryRoute, _super);
     function BookCategoryRoute() {
@@ -76,6 +77,60 @@ var BookCategoryRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: {
                                     bookCategories: bookCategories,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    BookCategoryRoute.prototype.createBookCategory = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, key, name, bookCategory;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, key = _a.key, name = _a.name;
+                        bookCategory = new bookCategory_model_1.BookCategoryModel({
+                            key: key,
+                            name: name,
+                        });
+                        return [4 /*yield*/, bookCategory.save()];
+                    case 1:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    bookCategory: bookCategory,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    BookCategoryRoute.prototype.deleteBookCategory = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, bookCategory;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.body.id;
+                        return [4 /*yield*/, bookCategory_model_1.BookCategoryModel.findById(id)];
+                    case 1:
+                        bookCategory = _a.sent();
+                        if (!bookCategory) {
+                            throw error_1.ErrorHelper.recoredNotFound("Category!");
+                        }
+                        return [4 /*yield*/, bookCategory_model_1.BookCategoryModel.deleteOne(id)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    bookCategory: bookCategory,
                                 },
                             })];
                 }

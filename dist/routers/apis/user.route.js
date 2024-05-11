@@ -73,6 +73,7 @@ var UserRoute = /** @class */ (function (_super) {
         this.router.post("/login", this.route(this.login));
         this.router.post("/getAllUser", [this.authentication], this.route(this.getAllUser));
         this.router.post("/getOneUser/:id", [this.authentication], this.route(this.getOneUser));
+        this.router.post("/getMe", [this.authentication], this.route(this.getMe));
         this.router.post("/createUser", [this.authentication], this.route(this.createUser));
         this.router.post("/updateMe", [this.authentication], this.route(this.updateMe));
         this.router.post("/updateUser", [this.authentication], this.route(this.updateUser));
@@ -245,6 +246,31 @@ var UserRoute = /** @class */ (function (_super) {
                         }
                         id = req.params.id;
                         return [4 /*yield*/, user_model_1.UserModel.findById(id)];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            //throw lỗi không tìm thấy
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    user: user,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    //getMe
+    UserRoute.prototype.getMe = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
                     case 1:
                         user = _a.sent();
                         if (!user) {

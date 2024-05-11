@@ -32,6 +32,11 @@ class OrderRoute extends BaseRoute {
       this.route(this.getAllOrderForAdmin)
     );
     this.router.post(
+      "/updateOrderForAdmin",
+      [this.authentication],
+      this.route(this.updateOrderForAdmin)
+    );
+    this.router.post(
       "/getOneOrder/:id",
       [this.authentication],
       this.route(this.getOneOrder)
@@ -50,6 +55,11 @@ class OrderRoute extends BaseRoute {
       "/deleteOneOrder",
       [this.authentication],
       this.route(this.deleteOneOrder)
+    );
+    this.router.post(
+      "/cancelOrder",
+      [this.authentication],
+      this.route(this.cancelOrder)
     );
   }
   //Auth

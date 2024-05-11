@@ -69,10 +69,12 @@ var OrderRoute = /** @class */ (function (_super) {
     OrderRoute.prototype.customRouting = function () {
         this.router.post("/getAllOrder", [this.authentication], this.route(this.getAllOrder));
         this.router.post("/getAllOrderForAdmin", [this.authentication], this.route(this.getAllOrderForAdmin));
+        this.router.post("/updateOrderForAdmin", [this.authentication], this.route(this.updateOrderForAdmin));
         this.router.post("/getOneOrder/:id", [this.authentication], this.route(this.getOneOrder));
         this.router.post("/getBill", [this.authentication], this.route(this.getBill));
         this.router.post("/createOrder", [this.authentication], this.route(this.createOrder));
         this.router.post("/deleteOneOrder", [this.authentication], this.route(this.deleteOneOrder));
+        this.router.post("/cancelOrder", [this.authentication], this.route(this.cancelOrder));
     };
     //Auth
     OrderRoute.prototype.authentication = function (req, res, next) {

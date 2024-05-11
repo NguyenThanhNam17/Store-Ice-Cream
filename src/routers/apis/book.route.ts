@@ -16,6 +16,11 @@ class BookRoute extends BaseRoute {
   }
   customRouting() {
     this.router.post("/getAllBook", this.route(this.getAllBook));
+    this.router.post(
+      "/getAllBookForAdmin",
+      [this.authentication],
+      this.route(this.getAllBookForAdmin)
+    );
     this.router.get("/getOneBook/:id", this.route(this.getOneBook));
     this.router.post(
       "/createBook",
@@ -152,7 +157,47 @@ class BookRoute extends BaseRoute {
       data: books,
     });
   }
-
+  async getAllBookForAdmin(req: Request, res: Response) {
+    let tokenData: any;
+    if (req.get("x-token")) {
+      tokenData = TokenHelper.decodeToken(req.get("x-token"));
+    }
+    if (tokenData.role_ != ROLES.ADMIN) {
+      throw ErrorHelper.permissionDeny();
+    }
+    try {
+      req.body.limit = parseInt(req.body.limit);
+    } catch (err) {
+      throw ErrorHelper.requestDataInvalid("limit");
+    }
+    try {
+      req.body.page = parseInt(req.body.page);
+    } catch (err) {
+      throw ErrorHelper.requestDataInvalid("page");
+    }
+    var { limit, page, search, filter } = req.body;
+    if (!limit) {
+      limit = 10;
+    }
+    if (!page) {
+      page = 1;
+    }
+    const books = await bookService.fetch(
+      {
+        filter: filter,
+        search: search,
+        limit: limit,
+        page: page,
+      },
+      ["category"]
+    );
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: books,
+    });
+  }
   //getOneBook
   async getOneBook(req: Request, res: Response) {
     let { id } = req.params;

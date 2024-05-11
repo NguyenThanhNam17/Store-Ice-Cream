@@ -26,6 +26,7 @@ class UserRoute extends BaseRoute {
       [this.authentication],
       this.route(this.getOneUser)
     );
+    this.router.post("/getMe", [this.authentication], this.route(this.getMe));
     this.router.post(
       "/createUser",
       [this.authentication],
@@ -167,6 +168,22 @@ class UserRoute extends BaseRoute {
     }
     let { id } = req.params;
     const user: any = await UserModel.findById(id);
+    if (!user) {
+      //throw lỗi không tìm thấy
+      throw ErrorHelper.userNotExist();
+    }
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        user,
+      },
+    });
+  }
+  //getMe
+  async getMe(req: Request, res: Response) {
+    const user: any = await UserModel.findById(req.tokenInfo._id);
     if (!user) {
       //throw lỗi không tìm thấy
       throw ErrorHelper.userNotExist();

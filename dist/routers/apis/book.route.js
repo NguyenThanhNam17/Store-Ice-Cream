@@ -70,6 +70,7 @@ var BookRoute = /** @class */ (function (_super) {
     }
     BookRoute.prototype.customRouting = function () {
         this.router.post("/getAllBook", this.route(this.getAllBook));
+        this.router.post("/getAllBookForAdmin", [this.authentication], this.route(this.getAllBookForAdmin));
         this.router.get("/getOneBook/:id", this.route(this.getOneBook));
         this.router.post("/createBook", [this.authentication], this.route(this.createBook));
         this.router.post("/updateBook", [this.authentication], this.route(this.updateBook));
@@ -189,6 +190,55 @@ var BookRoute = /** @class */ (function (_super) {
                             page: page,
                         }, ["category"])];
                     case 4:
+                        books = _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: books,
+                            })];
+                }
+            });
+        });
+    };
+    BookRoute.prototype.getAllBookForAdmin = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tokenData, _a, limit, page, search, filter, books;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (req.get("x-token")) {
+                            tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        }
+                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        try {
+                            req.body.limit = parseInt(req.body.limit);
+                        }
+                        catch (err) {
+                            throw error_1.ErrorHelper.requestDataInvalid("limit");
+                        }
+                        try {
+                            req.body.page = parseInt(req.body.page);
+                        }
+                        catch (err) {
+                            throw error_1.ErrorHelper.requestDataInvalid("page");
+                        }
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
+                        if (!limit) {
+                            limit = 10;
+                        }
+                        if (!page) {
+                            page = 1;
+                        }
+                        return [4 /*yield*/, book_service_1.bookService.fetch({
+                                filter: filter,
+                                search: search,
+                                limit: limit,
+                                page: page,
+                            }, ["category"])];
+                    case 1:
                         books = _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
