@@ -9,12 +9,10 @@ import { Request, Response } from "../../base/baseRoute";
 import { BookModel } from "../../models/book/book.model";
 import _ from "lodash";
 import { bookService } from "../../models/book/book.service";
-import { orderService } from "../..//models/order/order.service";
 import { OrderModel } from "../../models/order/order.model";
 import {
   OrderStatusEnum,
   ShoppingCartStatusEnum,
-  paymentMethodEnum,
 } from "../../constants/model.const";
 import { shoppingCartService } from "../../models/shoppingCart/shoppingCart.service";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
@@ -30,22 +28,22 @@ class ShoppingCartRoute extends BaseRoute {
     );
     this.router.post(
       "/getOneShoppingCart/:id",
-      [this.authentication],
+      // [this.authentication],
       this.route(this.getOneShoppingCart)
     );
     this.router.post(
       "/addBookToCart",
-      [this.authentication],
+      // [this.authentication],
       this.route(this.addBookToCart)
     );
     this.router.post(
       "/paymentShoppingCart",
-      [this.authentication],
+      // [this.authentication],
       this.route(this.paymentShoppingCart)
     );
     this.router.post(
       "/updateQuantityBookInCart",
-      [this.authentication],
+      // [this.authentication],
       this.route(this.updateQuantityBookInCart)
     );
   }
@@ -55,8 +53,8 @@ class ShoppingCartRoute extends BaseRoute {
       throw ErrorHelper.unauthorized();
     }
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if ([ROLES.ADMIN, ROLES.CLIENT, ROLES.STAFF].includes(tokenData.role_)) {
-      const user: any = await UserModel.findById(tokenData._id);
+    if ([ROLES.ADMIN].includes(tokenData.role_)) {
+      const user = await UserModel.findById(tokenData._id);
       if (!user) {
         throw ErrorHelper.userNotExist();
       }
@@ -69,6 +67,9 @@ class ShoppingCartRoute extends BaseRoute {
   //getAllShoppingCart
   async getAllShoppingCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    // if (tokenData) {
+    //   throw ErrorHelper.unauthorized();
+    // }
     try {
       req.body.limit = parseInt(req.body.limit);
     } catch (err) {
@@ -90,8 +91,6 @@ class ShoppingCartRoute extends BaseRoute {
       status: ShoppingCartStatusEnum.IN_CART,
       userId: tokenData._id,
     };
-
-    console.log(filter);
     const shoppingCarts = await shoppingCartService.fetch(
       {
         filter: filter,
@@ -111,6 +110,10 @@ class ShoppingCartRoute extends BaseRoute {
 
   //getOneShoppingCart
   async getOneShoppingCart(req: Request, res: Response) {
+    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    if (tokenData) {
+      throw ErrorHelper.unauthorized();
+    }
     let { id } = req.params;
     const shoppingCart = await ShoppingCartModel.findById(id)
       .populate("user")
@@ -131,6 +134,9 @@ class ShoppingCartRoute extends BaseRoute {
 
   async addBookToCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    if (tokenData) {
+      throw ErrorHelper.unauthorized();
+    }
     const { bookId, quantity } = req.body;
     if (!bookId || !quantity) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
@@ -176,6 +182,9 @@ class ShoppingCartRoute extends BaseRoute {
   }
   async paymentShoppingCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    if (tokenData) {
+      throw ErrorHelper.unauthorized();
+    }
     const { shoppingCartIds, address, note, phoneNumber } = req.body;
     if (
       !shoppingCartIds ||
@@ -220,6 +229,10 @@ class ShoppingCartRoute extends BaseRoute {
   }
 
   async updateQuantityBookInCart(req: Request, res: Response) {
+    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    if (tokenData) {
+      throw ErrorHelper.unauthorized();
+    }
     const { shoppingCartId, isIncrease } = req.body;
     let quantity = 1;
 

@@ -33,7 +33,7 @@ var ErrorHelper = /** @class */ (function (_super) {
     }
     // Auth
     ErrorHelper.unauthorized = function () {
-        return new BaseError(401, "-1", "Vui lòng đăng nhập");
+        return new BaseError(401, "401", "Vui lòng đăng nhập");
     };
     ErrorHelper.permissionDeny = function () {
         return new BaseError(405, "-2", "Không đủ quyền để truy cập");

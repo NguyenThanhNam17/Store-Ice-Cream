@@ -15,7 +15,7 @@ export class BaseError extends Error {
 export class ErrorHelper extends BaseError {
   // Auth
   static unauthorized() {
-    return new BaseError(401, "-1", "Vui lòng đăng nhập");
+    return new BaseError(401, "401", "Vui lòng đăng nhập");
   }
   static permissionDeny() {
     return new BaseError(405, "-2", "Không đủ quyền để truy cập");

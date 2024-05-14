@@ -69,10 +69,18 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     }
     ShoppingCartRoute.prototype.customRouting = function () {
         this.router.post("/getAllShoppingCart", [this.authentication], this.route(this.getAllShoppingCart));
-        this.router.post("/getOneShoppingCart/:id", [this.authentication], this.route(this.getOneShoppingCart));
-        this.router.post("/addBookToCart", [this.authentication], this.route(this.addBookToCart));
-        this.router.post("/paymentShoppingCart", [this.authentication], this.route(this.paymentShoppingCart));
-        this.router.post("/updateQuantityBookInCart", [this.authentication], this.route(this.updateQuantityBookInCart));
+        this.router.post("/getOneShoppingCart/:id", 
+        // [this.authentication],
+        this.route(this.getOneShoppingCart));
+        this.router.post("/addBookToCart", 
+        // [this.authentication],
+        this.route(this.addBookToCart));
+        this.router.post("/paymentShoppingCart", 
+        // [this.authentication],
+        this.route(this.paymentShoppingCart));
+        this.router.post("/updateQuantityBookInCart", 
+        // [this.authentication],
+        this.route(this.updateQuantityBookInCart));
     };
     //Auth
     ShoppingCartRoute.prototype.authentication = function (req, res, next) {
@@ -85,7 +93,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.CLIENT, role_const_1.ROLES.STAFF].includes(tokenData.role_)) return [3 /*break*/, 2];
+                        if (![role_const_1.ROLES.ADMIN].includes(tokenData.role_)) return [3 /*break*/, 2];
                         return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
                     case 1:
                         user = _a.sent();
@@ -109,6 +117,9 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        // if (tokenData) {
+                        //   throw ErrorHelper.unauthorized();
+                        // }
                         try {
                             req.body.limit = parseInt(req.body.limit);
                         }
@@ -132,7 +143,6 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             status: model_const_1.ShoppingCartStatusEnum.IN_CART,
                             userId: tokenData._id,
                         };
-                        console.log(filter);
                         return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.fetch({
                                 filter: filter,
                                 search: search,
@@ -154,10 +164,14 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     //getOneShoppingCart
     ShoppingCartRoute.prototype.getOneShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, shoppingCart;
+            var tokenData, id, shoppingCart;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (tokenData) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
                         id = req.params.id;
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(id)
                                 .populate("user")
@@ -187,6 +201,9 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (tokenData) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
                         _a = req.body, bookId = _a.bookId, quantity = _a.quantity;
                         if (!bookId || !quantity) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
@@ -252,6 +269,9 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (tokenData) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
                         _a = req.body, shoppingCartIds = _a.shoppingCartIds, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber;
                         if (!shoppingCartIds ||
                             shoppingCartIds.length < 1 ||
@@ -304,10 +324,14 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.updateQuantityBookInCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, shoppingCartId, isIncrease, quantity, shoppingCart, book;
+            var tokenData, _a, shoppingCartId, isIncrease, quantity, shoppingCart, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (tokenData) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
                         _a = req.body, shoppingCartId = _a.shoppingCartId, isIncrease = _a.isIncrease;
                         quantity = 1;
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(shoppingCartId)];

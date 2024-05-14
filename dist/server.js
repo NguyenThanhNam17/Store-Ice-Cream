@@ -45,6 +45,7 @@ var cors_1 = __importDefault(require("cors"));
 var dotenv_1 = __importDefault(require("dotenv"));
 var morgan_1 = __importDefault(require("morgan"));
 dotenv_1.default.config();
+require("express-async-errors");
 var app = (0, express_1.default)();
 var routers_1 = __importDefault(require("./routers"));
 var mongoose_1 = __importDefault(require("mongoose"));
@@ -77,6 +78,10 @@ app.use((0, morgan_1.default)("common"));
 app.use(body_parser_1.default.json({ limit: "10mb" }));
 app.use(body_parser_1.default.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/", routers_1.default);
+//Handle error in middleware
+app.use(function (err, req, res, next) {
+    res.status(err.info.status).send(err.info);
+});
 //app listening
 app.listen(PORT, function () {
     console.log("App is running at http://localhost:".concat(PORT));
