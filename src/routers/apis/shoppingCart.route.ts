@@ -28,22 +28,22 @@ class ShoppingCartRoute extends BaseRoute {
     );
     this.router.post(
       "/getOneShoppingCart/:id",
-      // [this.authentication],
+      [this.authentication],
       this.route(this.getOneShoppingCart)
     );
     this.router.post(
       "/addBookToCart",
-      // [this.authentication],
+      [this.authentication],
       this.route(this.addBookToCart)
     );
     this.router.post(
       "/paymentShoppingCart",
-      // [this.authentication],
+      [this.authentication],
       this.route(this.paymentShoppingCart)
     );
     this.router.post(
       "/updateQuantityBookInCart",
-      // [this.authentication],
+      [this.authentication],
       this.route(this.updateQuantityBookInCart)
     );
   }

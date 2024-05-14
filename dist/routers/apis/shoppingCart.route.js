@@ -69,18 +69,10 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     }
     ShoppingCartRoute.prototype.customRouting = function () {
         this.router.post("/getAllShoppingCart", [this.authentication], this.route(this.getAllShoppingCart));
-        this.router.post("/getOneShoppingCart/:id", 
-        // [this.authentication],
-        this.route(this.getOneShoppingCart));
-        this.router.post("/addBookToCart", 
-        // [this.authentication],
-        this.route(this.addBookToCart));
-        this.router.post("/paymentShoppingCart", 
-        // [this.authentication],
-        this.route(this.paymentShoppingCart));
-        this.router.post("/updateQuantityBookInCart", 
-        // [this.authentication],
-        this.route(this.updateQuantityBookInCart));
+        this.router.post("/getOneShoppingCart/:id", [this.authentication], this.route(this.getOneShoppingCart));
+        this.router.post("/addBookToCart", [this.authentication], this.route(this.addBookToCart));
+        this.router.post("/paymentShoppingCart", [this.authentication], this.route(this.paymentShoppingCart));
+        this.router.post("/updateQuantityBookInCart", [this.authentication], this.route(this.updateQuantityBookInCart));
     };
     //Auth
     ShoppingCartRoute.prototype.authentication = function (req, res, next) {
