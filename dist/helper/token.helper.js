@@ -12,7 +12,7 @@ var TokenHelper = /** @class */ (function () {
     function TokenHelper() {
     }
     TokenHelper.generateToken = function (payload) {
-        return jsonwebtoken_1.default.sign(payload, secretKey, { expiresIn: "365d" });
+        return jsonwebtoken_1.default.sign(payload, secretKey, { expiresIn: "30s" });
         // return jwt.sign(payload, configs.secretKey);
     };
     TokenHelper.decodeToken = function (token) {

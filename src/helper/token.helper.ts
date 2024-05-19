@@ -16,7 +16,7 @@ export interface IPayloadToken {
 export class TokenHelper {
   constructor() {}
   static generateToken(payload: IPayloadToken): string {
-    return jwt.sign(payload, secretKey, { expiresIn: "365d" });
+    return jwt.sign(payload, secretKey, { expiresIn: "30s" });
     // return jwt.sign(payload, configs.secretKey);
   }
 
