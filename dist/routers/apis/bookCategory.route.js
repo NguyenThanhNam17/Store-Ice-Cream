@@ -53,7 +53,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var baseRoute_1 = require("../../base/baseRoute");
 var bookCategory_model_1 = require("../../models/bookCategory/bookCategory.model");
-var error_1 = require("../..//base/error");
+var error_1 = require("../../base/error");
+var token_helper_1 = require("../../helper/token.helper");
+var role_const_1 = require("../../constants/role.const");
+var user_model_1 = require("../../models/user/user.model");
 var BookCategoryRoute = /** @class */ (function (_super) {
     __extends(BookCategoryRoute, _super);
     function BookCategoryRoute() {
@@ -61,6 +64,40 @@ var BookCategoryRoute = /** @class */ (function (_super) {
     }
     BookCategoryRoute.prototype.customRouting = function () {
         this.router.post("/getAllBookCategory", this.route(this.getAllBookCategory));
+        this.router.post("/createBookCategory", [this.authentication], this.route(this.createBookCategory));
+        this.router.post("/deleteBookCategory", [this.authentication], this.route(this.deleteBookCategory));
+    };
+    //Auth
+    BookCategoryRoute.prototype.authentication = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tokenData, user, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 4, , 5]);
+                        if (!req.get("x-token")) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.CLIENT, role_const_1.ROLES.STAFF].includes(tokenData.role_)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
+                    case 1:
+                        user = _b.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        req.tokenInfo = tokenData;
+                        next();
+                        return [3 /*break*/, 3];
+                    case 2: throw error_1.ErrorHelper.permissionDeny();
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
+                        _a = _b.sent();
+                        throw error_1.ErrorHelper.userWasOut();
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
     };
     //getAllBookCategory
     BookCategoryRoute.prototype.getAllBookCategory = function (req, res) {

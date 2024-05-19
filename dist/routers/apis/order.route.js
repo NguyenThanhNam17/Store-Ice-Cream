@@ -79,10 +79,11 @@ var OrderRoute = /** @class */ (function (_super) {
     //Auth
     OrderRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, user;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var tokenData, user, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
+                        _b.trys.push([0, 4, , 5]);
                         if (!req.get("x-token")) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
@@ -90,7 +91,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.CLIENT, role_const_1.ROLES.STAFF].includes(tokenData.role_)) return [3 /*break*/, 2];
                         return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
                     case 1:
-                        user = _a.sent();
+                        user = _b.sent();
                         if (!user) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
@@ -98,7 +99,11 @@ var OrderRoute = /** @class */ (function (_super) {
                         next();
                         return [3 /*break*/, 3];
                     case 2: throw error_1.ErrorHelper.permissionDeny();
-                    case 3: return [2 /*return*/];
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
+                        _a = _b.sent();
+                        throw error_1.ErrorHelper.userWasOut();
+                    case 5: return [2 /*return*/];
                 }
             });
         });
