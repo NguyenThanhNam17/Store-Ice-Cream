@@ -321,7 +321,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.updateQuantityBookInCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, shoppingCartId, isIncrease, quantity, shoppingCart, book;
+            var tokenData, _a, shoppingCartId, quantity, shoppingCart, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -329,8 +329,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         if (tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
-                        _a = req.body, shoppingCartId = _a.shoppingCartId, isIncrease = _a.isIncrease;
-                        quantity = 1;
+                        _a = req.body, shoppingCartId = _a.shoppingCartId, quantity = _a.quantity;
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(shoppingCartId)];
                     case 1:
                         shoppingCart = _b.sent();
@@ -343,34 +342,22 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         if (!book) {
                             throw error_1.ErrorHelper.recoredNotFound("book!");
                         }
-                        if (!(isIncrease == false)) return [3 /*break*/, 5];
-                        quantity = -1;
-                        if (!(shoppingCart.quantity == 1)) return [3 /*break*/, 4];
+                        if (!(shoppingCart.quantity == 0)) return [3 /*break*/, 4];
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.deleteOne(shoppingCart._id)];
                     case 3:
                         _b.sent();
                         _b.label = 4;
-                    case 4:
-                        book.quantity += 1;
-                        return [3 /*break*/, 6];
-                    case 5:
-                        book.quantity -= 1;
-                        _b.label = 6;
-                    case 6: return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.updateOne(shoppingCart._id, {
+                    case 4: return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.updateOne(shoppingCart._id, {
                             $inc: {
                                 quantity: quantity,
                             },
-                            initialCost: quantity == -1
-                                ? shoppingCart.initialCost - book.price
-                                : shoppingCart.initialCost + book.price,
-                            finalCost: quantity == -1
-                                ? shoppingCart.initialCost - book.price
-                                : shoppingCart.initialCost + book.price,
+                            initialCost: quantity * book.price,
+                            finalCost: quantity * book.price,
                         })];
-                    case 7:
+                    case 5:
                         _b.sent();
                         return [4 /*yield*/, book.save()];
-                    case 8:
+                    case 6:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,

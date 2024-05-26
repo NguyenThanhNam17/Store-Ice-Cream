@@ -237,9 +237,7 @@ class ShoppingCartRoute extends BaseRoute {
     if (tokenData) {
       throw ErrorHelper.unauthorized();
     }
-    const { shoppingCartId, isIncrease } = req.body;
-    let quantity = 1;
-
+    const { shoppingCartId, quantity } = req.body;
     let shoppingCart = await ShoppingCartModel.findById(shoppingCartId);
     if (!shoppingCart) {
       throw ErrorHelper.recoredNotFound("shoppingCart!");
@@ -248,27 +246,15 @@ class ShoppingCartRoute extends BaseRoute {
     if (!book) {
       throw ErrorHelper.recoredNotFound("book!");
     }
-    if (isIncrease == false) {
-      quantity = -1;
-      if (shoppingCart.quantity == 1) {
-        await ShoppingCartModel.deleteOne(shoppingCart._id);
-      }
-      book.quantity += 1;
-    } else {
-      book.quantity -= 1;
+    if (shoppingCart.quantity == 0) {
+      await ShoppingCartModel.deleteOne(shoppingCart._id);
     }
     await shoppingCartService.updateOne(shoppingCart._id, {
       $inc: {
         quantity: quantity,
       },
-      initialCost:
-        quantity == -1
-          ? shoppingCart.initialCost - book.price
-          : shoppingCart.initialCost + book.price,
-      finalCost:
-        quantity == -1
-          ? shoppingCart.initialCost - book.price
-          : shoppingCart.initialCost + book.price,
+      initialCost: quantity * book.price,
+      finalCost: quantity * book.price,
     });
     await book.save();
     return res.status(200).json({
