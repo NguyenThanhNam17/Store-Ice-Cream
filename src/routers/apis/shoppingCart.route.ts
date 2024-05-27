@@ -255,9 +255,7 @@ class ShoppingCartRoute extends BaseRoute {
       await ShoppingCartModel.deleteOne(shoppingCart._id);
     }
     await shoppingCartService.updateOne(shoppingCart._id, {
-      $inc: {
-        quantity: quantity,
-      },
+      quantity: quantity,
       initialCost: quantity * book.price,
       finalCost: quantity * book.price,
     });

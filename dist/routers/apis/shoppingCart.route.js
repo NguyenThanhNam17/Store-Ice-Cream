@@ -349,9 +349,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         _b.sent();
                         _b.label = 4;
                     case 4: return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.updateOne(shoppingCart._id, {
-                            $inc: {
-                                quantity: quantity,
-                            },
+                            quantity: quantity,
                             initialCost: quantity * book.price,
                             finalCost: quantity * book.price,
                         })];
