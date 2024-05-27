@@ -115,9 +115,9 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        // if (tokenData) {
-                        //   throw ErrorHelper.unauthorized();
-                        // }
+                        if (!tokenData) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
                         try {
                             req.body.limit = parseInt(req.body.limit);
                         }
@@ -167,7 +167,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (tokenData) {
+                        if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
                         id = req.params.id;
@@ -199,7 +199,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (tokenData) {
+                        if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
                         _a = req.body, bookId = _a.bookId, quantity = _a.quantity;
@@ -267,7 +267,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (tokenData) {
+                        if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
                         _a = req.body, shoppingCartIds = _a.shoppingCartIds, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber;
@@ -327,7 +327,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (tokenData) {
+                        if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
                         _a = req.body, shoppingCartId = _a.shoppingCartId, quantity = _a.quantity;
@@ -379,7 +379,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (tokenData) {
+                        if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
                         shoppingCartId = req.body.shoppingCartId;

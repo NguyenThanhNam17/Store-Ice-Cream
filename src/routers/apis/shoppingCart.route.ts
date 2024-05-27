@@ -76,9 +76,9 @@ class ShoppingCartRoute extends BaseRoute {
   //getAllShoppingCart
   async getAllShoppingCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    // if (tokenData) {
-    //   throw ErrorHelper.unauthorized();
-    // }
+    if (!tokenData) {
+      throw ErrorHelper.unauthorized();
+    }
     try {
       req.body.limit = parseInt(req.body.limit);
     } catch (err) {
@@ -120,7 +120,7 @@ class ShoppingCartRoute extends BaseRoute {
   //getOneShoppingCart
   async getOneShoppingCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (tokenData) {
+    if (!tokenData) {
       throw ErrorHelper.unauthorized();
     }
     let { id } = req.params;
@@ -143,7 +143,7 @@ class ShoppingCartRoute extends BaseRoute {
 
   async addBookToCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (tokenData) {
+    if (!tokenData) {
       throw ErrorHelper.unauthorized();
     }
     const { bookId, quantity } = req.body;
@@ -191,7 +191,7 @@ class ShoppingCartRoute extends BaseRoute {
   }
   async paymentShoppingCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (tokenData) {
+    if (!tokenData) {
       throw ErrorHelper.unauthorized();
     }
     const { shoppingCartIds, address, note, phoneNumber } = req.body;
@@ -239,7 +239,7 @@ class ShoppingCartRoute extends BaseRoute {
 
   async updateQuantityBookInCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (tokenData) {
+    if (!tokenData) {
       throw ErrorHelper.unauthorized();
     }
     const { shoppingCartId, quantity } = req.body;
@@ -273,7 +273,7 @@ class ShoppingCartRoute extends BaseRoute {
   }
   async deleteProductInCart(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (tokenData) {
+    if (!tokenData) {
       throw ErrorHelper.unauthorized();
     }
     const { shoppingCartId } = req.body;
