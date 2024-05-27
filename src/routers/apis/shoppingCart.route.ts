@@ -251,7 +251,7 @@ class ShoppingCartRoute extends BaseRoute {
     if (!book) {
       throw ErrorHelper.recoredNotFound("book!");
     }
-    if (shoppingCart.quantity == 0) {
+    if (quantity == 0) {
       await ShoppingCartModel.deleteOne(shoppingCart._id);
     }
     await shoppingCartService.updateOne(shoppingCart._id, {

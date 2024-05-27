@@ -343,7 +343,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         if (!book) {
                             throw error_1.ErrorHelper.recoredNotFound("book!");
                         }
-                        if (!(shoppingCart.quantity == 0)) return [3 /*break*/, 4];
+                        if (!(quantity == 0)) return [3 /*break*/, 4];
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.deleteOne(shoppingCart._id)];
                     case 3:
                         _b.sent();
