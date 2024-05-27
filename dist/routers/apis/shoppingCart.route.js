@@ -288,9 +288,15 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         initialCost = 0;
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
-                                initialCost += shoppingCart.initialCost;
-                                shoppingCart.status = model_const_1.ShoppingCartStatusEnum.SUCCESS;
-                                return [2 /*return*/];
+                                switch (_a.label) {
+                                    case 0:
+                                        initialCost += shoppingCart.initialCost;
+                                        shoppingCart.status = model_const_1.ShoppingCartStatusEnum.SUCCESS;
+                                        return [4 /*yield*/, shoppingCart.save()];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
                             });
                         }); });
                         order = new order_model_1.OrderModel({

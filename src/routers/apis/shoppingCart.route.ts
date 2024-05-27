@@ -214,6 +214,7 @@ class ShoppingCartRoute extends BaseRoute {
     shoppingCarts.map(async (shoppingCart) => {
       initialCost += shoppingCart.initialCost;
       shoppingCart.status = ShoppingCartStatusEnum.SUCCESS;
+      await shoppingCart.save();
     });
     let order = new OrderModel({
       userId: tokenData._id,
