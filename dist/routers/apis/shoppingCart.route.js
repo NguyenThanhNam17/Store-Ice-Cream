@@ -304,6 +304,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             shippingFee: 30000,
                             initialCost: initialCost,
                             finalCost: initialCost + 30000,
+                            paymentMethod: model_const_1.paymentMethodEnum.CASH,
                         });
                         return [4 /*yield*/, order.save()];
                     case 2:

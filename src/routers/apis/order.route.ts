@@ -145,9 +145,9 @@ class OrderRoute extends BaseRoute {
     if (!page) {
       page = 1;
     }
-    if (filter.status) {
-      filter.status = { $nin: [OrderStatusEnum.IN_CART] };
-    }
+    // if (filter.status) {
+    //   filter.status = { $nin: [OrderStatusEnum.IN_CART] };
+    // }
     const orders = await orderService.fetch(
       {
         filter: filter,
@@ -299,6 +299,16 @@ class OrderRoute extends BaseRoute {
       throw ErrorHelper.recoredNotFound("Book!");
     }
     order.status = OrderStatusEnum.CANCEL;
+    let shoppingCarts = await ShoppingCartModel.find({
+      _id: order.shoppingCartIds,
+    });
+    shoppingCarts.map(async (shoppingCart: any) => {
+      await bookService.updateOne(shoppingCart.bookId, {
+        $inc: {
+          quantity: shoppingCart.quantity,
+        },
+      });
+    });
     await order.save();
     return res.status(200).json({
       status: 200,

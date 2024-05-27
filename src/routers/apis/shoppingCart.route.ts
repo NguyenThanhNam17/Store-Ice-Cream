@@ -13,6 +13,7 @@ import { OrderModel } from "../../models/order/order.model";
 import {
   OrderStatusEnum,
   ShoppingCartStatusEnum,
+  paymentMethodEnum,
 } from "../../constants/model.const";
 import { shoppingCartService } from "../../models/shoppingCart/shoppingCart.service";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
@@ -225,6 +226,7 @@ class ShoppingCartRoute extends BaseRoute {
       shippingFee: 30000,
       initialCost: initialCost,
       finalCost: initialCost + 30000,
+      paymentMethod: paymentMethodEnum.CASH,
     });
     await order.save();
     return res.status(200).json({

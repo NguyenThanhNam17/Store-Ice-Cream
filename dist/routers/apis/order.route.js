@@ -57,6 +57,7 @@ var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var error_1 = require("../../base/error");
 var book_model_1 = require("../../models/book/book.model");
+var book_service_1 = require("../../models/book/book.service");
 var order_service_1 = require("../..//models/order/order.service");
 var order_model_1 = require("../../models/order/order.model");
 var model_const_1 = require("../../constants/model.const");
@@ -185,9 +186,6 @@ var OrderRoute = /** @class */ (function (_super) {
                         }
                         if (!page) {
                             page = 1;
-                        }
-                        if (filter.status) {
-                            filter.status = { $nin: [model_const_1.OrderStatusEnum.IN_CART] };
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
                                 filter: filter,
@@ -391,7 +389,8 @@ var OrderRoute = /** @class */ (function (_super) {
     //cancel order
     OrderRoute.prototype.cancelOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, order;
+            var id, order, shoppingCarts;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -403,8 +402,27 @@ var OrderRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.recoredNotFound("Book!");
                         }
                         order.status = model_const_1.OrderStatusEnum.CANCEL;
-                        return [4 /*yield*/, order.save()];
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
+                                _id: order.shoppingCartIds,
+                            })];
                     case 2:
+                        shoppingCarts = _a.sent();
+                        shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, book_service_1.bookService.updateOne(shoppingCart.bookId, {
+                                            $inc: {
+                                                quantity: shoppingCart.quantity,
+                                            },
+                                        })];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        return [4 /*yield*/, order.save()];
+                    case 3:
                         _a.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,

@@ -1,7 +1,7 @@
 export enum UserRoleEnum {
   ADMIN = "ADMIN",
   CLIENT = "CLIENT",
-  STAFF = "STAFF",
+  // STAFF = "STAFF",
 }
 export enum OrderStatusEnum {
   PENDING = "PENDING",
@@ -9,7 +9,7 @@ export enum OrderStatusEnum {
   DELIVERING = "DELIVERING",
   SUCCESS = "SUCCESS",
   CANCEL = "CANCEL",
-  IN_CART = "IN_CART",
+  //IN_CART = "IN_CART",
 }
 
 export enum paymentMethodEnum {

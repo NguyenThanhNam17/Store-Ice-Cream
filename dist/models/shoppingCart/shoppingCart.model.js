@@ -34,7 +34,7 @@ var shoppingCartSchema = new mongoose_1.default.Schema({
     status: {
         type: String,
         enum: Object.values(model_const_1.OrderStatusEnum),
-        default: model_const_1.OrderStatusEnum.IN_CART,
+        default: model_const_1.ShoppingCartStatusEnum.IN_CART,
     },
 }, { timestamps: true }
 //virtual populate

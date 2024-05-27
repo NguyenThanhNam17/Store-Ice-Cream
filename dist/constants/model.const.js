@@ -5,7 +5,7 @@ var UserRoleEnum;
 (function (UserRoleEnum) {
     UserRoleEnum["ADMIN"] = "ADMIN";
     UserRoleEnum["CLIENT"] = "CLIENT";
-    UserRoleEnum["STAFF"] = "STAFF";
+    // STAFF = "STAFF",
 })(UserRoleEnum || (exports.UserRoleEnum = UserRoleEnum = {}));
 var OrderStatusEnum;
 (function (OrderStatusEnum) {
@@ -14,7 +14,7 @@ var OrderStatusEnum;
     OrderStatusEnum["DELIVERING"] = "DELIVERING";
     OrderStatusEnum["SUCCESS"] = "SUCCESS";
     OrderStatusEnum["CANCEL"] = "CANCEL";
-    OrderStatusEnum["IN_CART"] = "IN_CART";
+    //IN_CART = "IN_CART",
 })(OrderStatusEnum || (exports.OrderStatusEnum = OrderStatusEnum = {}));
 var paymentMethodEnum;
 (function (paymentMethodEnum) {

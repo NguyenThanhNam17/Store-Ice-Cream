@@ -34,7 +34,7 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: Object.values(OrderStatusEnum),
-      default: OrderStatusEnum.IN_CART,
+      default: OrderStatusEnum.PENDING,
     },
     note: { type: String },
     address: { type: String },

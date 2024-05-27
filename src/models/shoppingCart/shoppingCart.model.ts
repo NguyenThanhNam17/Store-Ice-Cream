@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { BaseDocument } from "../../base/baseModel";
 import {
   OrderStatusEnum,
+  ShoppingCartStatusEnum,
   paymentMethodEnum,
 } from "../../constants/model.const";
 
@@ -23,7 +24,7 @@ const shoppingCartSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: Object.values(OrderStatusEnum),
-      default: OrderStatusEnum.IN_CART,
+      default: ShoppingCartStatusEnum.IN_CART,
     },
   },
   { timestamps: true }
