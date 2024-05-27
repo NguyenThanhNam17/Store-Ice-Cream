@@ -46,6 +46,11 @@ class ShoppingCartRoute extends BaseRoute {
       [this.authentication],
       this.route(this.updateQuantityBookInCart)
     );
+    this.router.post(
+      "/deleteProductInCart",
+      [this.authentication],
+      this.route(this.deleteProductInCart)
+    );
   }
   //Auth
   async authentication(req: Request, res: Response, next: NextFunction) {
@@ -257,6 +262,35 @@ class ShoppingCartRoute extends BaseRoute {
       finalCost: quantity * book.price,
     });
     await book.save();
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        shoppingCart,
+      },
+    });
+  }
+  async deleteProductInCart(req: Request, res: Response) {
+    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    if (tokenData) {
+      throw ErrorHelper.unauthorized();
+    }
+    const { shoppingCartId } = req.body;
+    let shoppingCart = await ShoppingCartModel.findById(shoppingCartId);
+    if (!shoppingCart) {
+      throw ErrorHelper.recoredNotFound("shoppingCart!");
+    }
+    let book = await BookModel.findById(shoppingCart.bookId);
+    if (!book) {
+      throw ErrorHelper.recoredNotFound("book!");
+    }
+    await bookService.updateOne(book._id, {
+      $inc: {
+        quantity: shoppingCart.quantity,
+      },
+    });
+    await ShoppingCartModel.deleteOne(shoppingCart._id);
     return res.status(200).json({
       status: 200,
       code: "200",

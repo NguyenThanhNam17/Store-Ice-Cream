@@ -73,6 +73,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
         this.router.post("/addBookToCart", [this.authentication], this.route(this.addBookToCart));
         this.router.post("/paymentShoppingCart", [this.authentication], this.route(this.paymentShoppingCart));
         this.router.post("/updateQuantityBookInCart", [this.authentication], this.route(this.updateQuantityBookInCart));
+        this.router.post("/deleteProductInCart", [this.authentication], this.route(this.deleteProductInCart));
     };
     //Auth
     ShoppingCartRoute.prototype.authentication = function (req, res, next) {
@@ -359,6 +360,51 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, book.save()];
                     case 6:
                         _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    shoppingCart: shoppingCart,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    ShoppingCartRoute.prototype.deleteProductInCart = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tokenData, shoppingCartId, shoppingCart, book;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (tokenData) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
+                        shoppingCartId = req.body.shoppingCartId;
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(shoppingCartId)];
+                    case 1:
+                        shoppingCart = _a.sent();
+                        if (!shoppingCart) {
+                            throw error_1.ErrorHelper.recoredNotFound("shoppingCart!");
+                        }
+                        return [4 /*yield*/, book_model_1.BookModel.findById(shoppingCart.bookId)];
+                    case 2:
+                        book = _a.sent();
+                        if (!book) {
+                            throw error_1.ErrorHelper.recoredNotFound("book!");
+                        }
+                        return [4 /*yield*/, book_service_1.bookService.updateOne(book._id, {
+                                $inc: {
+                                    quantity: shoppingCart.quantity,
+                                },
+                            })];
+                    case 3:
+                        _a.sent();
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.deleteOne(shoppingCart._id)];
+                    case 4:
+                        _a.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
