@@ -34,7 +34,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "build": "tsc",
+    "build-ts": "tsc",
     "start": "node dist/server.js",
     "watch-ts": "tsc -w",
     "watch-node": "nodemon dist/server.js",
