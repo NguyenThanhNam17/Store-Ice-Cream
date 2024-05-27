@@ -33,7 +33,7 @@ var shoppingCartSchema = new mongoose_1.default.Schema({
     initialCost: { type: Number },
     status: {
         type: String,
-        enum: Object.values(model_const_1.OrderStatusEnum),
+        enum: Object.values(model_const_1.ShoppingCartStatusEnum),
         default: model_const_1.ShoppingCartStatusEnum.IN_CART,
     },
 }, { timestamps: true }

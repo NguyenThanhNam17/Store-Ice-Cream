@@ -71,6 +71,7 @@ var OrderRoute = /** @class */ (function (_super) {
         this.router.post("/getAllOrder", [this.authentication], this.route(this.getAllOrder));
         this.router.post("/getAllOrderForAdmin", [this.authentication], this.route(this.getAllOrderForAdmin));
         this.router.post("/updateOrderForAdmin", [this.authentication], this.route(this.updateOrderForAdmin));
+        this.router.post("/updateStatusOrder", [this.authentication], this.route(this.updateStatusOrder));
         this.router.post("/getOneOrder/:id", [this.authentication], this.route(this.getOneOrder));
         this.router.post("/getBill", [this.authentication], this.route(this.getBill));
         this.router.post("/createOrder", [this.authentication], this.route(this.createOrder));
@@ -129,7 +130,8 @@ var OrderRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search;
+                        filter = (req === null || req === void 0 ? void 0 : req.body) || {};
                         if (!limit) {
                             limit = 10;
                         }
@@ -139,12 +141,13 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
                             filter.userId = tokenData._id;
                         }
+                        console.log(filter);
                         return [4 /*yield*/, order_service_1.orderService.fetch({
                                 filter: filter,
                                 search: search,
                                 limit: limit,
                                 page: page,
-                            }, ["user", "book"])];
+                            }, ["user", "shoppingCarts"])];
                     case 1:
                         orders = _b.sent();
                         return [2 /*return*/, res.status(200).json({
@@ -192,7 +195,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 search: search,
                                 limit: limit,
                                 page: page,
-                            }, ["user", "book"])];
+                            }, ["user", "shoppingCarts"])];
                     case 1:
                         orders = _b.sent();
                         return [2 /*return*/, res.status(200).json({
@@ -327,11 +330,18 @@ var OrderRoute = /** @class */ (function (_super) {
     //update order for admin
     OrderRoute.prototype.updateOrderForAdmin = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, address, note, status, phoneNumber, order;
+            var _a, id, address, note, status, phoneNumber, tokenData, order;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _a = req.body, id = _a.id, address = _a.address, note = _a.note, status = _a.status, phoneNumber = _a.phoneNumber;
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (!tokenData) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
+                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
                         return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
                     case 1:
                         order = _b.sent();
@@ -361,27 +371,56 @@ var OrderRoute = /** @class */ (function (_super) {
     //update status order for admin
     OrderRoute.prototype.updateStatusOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, status, order;
+            var _a, id, status, tokenData, order, shoppingCarts;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _a = req.body, id = _a.id, status = _a.status;
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (!tokenData) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
+                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
                         return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
                     case 1:
                         order = _b.sent();
                         if (!order) {
-                            throw error_1.ErrorHelper.recoredNotFound("Book");
+                            throw error_1.ErrorHelper.recoredNotFound("order");
                         }
                         order.status = status;
                         order.save();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: {
-                                    order: order,
-                                },
+                        if (!(status == model_const_1.OrderStatusEnum.CANCEL)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
+                                _id: order.shoppingCartIds,
                             })];
+                    case 2:
+                        shoppingCarts = _b.sent();
+                        shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, book_service_1.bookService.updateOne(shoppingCart.bookId, {
+                                            $inc: {
+                                                quantity: shoppingCart.quantity,
+                                            },
+                                        })];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        _b.label = 3;
+                    case 3: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            data: {
+                                order: order,
+                            },
+                        })];
                 }
             });
         });

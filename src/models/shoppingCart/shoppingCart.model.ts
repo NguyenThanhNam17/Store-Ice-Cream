@@ -23,7 +23,7 @@ const shoppingCartSchema = new mongoose.Schema(
     initialCost: { type: Number },
     status: {
       type: String,
-      enum: Object.values(OrderStatusEnum),
+      enum: Object.values(ShoppingCartStatusEnum),
       default: ShoppingCartStatusEnum.IN_CART,
     },
   },

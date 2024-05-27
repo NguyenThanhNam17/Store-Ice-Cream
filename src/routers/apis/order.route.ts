@@ -37,6 +37,12 @@ class OrderRoute extends BaseRoute {
       this.route(this.updateOrderForAdmin)
     );
     this.router.post(
+      "/updateStatusOrder",
+      [this.authentication],
+      this.route(this.updateStatusOrder)
+    );
+
+    this.router.post(
       "/getOneOrder/:id",
       [this.authentication],
       this.route(this.getOneOrder)
@@ -96,7 +102,8 @@ class OrderRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, filter } = req.body;
+    var { limit, page, search } = req.body;
+    let filter = req?.body || {};
     if (!limit) {
       limit = 10;
     }
@@ -106,6 +113,7 @@ class OrderRoute extends BaseRoute {
     if (tokenData.role_ != ROLES.ADMIN) {
       filter.userId = tokenData._id;
     }
+    console.log(filter);
     const orders = await orderService.fetch(
       {
         filter: filter,
@@ -113,7 +121,7 @@ class OrderRoute extends BaseRoute {
         limit: limit,
         page: page,
       },
-      ["user", "book"]
+      [`user`, "shoppingCarts"]
     );
     return res.status(200).json({
       status: 200,
@@ -155,7 +163,7 @@ class OrderRoute extends BaseRoute {
         limit: limit,
         page: page,
       },
-      ["user", "book"]
+      ["user", "shoppingCarts"]
     );
     return res.status(200).json({
       status: 200,
@@ -254,6 +262,13 @@ class OrderRoute extends BaseRoute {
   //update order for admin
   async updateOrderForAdmin(req: Request, res: Response) {
     const { id, address, note, status, phoneNumber } = req.body;
+    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    if (!tokenData) {
+      throw ErrorHelper.unauthorized();
+    }
+    if (tokenData.role_ != ROLES.ADMIN) {
+      throw ErrorHelper.permissionDeny();
+    }
     let order = await OrderModel.findById(id);
     if (!order) {
       throw ErrorHelper.recoredNotFound("Book");
@@ -276,12 +291,31 @@ class OrderRoute extends BaseRoute {
   //update status order for admin
   async updateStatusOrder(req: Request, res: Response) {
     const { id, status } = req.body;
+    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    if (!tokenData) {
+      throw ErrorHelper.unauthorized();
+    }
+    if (tokenData.role_ != ROLES.ADMIN) {
+      throw ErrorHelper.permissionDeny();
+    }
     let order = await OrderModel.findById(id);
     if (!order) {
-      throw ErrorHelper.recoredNotFound("Book");
+      throw ErrorHelper.recoredNotFound("order");
     }
     order.status = status;
     order.save();
+    if (status == OrderStatusEnum.CANCEL) {
+      let shoppingCarts = await ShoppingCartModel.find({
+        _id: order.shoppingCartIds,
+      });
+      shoppingCarts.map(async (shoppingCart: any) => {
+        await bookService.updateOne(shoppingCart.bookId, {
+          $inc: {
+            quantity: shoppingCart.quantity,
+          },
+        });
+      });
+    }
     return res.status(200).json({
       status: 200,
       code: "200",
