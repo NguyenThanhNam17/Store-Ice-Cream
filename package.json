@@ -13,7 +13,10 @@
     "mongoose": "^7.6.9",
     "password-hash": "^1.2.2",
     "phone": "^3.1.42",
-    "vntk": "^1.4.4"
+    "vntk": "^1.4.4",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.0",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.5",
@@ -25,10 +28,7 @@
     "@types/lodash": "^4.17.0",
     "@types/mongoose": "^5.11.97",
     "@types/morgan": "^1.9.9",
-    "@types/password-hash": "^1.2.24",
-    "morgan": "^1.10.0",
-    "nodemon": "^3.1.0",
-    "typescript": "^5.3.3"
+    "@types/password-hash": "^1.2.24"
   },
   "name": "express-typescript-starter",
   "version": "1.0.0",
