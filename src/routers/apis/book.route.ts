@@ -21,7 +21,7 @@ class BookRoute extends BaseRoute {
       [this.authentication],
       this.route(this.getAllBookForAdmin)
     );
-    this.router.get("/getOneBook/:id", this.route(this.getOneBook));
+    this.router.post("/getOneBook/:id", this.route(this.getOneBook));
     this.router.post(
       "/createBook",
       [this.authentication],
@@ -205,6 +205,7 @@ class BookRoute extends BaseRoute {
   //getOneBook
   async getOneBook(req: Request, res: Response) {
     let { id } = req.params;
+    console.log("abc", req.params);
     const book: any = await BookModel.findById(id).populate("category");
     if (!book) {
       //throw lỗi không tìm thấy
