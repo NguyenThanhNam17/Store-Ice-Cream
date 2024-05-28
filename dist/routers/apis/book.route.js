@@ -71,7 +71,7 @@ var BookRoute = /** @class */ (function (_super) {
     BookRoute.prototype.customRouting = function () {
         this.router.post("/getAllBook", this.route(this.getAllBook));
         this.router.post("/getAllBookForAdmin", [this.authentication], this.route(this.getAllBookForAdmin));
-        this.router.post("/getOneBook/:id", this.route(this.getOneBook));
+        this.router.post("/getOneBook", this.route(this.getOneBook));
         this.router.post("/createBook", [this.authentication], this.route(this.createBook));
         this.router.post("/updateBook", [this.authentication], this.route(this.updateBook));
         this.router.post("/deleteOneBook", [this.authentication], this.route(this.deleteOneBook));

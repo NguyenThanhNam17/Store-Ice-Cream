@@ -21,7 +21,7 @@ class BookRoute extends BaseRoute {
       [this.authentication],
       this.route(this.getAllBookForAdmin)
     );
-    this.router.post("/getOneBook/:id", this.route(this.getOneBook));
+    this.router.post("/getOneBook", this.route(this.getOneBook));
     this.router.post(
       "/createBook",
       [this.authentication],
