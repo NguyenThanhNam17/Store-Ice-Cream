@@ -262,8 +262,7 @@ var BookRoute = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        id = req.params.id;
-                        console.log("abc", req.params);
+                        id = req.body.id;
                         return [4 /*yield*/, book_model_1.BookModel.findById(id).populate("category")];
                     case 1:
                         book = _a.sent();
