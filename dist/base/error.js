@@ -67,6 +67,9 @@ var ErrorHelper = /** @class */ (function (_super) {
     ErrorHelper.somethingWentWrong = function (message) {
         return new BaseError(500, "-10", message || "Có lỗi xảy ra");
     };
+    ErrorHelper.badToken = function () {
+        return new BaseError(401, "-1", "Do not have access");
+    };
     return ErrorHelper;
 }(BaseError));
 exports.ErrorHelper = ErrorHelper;

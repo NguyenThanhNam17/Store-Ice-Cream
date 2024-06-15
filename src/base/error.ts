@@ -57,4 +57,7 @@ export class ErrorHelper extends BaseError {
   static somethingWentWrong(message?: string) {
     return new BaseError(500, "-10", message || "Có lỗi xảy ra");
   }
+  static badToken() {
+    return new BaseError(401, "-1", "Do not have access");
+  }
 }
