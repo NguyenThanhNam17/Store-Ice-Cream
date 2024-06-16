@@ -330,7 +330,8 @@ var OrderRoute = /** @class */ (function (_super) {
     //update order for admin
     OrderRoute.prototype.updateOrderForAdmin = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, address, note, status, phoneNumber, noteUpdate, tokenData, order;
+            var _a, id, address, note, status, phoneNumber, noteUpdate, tokenData, order, shoppingCarts;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -348,6 +349,14 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (!order) {
                             throw error_1.ErrorHelper.recoredNotFound("Book");
                         }
+                        if (model_const_1.OrderStatusEnum.CANCEL == order.status) {
+                            throw error_1.ErrorHelper.forbidden("The order is canceled!");
+                        }
+                        else {
+                            if (model_const_1.OrderStatusEnum.SUCCESS == status) {
+                                throw error_1.ErrorHelper.forbidden("The order is success!");
+                            }
+                        }
                         return [4 /*yield*/, order_service_1.orderService.updateOne(order._id, {
                                 address: address || order.address,
                                 note: note || order.note,
@@ -357,14 +366,35 @@ var OrderRoute = /** @class */ (function (_super) {
                             })];
                     case 2:
                         _b.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: {
-                                    order: order,
-                                },
+                        if (!(status == model_const_1.OrderStatusEnum.CANCEL)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
+                                _id: order.shoppingCartIds,
                             })];
+                    case 3:
+                        shoppingCarts = _b.sent();
+                        shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, book_service_1.bookService.updateOne(shoppingCart.bookId, {
+                                            $inc: {
+                                                quantity: shoppingCart.quantity,
+                                            },
+                                        })];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        _b.label = 4;
+                    case 4: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            data: {
+                                order: order,
+                            },
+                        })];
                 }
             });
         });

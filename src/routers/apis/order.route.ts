@@ -273,6 +273,13 @@ class OrderRoute extends BaseRoute {
     if (!order) {
       throw ErrorHelper.recoredNotFound("Book");
     }
+    if (OrderStatusEnum.CANCEL == order.status) {
+      throw ErrorHelper.forbidden("The order is canceled!");
+    } else {
+      if (OrderStatusEnum.SUCCESS == status) {
+        throw ErrorHelper.forbidden("The order is success!");
+      }
+    }
     await orderService.updateOne(order._id, {
       address: address || order.address,
       note: note || order.note,
@@ -280,6 +287,18 @@ class OrderRoute extends BaseRoute {
       phone: phoneNumber || order.phone,
       noteUpdate: noteUpdate || order.noteUpdate,
     });
+    if (status == OrderStatusEnum.CANCEL) {
+      let shoppingCarts = await ShoppingCartModel.find({
+        _id: order.shoppingCartIds,
+      });
+      shoppingCarts.map(async (shoppingCart: any) => {
+        await bookService.updateOne(shoppingCart.bookId, {
+          $inc: {
+            quantity: shoppingCart.quantity,
+          },
+        });
+      });
+    }
     return res.status(200).json({
       status: 200,
       code: "200",
