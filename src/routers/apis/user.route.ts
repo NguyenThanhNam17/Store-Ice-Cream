@@ -47,6 +47,16 @@ class UserRoute extends BaseRoute {
       [this.authentication],
       this.route(this.deleteOneUser)
     );
+    this.router.post(
+      "/changePasswordForAdmin",
+      [this.authentication],
+      this.route(this.changePasswordForAdmin)
+    );
+    this.router.post(
+      "/changePassword",
+      [this.authentication],
+      this.route(this.changePassword)
+    );
   }
 
   async authentication(req: Request, res: Response, next: NextFunction) {
@@ -298,6 +308,52 @@ class UserRoute extends BaseRoute {
       message: "success",
       data: {
         userCheck,
+      },
+    });
+  }
+  async changePassword(req: Request, res: Response) {
+    if (ROLES.ADMIN != req.tokenInfo.role_) {
+      throw ErrorHelper.permissionDeny();
+    }
+    const { id, oldPass, newPass } = req.body;
+
+    let user = await UserModel.findById(id);
+    if (!user) {
+      throw ErrorHelper.userNotExist();
+    }
+    if (passwordHash.verify(oldPass, user.password)) {
+      user.password = passwordHash.generate(newPass);
+      await user.save();
+    } else {
+      throw ErrorHelper.userPasswordNotCorrect();
+    }
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        user,
+      },
+    });
+  }
+  async changePasswordForAdmin(req: Request, res: Response) {
+    if (ROLES.ADMIN != req.tokenInfo.role_) {
+      throw ErrorHelper.permissionDeny();
+    }
+    const { id, newPass } = req.body;
+
+    let user = await UserModel.findById(id);
+    if (!user) {
+      throw ErrorHelper.userNotExist();
+    }
+    user.password = passwordHash.generate(newPass);
+    await user.save();
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        user,
       },
     });
   }

@@ -78,6 +78,8 @@ var UserRoute = /** @class */ (function (_super) {
         this.router.post("/updateMe", [this.authentication], this.route(this.updateMe));
         this.router.post("/updateUser", [this.authentication], this.route(this.updateUser));
         this.router.post("/deleteOneUser", [this.authentication], this.route(this.deleteOneUser));
+        this.router.post("/changePasswordForAdmin", [this.authentication], this.route(this.changePasswordForAdmin));
+        this.router.post("/changePassword", [this.authentication], this.route(this.changePassword));
     };
     UserRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
@@ -433,6 +435,73 @@ var UserRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: {
                                     userCheck: userCheck,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.changePassword = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, id, oldPass, newPass, user;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        _a = req.body, id = _a.id, oldPass = _a.oldPass, newPass = _a.newPass;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(id)];
+                    case 1:
+                        user = _b.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        if (!password_hash_1.default.verify(oldPass, user.password)) return [3 /*break*/, 3];
+                        user.password = password_hash_1.default.generate(newPass);
+                        return [4 /*yield*/, user.save()];
+                    case 2:
+                        _b.sent();
+                        return [3 /*break*/, 4];
+                    case 3: throw error_1.ErrorHelper.userPasswordNotCorrect();
+                    case 4: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            data: {
+                                user: user,
+                            },
+                        })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.changePasswordForAdmin = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, id, newPass, user;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        _a = req.body, id = _a.id, newPass = _a.newPass;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(id)];
+                    case 1:
+                        user = _b.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        user.password = password_hash_1.default.generate(newPass);
+                        return [4 /*yield*/, user.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    user: user,
                                 },
                             })];
                 }
