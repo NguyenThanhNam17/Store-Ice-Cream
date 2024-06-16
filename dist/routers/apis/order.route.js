@@ -72,7 +72,7 @@ var OrderRoute = /** @class */ (function (_super) {
         this.router.post("/getAllOrderForAdmin", [this.authentication], this.route(this.getAllOrderForAdmin));
         this.router.post("/updateOrderForAdmin", [this.authentication], this.route(this.updateOrderForAdmin));
         this.router.post("/updateStatusOrder", [this.authentication], this.route(this.updateStatusOrder));
-        this.router.post("/getOneOrder/:id", [this.authentication], this.route(this.getOneOrder));
+        this.router.post("/getOneOrder", [this.authentication], this.route(this.getOneOrder));
         this.router.post("/getBill", [this.authentication], this.route(this.getBill));
         this.router.post("/createOrder", [this.authentication], this.route(this.createOrder));
         this.router.post("/deleteOneOrder", [this.authentication], this.route(this.deleteOneOrder));
@@ -215,10 +215,15 @@ var OrderRoute = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        id = req.params.id;
+                        id = req.body.id;
                         return [4 /*yield*/, order_model_1.OrderModel.findById(id)
                                 .populate("user")
-                                .populate("book")];
+                                .populate({
+                                path: "shoppingCarts",
+                                populate: {
+                                    path: "book",
+                                },
+                            })];
                     case 1:
                         order = _a.sent();
                         if (!order) {

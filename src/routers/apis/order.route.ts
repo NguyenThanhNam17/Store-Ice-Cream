@@ -43,7 +43,7 @@ class OrderRoute extends BaseRoute {
     );
 
     this.router.post(
-      "/getOneOrder/:id",
+      "/getOneOrder",
       [this.authentication],
       this.route(this.getOneOrder)
     );
@@ -175,10 +175,15 @@ class OrderRoute extends BaseRoute {
 
   //getOneOrder
   async getOneOrder(req: Request, res: Response) {
-    let { id } = req.params;
+    let { id } = req.body;
     const order = await OrderModel.findById(id)
       .populate("user")
-      .populate("book");
+      .populate({
+        path: "shoppingCarts",
+        populate: {
+          path: "book",
+        },
+      });
     if (!order) {
       //throw lỗi không tìm thấy
       throw ErrorHelper.recoredNotFound("order!");
