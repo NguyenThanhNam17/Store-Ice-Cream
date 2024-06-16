@@ -87,7 +87,7 @@ class BookCategoryRoute extends BaseRoute {
     if (!bookCategory) {
       throw ErrorHelper.recoredNotFound("Category!");
     }
-    await BookCategoryModel.deleteOne(id);
+    await BookCategoryModel.deleteOne({ _id: id });
     return res.status(200).json({
       status: 200,
       code: "200",

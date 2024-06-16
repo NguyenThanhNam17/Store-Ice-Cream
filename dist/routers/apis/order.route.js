@@ -141,7 +141,6 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
                             filter.userId = tokenData._id;
                         }
-                        console.log(filter);
                         return [4 /*yield*/, order_service_1.orderService.fetch({
                                 filter: filter,
                                 search: search,
@@ -319,6 +318,26 @@ var OrderRoute = /** @class */ (function (_super) {
                         });
                         return [4 /*yield*/, order.save()];
                     case 3:
+                        _b.sent();
+                        return [4 /*yield*/, Promise.all([
+                                user_model_1.UserModel.updateOne({ _id: order.userId }, {
+                                    $addToSet: {
+                                        searchs: {
+                                            $each: book.categoryId,
+                                        },
+                                    },
+                                }),
+                                //limit array size
+                                user_model_1.UserModel.updateOne({ _id: order.userId }, {
+                                    $push: {
+                                        searchs: {
+                                            $each: [],
+                                            $slice: -10,
+                                        },
+                                    },
+                                }),
+                            ])];
+                    case 4:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,

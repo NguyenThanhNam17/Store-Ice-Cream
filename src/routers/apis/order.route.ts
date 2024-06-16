@@ -16,6 +16,7 @@ import {
   ShoppingCartStatusEnum,
 } from "../../constants/model.const";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
+import { userService } from "../../models/user/user.service";
 class OrderRoute extends BaseRoute {
   constructor() {
     super();
@@ -113,7 +114,6 @@ class OrderRoute extends BaseRoute {
     if (tokenData.role_ != ROLES.ADMIN) {
       filter.userId = tokenData._id;
     }
-    console.log(filter);
     const orders = await orderService.fetch(
       {
         filter: filter,
@@ -255,6 +255,30 @@ class OrderRoute extends BaseRoute {
       shippingFee: 30000,
     });
     await order.save();
+    await Promise.all([
+      UserModel.updateOne(
+        { _id: order.userId },
+        {
+          $addToSet: {
+            searchs: {
+              $each: book.categoryId,
+            },
+          },
+        }
+      ),
+      //limit array size
+      UserModel.updateOne(
+        { _id: order.userId },
+        {
+          $push: {
+            searchs: {
+              $each: [],
+              $slice: -10,
+            },
+          },
+        }
+      ),
+    ]);
     return res.status(200).json({
       status: 200,
       code: "200",

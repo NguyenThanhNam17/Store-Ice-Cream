@@ -35,6 +35,7 @@ var bookSchema = new mongoose_1.default.Schema({
     images: [{ type: String }],
     isHighlight: { type: Boolean },
     soldQuantity: { type: Number },
+    bookCategoryIds: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "BookCategory" }],
 }, { timestamps: true });
 // Index for search
 bookSchema.index({ name: "text", author: "text" }, { weights: { name: 4, author: 2 } });

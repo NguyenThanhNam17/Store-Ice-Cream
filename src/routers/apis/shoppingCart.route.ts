@@ -17,6 +17,7 @@ import {
 } from "../../constants/model.const";
 import { shoppingCartService } from "../../models/shoppingCart/shoppingCart.service";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
+import { userService } from "../../models/user/user.service";
 class ShoppingCartRoute extends BaseRoute {
   constructor() {
     super();
@@ -230,6 +231,35 @@ class ShoppingCartRoute extends BaseRoute {
       paymentMethod: paymentMethodEnum.CASH,
     });
     await order.save();
+    let bookCategoryIds: any = [];
+    shoppingCarts.map(async (shoppingCart: any) => {
+      let book = await BookModel.findById(shoppingCart.bookId);
+      bookCategoryIds.push(book.categoryId);
+    });
+    await Promise.all([
+      UserModel.updateOne(
+        { _id: order.userId },
+        {
+          $addToSet: {
+            searchs: {
+              $each: bookCategoryIds,
+            },
+          },
+        }
+      ),
+      //limit array size
+      UserModel.updateOne(
+        { _id: order.userId },
+        {
+          $push: {
+            searchs: {
+              $each: [],
+              $slice: -10,
+            },
+          },
+        }
+      ),
+    ]);
     return res.status(200).json({
       status: 200,
       code: "200",

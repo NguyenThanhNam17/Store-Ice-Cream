@@ -160,7 +160,7 @@ var BookCategoryRoute = /** @class */ (function (_super) {
                         if (!bookCategory) {
                             throw error_1.ErrorHelper.recoredNotFound("Category!");
                         }
-                        return [4 /*yield*/, bookCategory_model_1.BookCategoryModel.deleteOne(id)];
+                        return [4 /*yield*/, bookCategory_model_1.BookCategoryModel.deleteOne({ _id: id })];
                     case 2:
                         _a.sent();
                         return [2 /*return*/, res.status(200).json({

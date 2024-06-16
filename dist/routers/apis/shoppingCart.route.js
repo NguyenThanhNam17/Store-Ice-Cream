@@ -261,7 +261,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.paymentShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, shoppingCartIds, address, note, phoneNumber, shoppingCarts, initialCost, order;
+            var tokenData, _a, shoppingCartIds, address, note, phoneNumber, shoppingCarts, initialCost, order, bookCategoryIds;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -314,6 +314,39 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         });
                         return [4 /*yield*/, order.save()];
                     case 2:
+                        _b.sent();
+                        bookCategoryIds = [];
+                        shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
+                            var book;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, book_model_1.BookModel.findById(shoppingCart.bookId)];
+                                    case 1:
+                                        book = _a.sent();
+                                        bookCategoryIds.push(book.categoryId);
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        return [4 /*yield*/, Promise.all([
+                                user_model_1.UserModel.updateOne({ _id: order.userId }, {
+                                    $addToSet: {
+                                        searchs: {
+                                            $each: bookCategoryIds,
+                                        },
+                                    },
+                                }),
+                                //limit array size
+                                user_model_1.UserModel.updateOne({ _id: order.userId }, {
+                                    $push: {
+                                        searchs: {
+                                            $each: [],
+                                            $slice: -10,
+                                        },
+                                    },
+                                }),
+                            ])];
+                    case 3:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
