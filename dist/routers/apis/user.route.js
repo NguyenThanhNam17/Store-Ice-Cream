@@ -72,7 +72,7 @@ var UserRoute = /** @class */ (function (_super) {
         this.router.post("/register", this.route(this.register));
         this.router.post("/login", this.route(this.login));
         this.router.post("/getAllUser", [this.authentication], this.route(this.getAllUser));
-        this.router.post("/getOneUser/:id", [this.authentication], this.route(this.getOneUser));
+        this.router.post("/getOneUser", [this.authentication], this.route(this.getOneUser));
         this.router.post("/getMe", [this.authentication], this.route(this.getMe));
         this.router.post("/createUser", [this.authentication], this.route(this.createUser));
         this.router.post("/updateMe", [this.authentication], this.route(this.updateMe));
@@ -254,7 +254,7 @@ var UserRoute = /** @class */ (function (_super) {
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        id = req.params.id;
+                        id = req.body.id;
                         return [4 /*yield*/, user_model_1.UserModel.findById(id)];
                     case 1:
                         user = _a.sent();

@@ -22,7 +22,7 @@ class UserRoute extends BaseRoute {
       this.route(this.getAllUser)
     );
     this.router.post(
-      "/getOneUser/:id",
+      "/getOneUser",
       [this.authentication],
       this.route(this.getOneUser)
     );
@@ -183,7 +183,7 @@ class UserRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    let { id } = req.params;
+    let { id } = req.body;
     const user: any = await UserModel.findById(id);
     if (!user) {
       //throw lỗi không tìm thấy

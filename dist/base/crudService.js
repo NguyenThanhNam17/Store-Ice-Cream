@@ -153,7 +153,7 @@ var CrudService = /** @class */ (function (_super) {
                         countQuery.setQuery(query4Count);
                         query.limit(limit);
                         query.skip(skip);
-                        if (populates.length != 0) {
+                        if (populates && populates.length != 0) {
                             for (_i = 0, populates_1 = populates; _i < populates_1.length; _i++) {
                                 populate = populates_1[_i];
                                 query.populate(populate);

@@ -95,7 +95,7 @@ export abstract class CrudService<
     query.limit(limit);
     query.skip(skip);
 
-    if (populates.length != 0) {
+    if (populates && populates.length != 0) {
       for (let populate of populates) {
         query.populate(populate);
       }
