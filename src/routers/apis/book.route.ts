@@ -263,6 +263,7 @@ class BookRoute extends BaseRoute {
       quantity,
       images,
       note,
+      isHighlight,
     } = req.body;
 
     let book = await BookModel.findById(id);
@@ -276,6 +277,9 @@ class BookRoute extends BaseRoute {
     book.price = price || book.price;
     book.quantity = quantity || book.quantity;
     book.images = images || book.images;
+    if (isHighlight != null) {
+      book.isHighlight = isHighlight;
+    }
     await book.save();
     return res.status(200).json({
       status: 200,

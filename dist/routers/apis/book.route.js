@@ -318,14 +318,14 @@ var BookRoute = /** @class */ (function (_super) {
     };
     BookRoute.prototype.updateBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, name, author, categoryId, description, price, quantity, images, note, book;
+            var _a, id, name, author, categoryId, description, price, quantity, images, note, isHighlight, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, id = _a.id, name = _a.name, author = _a.author, categoryId = _a.categoryId, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images, note = _a.note;
+                        _a = req.body, id = _a.id, name = _a.name, author = _a.author, categoryId = _a.categoryId, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images, note = _a.note, isHighlight = _a.isHighlight;
                         return [4 /*yield*/, book_model_1.BookModel.findById(id)];
                     case 1:
                         book = _b.sent();
@@ -339,6 +339,9 @@ var BookRoute = /** @class */ (function (_super) {
                         book.price = price || book.price;
                         book.quantity = quantity || book.quantity;
                         book.images = images || book.images;
+                        if (isHighlight != null) {
+                            book.isHighlight = isHighlight;
+                        }
                         return [4 /*yield*/, book.save()];
                     case 2:
                         _b.sent();

@@ -33,7 +33,7 @@ var bookSchema = new mongoose_1.default.Schema({
     quantity: { type: Number },
     price: { type: Number },
     images: [{ type: String }],
-    isHighlight: { type: Boolean },
+    isHighlight: { type: Boolean, default: false },
     soldQuantity: { type: Number },
     bookCategoryIds: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "BookCategory" }],
 }, { timestamps: true });
