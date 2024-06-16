@@ -269,7 +269,6 @@ class UserRoute extends BaseRoute {
       throw ErrorHelper.permissionDeny();
     }
     const { id, name, gender, address, email, isBlock } = req.body;
-
     let userCheck = await UserModel.findById(id);
     if (!userCheck) {
       throw ErrorHelper.userNotExist();
@@ -278,7 +277,9 @@ class UserRoute extends BaseRoute {
     userCheck.email = email || userCheck.email;
     userCheck.gender = gender || userCheck.gender;
     userCheck.address = address || userCheck.address;
-    userCheck.isBlock = isBlock || userCheck.isBlock;
+    if (isBlock) {
+      userCheck.isBlock = isBlock;
+    }
     await userCheck.save();
     return res.status(200).json({
       status: 200,
