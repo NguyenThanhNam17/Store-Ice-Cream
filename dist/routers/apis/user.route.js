@@ -392,13 +392,8 @@ var UserRoute = /** @class */ (function (_super) {
                         userCheck.email = email || userCheck.email;
                         userCheck.gender = gender || userCheck.gender;
                         userCheck.address = address || userCheck.address;
-                        if (isBlock) {
-                            if (isBlock == true) {
-                                userCheck.isBlock = true;
-                            }
-                            else {
-                                userCheck.isBlock = false;
-                            }
+                        if (isBlock != null) {
+                            userCheck.isBlock = isBlock;
                         }
                         return [4 /*yield*/, userCheck.save()];
                     case 2:

@@ -277,13 +277,10 @@ class UserRoute extends BaseRoute {
     userCheck.email = email || userCheck.email;
     userCheck.gender = gender || userCheck.gender;
     userCheck.address = address || userCheck.address;
-    if (isBlock) {
-      if (isBlock == true) {
-        userCheck.isBlock = true;
-      } else {
-        userCheck.isBlock = false;
-      }
+    if (isBlock != null) {
+      userCheck.isBlock = isBlock;
     }
+
     await userCheck.save();
     return res.status(200).json({
       status: 200,
