@@ -65,6 +65,7 @@ var BookCategoryRoute = /** @class */ (function (_super) {
     BookCategoryRoute.prototype.customRouting = function () {
         this.router.post("/getAllBookCategory", this.route(this.getAllBookCategory));
         this.router.post("/createBookCategory", [this.authentication], this.route(this.createBookCategory));
+        this.router.post("/updateBookCategory", [this.authentication], this.route(this.updateBookCategory));
         this.router.post("/deleteOneBookCategory", [this.authentication], this.route(this.deleteOneBookCategory));
     };
     //Auth
@@ -162,6 +163,35 @@ var BookCategoryRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, bookCategory_model_1.BookCategoryModel.deleteOne(id)];
                     case 2:
                         _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    bookCategory: bookCategory,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    BookCategoryRoute.prototype.updateBookCategory = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, id, name, bookCategory;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, id = _a.id, name = _a.name;
+                        return [4 /*yield*/, bookCategory_model_1.BookCategoryModel.findById(id)];
+                    case 1:
+                        bookCategory = _b.sent();
+                        if (!bookCategory) {
+                            throw error_1.ErrorHelper.recoredNotFound("Category!");
+                        }
+                        bookCategory.name = name || bookCategory.name;
+                        return [4 /*yield*/, bookCategory.save()];
+                    case 2:
+                        _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",

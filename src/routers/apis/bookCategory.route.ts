@@ -21,6 +21,11 @@ class BookCategoryRoute extends BaseRoute {
       this.route(this.createBookCategory)
     );
     this.router.post(
+      "/updateBookCategory",
+      [this.authentication],
+      this.route(this.updateBookCategory)
+    );
+    this.router.post(
       "/deleteOneBookCategory",
       [this.authentication],
       this.route(this.deleteOneBookCategory)
@@ -83,6 +88,23 @@ class BookCategoryRoute extends BaseRoute {
       throw ErrorHelper.recoredNotFound("Category!");
     }
     await BookCategoryModel.deleteOne(id);
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        bookCategory,
+      },
+    });
+  }
+  async updateBookCategory(req: Request, res: Response) {
+    const { id, name } = req.body;
+    let bookCategory = await BookCategoryModel.findById(id);
+    if (!bookCategory) {
+      throw ErrorHelper.recoredNotFound("Category!");
+    }
+    bookCategory.name = name || bookCategory.name;
+    await bookCategory.save();
     return res.status(200).json({
       status: 200,
       code: "200",
