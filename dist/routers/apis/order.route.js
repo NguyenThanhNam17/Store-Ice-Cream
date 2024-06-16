@@ -378,7 +378,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.forbidden("The order is canceled!");
                         }
                         else {
-                            if (model_const_1.OrderStatusEnum.SUCCESS == status) {
+                            if (model_const_1.OrderStatusEnum.SUCCESS == order.status) {
                                 throw error_1.ErrorHelper.forbidden("The order is success!");
                             }
                         }

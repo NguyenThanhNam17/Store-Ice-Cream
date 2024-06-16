@@ -306,7 +306,7 @@ class OrderRoute extends BaseRoute {
     if (OrderStatusEnum.CANCEL == order.status) {
       throw ErrorHelper.forbidden("The order is canceled!");
     } else {
-      if (OrderStatusEnum.SUCCESS == status) {
+      if (OrderStatusEnum.SUCCESS == order.status) {
         throw ErrorHelper.forbidden("The order is success!");
       }
     }
