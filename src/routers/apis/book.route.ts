@@ -16,11 +16,11 @@ class BookRoute extends BaseRoute {
   }
   customRouting() {
     this.router.post("/getAllBook", this.route(this.getAllBook));
-    this.router.post(
-      "/getAllBookForAdmin",
-      [this.authentication],
-      this.route(this.getAllBookForAdmin)
-    );
+    // this.router.post(
+    //   "/getAllBookForAdmin",
+    //   [this.authentication],
+    //   this.route(this.getAllBookForAdmin)
+    // );
     this.router.post("/getOneBook", this.route(this.getOneBook));
     this.router.post(
       "/createBook",
@@ -88,62 +88,64 @@ class BookRoute extends BaseRoute {
       page = 1;
     }
     if (search && tokenData) {
-      let mine = await UserModel.findById(tokenData._id);
-      if (!mine) {
-        throw ErrorHelper.userNotExist();
+      if (tokenData.role_ != ROLES.ADMIN) {
+        let mine = await UserModel.findById(tokenData._id);
+        if (!mine) {
+          throw ErrorHelper.userNotExist();
+        }
+        const keywords = mine.searchs.join("|");
+        _.set(req.body, "filter", {
+          content: { $regex: keywords, $options: "i" },
+        });
+        const text = search;
+        const tokenizer = vntk.posTag();
+        const words: any = tokenizer.tag(text);
+
+        const nouns = words.filter(
+          (word: any) => word[1] === "N" || word[1] === "M" || word[1] === "Np"
+        );
+
+        const tfidf = new vntk.TfIdf();
+        tfidf.addDocument(text);
+        const importantWords = nouns.map((word: any) => {
+          return {
+            word: word[0],
+            tfidf: tfidf.tfidfs(word[0], function (i, measure) {
+              console.log("document #" + i + " is " + measure);
+            }),
+          };
+        });
+
+        const topKeywords = importantWords
+          .sort((a: any, b: any) => b.tfidf - a.tfidf)
+          .slice(0, 3);
+        const result = topKeywords.map((item: any) => item.word);
+
+        await Promise.all([
+          UserModel.updateOne(
+            { _id: mine._id },
+            {
+              $addToSet: {
+                searchs: {
+                  $each: result,
+                },
+              },
+            }
+          ),
+          //limit array size
+          UserModel.updateOne(
+            { _id: mine._id },
+            {
+              $push: {
+                searchs: {
+                  $each: [],
+                  $slice: -10,
+                },
+              },
+            }
+          ),
+        ]);
       }
-      const keywords = mine.searchs.join("|");
-      _.set(req.body, "filter", {
-        content: { $regex: keywords, $options: "i" },
-      });
-      const text = search;
-      const tokenizer = vntk.posTag();
-      const words: any = tokenizer.tag(text);
-
-      const nouns = words.filter(
-        (word: any) => word[1] === "N" || word[1] === "M" || word[1] === "Np"
-      );
-
-      const tfidf = new vntk.TfIdf();
-      tfidf.addDocument(text);
-      const importantWords = nouns.map((word: any) => {
-        return {
-          word: word[0],
-          tfidf: tfidf.tfidfs(word[0], function (i, measure) {
-            console.log("document #" + i + " is " + measure);
-          }),
-        };
-      });
-
-      const topKeywords = importantWords
-        .sort((a: any, b: any) => b.tfidf - a.tfidf)
-        .slice(0, 3);
-      const result = topKeywords.map((item: any) => item.word);
-
-      await Promise.all([
-        UserModel.updateOne(
-          { _id: mine._id },
-          {
-            $addToSet: {
-              searchs: {
-                $each: result,
-              },
-            },
-          }
-        ),
-        //limit array size
-        UserModel.updateOne(
-          { _id: mine._id },
-          {
-            $push: {
-              searchs: {
-                $each: [],
-                $slice: -10,
-              },
-            },
-          }
-        ),
-      ]);
     }
     const books = await bookService.fetch(
       {
@@ -161,47 +163,47 @@ class BookRoute extends BaseRoute {
       data: books,
     });
   }
-  async getAllBookForAdmin(req: Request, res: Response) {
-    let tokenData: any;
-    if (req.get("x-token")) {
-      tokenData = TokenHelper.decodeToken(req.get("x-token"));
-    }
-    if (tokenData.role_ != ROLES.ADMIN) {
-      throw ErrorHelper.permissionDeny();
-    }
-    try {
-      req.body.limit = parseInt(req.body.limit);
-    } catch (err) {
-      throw ErrorHelper.requestDataInvalid("limit");
-    }
-    try {
-      req.body.page = parseInt(req.body.page);
-    } catch (err) {
-      throw ErrorHelper.requestDataInvalid("page");
-    }
-    var { limit, page, search, filter } = req.body;
-    if (!limit) {
-      limit = 10;
-    }
-    if (!page) {
-      page = 1;
-    }
-    const books = await bookService.fetch(
-      {
-        filter: filter,
-        search: search,
-        limit: limit,
-        page: page,
-      },
-      ["category"]
-    );
-    return res.status(200).json({
-      status: 200,
-      code: "200",
-      message: "success",
-      data: books,
-    });
-  }
+  // async getAllBookForAdmin(req: Request, res: Response) {
+  //   let tokenData: any;
+  //   if (req.get("x-token")) {
+  //     tokenData = TokenHelper.decodeToken(req.get("x-token"));
+  //   }
+  //   if (tokenData.role_ != ROLES.ADMIN) {
+  //     throw ErrorHelper.permissionDeny();
+  //   }
+  //   try {
+  //     req.body.limit = parseInt(req.body.limit);
+  //   } catch (err) {
+  //     throw ErrorHelper.requestDataInvalid("limit");
+  //   }
+  //   try {
+  //     req.body.page = parseInt(req.body.page);
+  //   } catch (err) {
+  //     throw ErrorHelper.requestDataInvalid("page");
+  //   }
+  //   var { limit, page, search, filter } = req.body;
+  //   if (!limit) {
+  //     limit = 10;
+  //   }
+  //   if (!page) {
+  //     page = 1;
+  //   }
+  //   const books = await bookService.fetch(
+  //     {
+  //       filter: filter,
+  //       search: search,
+  //       limit: limit,
+  //       page: page,
+  //     },
+  //     ["category"]
+  //   );
+  //   return res.status(200).json({
+  //     status: 200,
+  //     code: "200",
+  //     message: "success",
+  //     data: books,
+  //   });
+  // }
   //getOneBook
   async getOneBook(req: Request, res: Response) {
     let { id } = req.body;
@@ -260,6 +262,7 @@ class BookRoute extends BaseRoute {
       price,
       quantity,
       images,
+      note,
     } = req.body;
 
     let book = await BookModel.findById(id);

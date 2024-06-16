@@ -70,7 +70,11 @@ var BookRoute = /** @class */ (function (_super) {
     }
     BookRoute.prototype.customRouting = function () {
         this.router.post("/getAllBook", this.route(this.getAllBook));
-        this.router.post("/getAllBookForAdmin", [this.authentication], this.route(this.getAllBookForAdmin));
+        // this.router.post(
+        //   "/getAllBookForAdmin",
+        //   [this.authentication],
+        //   this.route(this.getAllBookForAdmin)
+        // );
         this.router.post("/getOneBook", this.route(this.getOneBook));
         this.router.post("/createBook", [this.authentication], this.route(this.createBook));
         this.router.post("/updateBook", [this.authentication], this.route(this.updateBook));
@@ -139,6 +143,7 @@ var BookRoute = /** @class */ (function (_super) {
                             page = 1;
                         }
                         if (!(search && tokenData)) return [3 /*break*/, 3];
+                        if (!(tokenData.role_ != role_const_1.ROLES.ADMIN)) return [3 /*break*/, 3];
                         return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
                     case 1:
                         mine = _b.sent();
@@ -206,55 +211,47 @@ var BookRoute = /** @class */ (function (_super) {
             });
         });
     };
-    BookRoute.prototype.getAllBookForAdmin = function (req, res) {
-        return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, books;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        if (req.get("x-token")) {
-                            tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        }
-                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
-                            throw error_1.ErrorHelper.permissionDeny();
-                        }
-                        try {
-                            req.body.limit = parseInt(req.body.limit);
-                        }
-                        catch (err) {
-                            throw error_1.ErrorHelper.requestDataInvalid("limit");
-                        }
-                        try {
-                            req.body.page = parseInt(req.body.page);
-                        }
-                        catch (err) {
-                            throw error_1.ErrorHelper.requestDataInvalid("page");
-                        }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
-                        if (!limit) {
-                            limit = 10;
-                        }
-                        if (!page) {
-                            page = 1;
-                        }
-                        return [4 /*yield*/, book_service_1.bookService.fetch({
-                                filter: filter,
-                                search: search,
-                                limit: limit,
-                                page: page,
-                            }, ["category"])];
-                    case 1:
-                        books = _b.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: books,
-                            })];
-                }
-            });
-        });
-    };
+    // async getAllBookForAdmin(req: Request, res: Response) {
+    //   let tokenData: any;
+    //   if (req.get("x-token")) {
+    //     tokenData = TokenHelper.decodeToken(req.get("x-token"));
+    //   }
+    //   if (tokenData.role_ != ROLES.ADMIN) {
+    //     throw ErrorHelper.permissionDeny();
+    //   }
+    //   try {
+    //     req.body.limit = parseInt(req.body.limit);
+    //   } catch (err) {
+    //     throw ErrorHelper.requestDataInvalid("limit");
+    //   }
+    //   try {
+    //     req.body.page = parseInt(req.body.page);
+    //   } catch (err) {
+    //     throw ErrorHelper.requestDataInvalid("page");
+    //   }
+    //   var { limit, page, search, filter } = req.body;
+    //   if (!limit) {
+    //     limit = 10;
+    //   }
+    //   if (!page) {
+    //     page = 1;
+    //   }
+    //   const books = await bookService.fetch(
+    //     {
+    //       filter: filter,
+    //       search: search,
+    //       limit: limit,
+    //       page: page,
+    //     },
+    //     ["category"]
+    //   );
+    //   return res.status(200).json({
+    //     status: 200,
+    //     code: "200",
+    //     message: "success",
+    //     data: books,
+    //   });
+    // }
     //getOneBook
     BookRoute.prototype.getOneBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
@@ -321,14 +318,14 @@ var BookRoute = /** @class */ (function (_super) {
     };
     BookRoute.prototype.updateBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, name, author, categoryId, description, price, quantity, images, book;
+            var _a, id, name, author, categoryId, description, price, quantity, images, note, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, id = _a.id, name = _a.name, author = _a.author, categoryId = _a.categoryId, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images;
+                        _a = req.body, id = _a.id, name = _a.name, author = _a.author, categoryId = _a.categoryId, description = _a.description, price = _a.price, quantity = _a.quantity, images = _a.images, note = _a.note;
                         return [4 /*yield*/, book_model_1.BookModel.findById(id)];
                     case 1:
                         book = _b.sent();

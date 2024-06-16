@@ -330,11 +330,11 @@ var OrderRoute = /** @class */ (function (_super) {
     //update order for admin
     OrderRoute.prototype.updateOrderForAdmin = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, address, note, status, phoneNumber, tokenData, order;
+            var _a, id, address, note, status, phoneNumber, noteUpdate, tokenData, order;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = req.body, id = _a.id, address = _a.address, note = _a.note, status = _a.status, phoneNumber = _a.phoneNumber;
+                        _a = req.body, id = _a.id, address = _a.address, note = _a.note, status = _a.status, phoneNumber = _a.phoneNumber, noteUpdate = _a.noteUpdate;
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
                         if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
@@ -349,10 +349,11 @@ var OrderRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.recoredNotFound("Book");
                         }
                         return [4 /*yield*/, order_service_1.orderService.updateOne(order._id, {
-                                address: address,
-                                note: note,
-                                status: status,
-                                phone: phoneNumber,
+                                address: address || order.address,
+                                note: note || order.note,
+                                status: status || order.status,
+                                phone: phoneNumber || order.phone,
+                                noteUpdate: noteUpdate || order.noteUpdate,
                             })];
                     case 2:
                         _b.sent();

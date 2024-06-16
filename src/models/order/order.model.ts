@@ -20,6 +20,7 @@ export type IOrder = BaseDocument & {
   phone?: string;
   isPaid?: boolean;
   paymentMethod?: string;
+  noteUpdate?: string;
 };
 
 const orderSchema = new mongoose.Schema(
@@ -45,6 +46,7 @@ const orderSchema = new mongoose.Schema(
       enum: Object.values(paymentMethodEnum),
       default: paymentMethodEnum.CASH,
     },
+    noteUpdate: { type: String },
   },
   { timestamps: true }
   //virtual populate

@@ -261,7 +261,7 @@ class OrderRoute extends BaseRoute {
   }
   //update order for admin
   async updateOrderForAdmin(req: Request, res: Response) {
-    const { id, address, note, status, phoneNumber } = req.body;
+    const { id, address, note, status, phoneNumber, noteUpdate } = req.body;
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
     if (!tokenData) {
       throw ErrorHelper.unauthorized();
@@ -274,10 +274,11 @@ class OrderRoute extends BaseRoute {
       throw ErrorHelper.recoredNotFound("Book");
     }
     await orderService.updateOne(order._id, {
-      address: address,
-      note: note,
-      status: status,
-      phone: phoneNumber,
+      address: address || order.address,
+      note: note || order.note,
+      status: status || order.status,
+      phone: phoneNumber || order.phone,
+      noteUpdate: noteUpdate || order.noteUpdate,
     });
     return res.status(200).json({
       status: 200,
