@@ -382,7 +382,6 @@ var UserRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
                         _a = req.body, id = _a.id, name = _a.name, gender = _a.gender, address = _a.address, email = _a.email, isBlock = _a.isBlock;
-                        console.log(req.body);
                         return [4 /*yield*/, user_model_1.UserModel.findById(id)];
                     case 1:
                         userCheck = _b.sent();
@@ -394,7 +393,12 @@ var UserRoute = /** @class */ (function (_super) {
                         userCheck.gender = gender || userCheck.gender;
                         userCheck.address = address || userCheck.address;
                         if (isBlock) {
-                            userCheck.isBlock = isBlock;
+                            if (isBlock == true) {
+                                userCheck.isBlock = true;
+                            }
+                            else {
+                                userCheck.isBlock = false;
+                            }
                         }
                         return [4 /*yield*/, userCheck.save()];
                     case 2:

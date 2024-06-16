@@ -278,7 +278,11 @@ class UserRoute extends BaseRoute {
     userCheck.gender = gender || userCheck.gender;
     userCheck.address = address || userCheck.address;
     if (isBlock) {
-      userCheck.isBlock = isBlock;
+      if (isBlock == true) {
+        userCheck.isBlock = true;
+      } else {
+        userCheck.isBlock = false;
+      }
     }
     await userCheck.save();
     return res.status(200).json({
