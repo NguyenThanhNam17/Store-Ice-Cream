@@ -236,9 +236,7 @@ var UserRoute = /** @class */ (function (_super) {
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: {
-                                    users: users,
-                                },
+                                data: users,
                             })];
                 }
             });

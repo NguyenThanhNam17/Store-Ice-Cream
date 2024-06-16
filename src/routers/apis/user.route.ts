@@ -172,9 +172,7 @@ class UserRoute extends BaseRoute {
       status: 200,
       code: "200",
       message: "success",
-      data: {
-        users,
-      },
+      data: users,
     });
   }
 
