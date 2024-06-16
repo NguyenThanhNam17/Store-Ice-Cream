@@ -21,9 +21,9 @@ class BookCategoryRoute extends BaseRoute {
       this.route(this.createBookCategory)
     );
     this.router.post(
-      "/deleteBookCategory",
+      "/deleteOneBookCategory",
       [this.authentication],
-      this.route(this.deleteBookCategory)
+      this.route(this.deleteOneBookCategory)
     );
   }
   //Auth
@@ -76,7 +76,7 @@ class BookCategoryRoute extends BaseRoute {
       },
     });
   }
-  async deleteBookCategory(req: Request, res: Response) {
+  async deleteOneBookCategory(req: Request, res: Response) {
     const { id } = req.body;
     let bookCategory = await BookCategoryModel.findById(id);
     if (!bookCategory) {

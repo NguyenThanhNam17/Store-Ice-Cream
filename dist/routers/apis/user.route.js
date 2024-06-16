@@ -350,10 +350,10 @@ var UserRoute = /** @class */ (function (_super) {
                         if (!userCheck) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        userCheck.name = name;
-                        userCheck.email = email;
-                        userCheck.gender = gender;
-                        userCheck.address = address;
+                        userCheck.name = name || userCheck.name;
+                        userCheck.email = email || userCheck.email;
+                        userCheck.gender = gender || userCheck.gender;
+                        userCheck.address = address || userCheck.address;
                         return [4 /*yield*/, userCheck.save()];
                     case 2:
                         _b.sent();
@@ -385,10 +385,10 @@ var UserRoute = /** @class */ (function (_super) {
                         if (!userCheck) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        userCheck.name = name;
-                        userCheck.email = email;
-                        userCheck.gender = gender;
-                        userCheck.address = address;
+                        userCheck.name = name || userCheck.name;
+                        userCheck.email = email || userCheck.email;
+                        userCheck.gender = gender || userCheck.gender;
+                        userCheck.address = address || userCheck.address;
                         return [4 /*yield*/, userCheck.save()];
                     case 2:
                         _b.sent();

@@ -335,13 +335,13 @@ var BookRoute = /** @class */ (function (_super) {
                         if (!book) {
                             throw error_1.ErrorHelper.recoredNotFound("Book");
                         }
-                        book.name = name;
-                        book.author = author;
-                        book.categoryId = categoryId;
-                        book.description = description;
-                        book.price = price;
-                        book.quantity = quantity;
-                        book.images = images;
+                        book.name = name || book.name;
+                        book.author = author || book.author;
+                        book.categoryId = categoryId || book.categoryId;
+                        book.description = description || book.description;
+                        book.price = price || book.price;
+                        book.quantity = quantity || book.quantity;
+                        book.images = images || book.images;
                         return [4 /*yield*/, book.save()];
                     case 2:
                         _b.sent();

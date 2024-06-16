@@ -239,10 +239,10 @@ class UserRoute extends BaseRoute {
     if (!userCheck) {
       throw ErrorHelper.userNotExist();
     }
-    userCheck.name = name;
-    userCheck.email = email;
-    userCheck.gender = gender;
-    userCheck.address = address;
+    userCheck.name = name || userCheck.name;
+    userCheck.email = email || userCheck.email;
+    userCheck.gender = gender || userCheck.gender;
+    userCheck.address = address || userCheck.address;
     await userCheck.save();
     return res.status(200).json({
       status: 200,
@@ -263,10 +263,10 @@ class UserRoute extends BaseRoute {
     if (!userCheck) {
       throw ErrorHelper.userNotExist();
     }
-    userCheck.name = name;
-    userCheck.email = email;
-    userCheck.gender = gender;
-    userCheck.address = address;
+    userCheck.name = name || userCheck.name;
+    userCheck.email = email || userCheck.email;
+    userCheck.gender = gender || userCheck.gender;
+    userCheck.address = address || userCheck.address;
     await userCheck.save();
     return res.status(200).json({
       status: 200,

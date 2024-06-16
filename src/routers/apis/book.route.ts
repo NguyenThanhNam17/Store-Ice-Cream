@@ -266,13 +266,13 @@ class BookRoute extends BaseRoute {
     if (!book) {
       throw ErrorHelper.recoredNotFound("Book");
     }
-    book.name = name;
-    book.author = author;
-    book.categoryId = categoryId;
-    book.description = description;
-    book.price = price;
-    book.quantity = quantity;
-    book.images = images;
+    book.name = name || book.name;
+    book.author = author || book.author;
+    book.categoryId = categoryId || book.categoryId;
+    book.description = description || book.description;
+    book.price = price || book.price;
+    book.quantity = quantity || book.quantity;
+    book.images = images || book.images;
     await book.save();
     return res.status(200).json({
       status: 200,

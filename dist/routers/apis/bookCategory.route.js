@@ -65,7 +65,7 @@ var BookCategoryRoute = /** @class */ (function (_super) {
     BookCategoryRoute.prototype.customRouting = function () {
         this.router.post("/getAllBookCategory", this.route(this.getAllBookCategory));
         this.router.post("/createBookCategory", [this.authentication], this.route(this.createBookCategory));
-        this.router.post("/deleteBookCategory", [this.authentication], this.route(this.deleteBookCategory));
+        this.router.post("/deleteOneBookCategory", [this.authentication], this.route(this.deleteOneBookCategory));
     };
     //Auth
     BookCategoryRoute.prototype.authentication = function (req, res, next) {
@@ -146,7 +146,7 @@ var BookCategoryRoute = /** @class */ (function (_super) {
             });
         });
     };
-    BookCategoryRoute.prototype.deleteBookCategory = function (req, res) {
+    BookCategoryRoute.prototype.deleteOneBookCategory = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var id, bookCategory;
             return __generator(this, function (_a) {
