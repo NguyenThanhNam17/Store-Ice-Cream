@@ -29,6 +29,7 @@ var model_const_1 = require("../../constants/model.const");
 var shoppingCartSchema = new mongoose_1.default.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     bookId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Book" },
+    bookName: { type: String },
     quantity: { type: Number },
     initialCost: { type: Number },
     status: {

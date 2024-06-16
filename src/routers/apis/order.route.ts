@@ -236,6 +236,7 @@ class OrderRoute extends BaseRoute {
     let initialCost = book.price * quantity;
     let shoppingCart = new ShoppingCartModel({
       bookId: book._id,
+      bookName: book.name,
       quantity: quantity,
       initialCost: initialCost,
       status: ShoppingCartStatusEnum.SUCCESS,

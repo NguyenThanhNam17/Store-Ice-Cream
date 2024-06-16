@@ -296,6 +296,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         initialCost = book.price * quantity;
                         shoppingCart = new shoppingCart_model_1.ShoppingCartModel({
                             bookId: book._id,
+                            bookName: book.name,
                             quantity: quantity,
                             initialCost: initialCost,
                             status: model_const_1.ShoppingCartStatusEnum.SUCCESS,

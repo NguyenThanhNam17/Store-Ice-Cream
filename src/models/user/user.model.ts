@@ -13,6 +13,7 @@ export type IUser = BaseDocument & {
   gender?: string;
   key?: string;
   searchs?: string[];
+  isBlock?: boolean;
 };
 
 const userSchema = new mongoose.Schema(
@@ -27,6 +28,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String },
     key: { type: String },
     searchs: [{ type: String }],
+    isBlock: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

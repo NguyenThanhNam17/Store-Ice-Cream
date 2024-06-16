@@ -171,6 +171,9 @@ var UserRoute = /** @class */ (function (_super) {
                         if (!user) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
+                        if (user.isBlock == true) {
+                            throw error_1.ErrorHelper.userWasBlock();
+                        }
                         if (!password_hash_1.default.verify(password, user.password)) return [3 /*break*/, 3];
                         key = token_helper_1.TokenHelper.generateKey();
                         return [4 /*yield*/, user_model_1.UserModel.updateOne({ _id: user.id }, { $set: { key: key } })];
@@ -371,14 +374,14 @@ var UserRoute = /** @class */ (function (_super) {
     };
     UserRoute.prototype.updateUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, name, gender, address, email, userCheck;
+            var _a, id, name, gender, address, email, isBlock, userCheck;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, id = _a.id, name = _a.name, gender = _a.gender, address = _a.address, email = _a.email;
+                        _a = req.body, id = _a.id, name = _a.name, gender = _a.gender, address = _a.address, email = _a.email, isBlock = _a.isBlock;
                         return [4 /*yield*/, user_model_1.UserModel.findById(id)];
                     case 1:
                         userCheck = _b.sent();
@@ -389,6 +392,7 @@ var UserRoute = /** @class */ (function (_super) {
                         userCheck.email = email || userCheck.email;
                         userCheck.gender = gender || userCheck.gender;
                         userCheck.address = address || userCheck.address;
+                        userCheck.isBlock = isBlock || userCheck.isBlock;
                         return [4 /*yield*/, userCheck.save()];
                     case 2:
                         _b.sent();

@@ -10,6 +10,7 @@ import {
 export type IShoppingCart = BaseDocument & {
   userId?: string;
   bookId?: string;
+  bookName?: string;
   quantity?: number;
   initialCost?: number;
   status?: string;
@@ -19,6 +20,7 @@ const shoppingCartSchema = new mongoose.Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     bookId: { type: Schema.Types.ObjectId, ref: "Book" },
+    bookName: { type: String },
     quantity: { type: Number },
     initialCost: { type: Number },
     status: {

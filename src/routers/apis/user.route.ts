@@ -111,6 +111,9 @@ class UserRoute extends BaseRoute {
     if (!user) {
       throw ErrorHelper.userNotExist();
     }
+    if (user.isBlock == true) {
+      throw ErrorHelper.userWasBlock();
+    }
     if (passwordHash.verify(password, user.password)) {
       const key = TokenHelper.generateKey();
       await UserModel.updateOne({ _id: user.id }, { $set: { key: key } });
@@ -257,7 +260,7 @@ class UserRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const { id, name, gender, address, email } = req.body;
+    const { id, name, gender, address, email, isBlock } = req.body;
 
     let userCheck = await UserModel.findById(id);
     if (!userCheck) {
@@ -267,6 +270,7 @@ class UserRoute extends BaseRoute {
     userCheck.email = email || userCheck.email;
     userCheck.gender = gender || userCheck.gender;
     userCheck.address = address || userCheck.address;
+    userCheck.isBlock = isBlock || userCheck.isBlock;
     await userCheck.save();
     return res.status(200).json({
       status: 200,
