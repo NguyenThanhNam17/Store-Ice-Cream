@@ -288,6 +288,11 @@ class ShoppingCartRoute extends BaseRoute {
       throw ErrorHelper.recoredNotFound("book!");
     }
     if (quantity == 0) {
+      await bookService.updateOne(book._id, {
+        $inc: {
+          quantity: shoppingCart.quantity,
+        },
+      });
       await ShoppingCartModel.deleteOne(shoppingCart._id);
     } else {
       await shoppingCartService.updateOne(shoppingCart._id, {

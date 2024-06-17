@@ -386,21 +386,28 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         if (!book) {
                             throw error_1.ErrorHelper.recoredNotFound("book!");
                         }
-                        if (!(quantity == 0)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.deleteOne(shoppingCart._id)];
+                        if (!(quantity == 0)) return [3 /*break*/, 5];
+                        return [4 /*yield*/, book_service_1.bookService.updateOne(book._id, {
+                                $inc: {
+                                    quantity: shoppingCart.quantity,
+                                },
+                            })];
                     case 3:
                         _b.sent();
-                        return [3 /*break*/, 6];
-                    case 4: return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.updateOne(shoppingCart._id, {
+                        return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.deleteOne(shoppingCart._id)];
+                    case 4:
+                        _b.sent();
+                        return [3 /*break*/, 7];
+                    case 5: return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.updateOne(shoppingCart._id, {
                             quantity: quantity,
                             initialCost: quantity * book.price,
                             finalCost: quantity * book.price,
                         })];
-                    case 5:
+                    case 6:
                         _b.sent();
-                        _b.label = 6;
-                    case 6: return [4 /*yield*/, book.save()];
-                    case 7:
+                        _b.label = 7;
+                    case 7: return [4 /*yield*/, book.save()];
+                    case 8:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
