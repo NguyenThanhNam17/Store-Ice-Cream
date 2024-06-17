@@ -62,6 +62,7 @@ var order_model_1 = require("../../models/order/order.model");
 var model_const_1 = require("../../constants/model.const");
 var shoppingCart_service_1 = require("../../models/shoppingCart/shoppingCart.service");
 var shoppingCart_model_1 = require("../../models/shoppingCart/shoppingCart.model");
+var utils_helper_1 = require("../../helper/utils.helper");
 var ShoppingCartRoute = /** @class */ (function (_super) {
     __extends(ShoppingCartRoute, _super);
     function ShoppingCartRoute() {
@@ -262,7 +263,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.paymentShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, shoppingCartIds, address, note, phoneNumber, shoppingCarts, initialCost, order, bookCategoryIds;
+            var tokenData, _a, shoppingCartIds, address, note, phoneNumber, newPhone, shoppingCarts, initialCost, order, bookCategoryIds;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -278,6 +279,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             !address) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
+                        newPhone = utils_helper_1.UtilsHelper.parsePhone(phoneNumber, "+84");
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
                                 _id: { $in: shoppingCartIds },
                             })];
@@ -303,7 +305,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         order = new order_model_1.OrderModel({
                             userId: tokenData._id,
                             shoppingCartIds: shoppingCartIds,
-                            phone: phoneNumber,
+                            phone: newPhone,
                             address: address,
                             note: note,
                             status: model_const_1.OrderStatusEnum.PENDING,

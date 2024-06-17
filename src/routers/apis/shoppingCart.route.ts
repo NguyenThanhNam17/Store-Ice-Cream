@@ -18,6 +18,7 @@ import {
 import { shoppingCartService } from "../../models/shoppingCart/shoppingCart.service";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
 import { userService } from "../../models/user/user.service";
+import { UtilsHelper } from "../../helper/utils.helper";
 class ShoppingCartRoute extends BaseRoute {
   constructor() {
     super();
@@ -206,6 +207,7 @@ class ShoppingCartRoute extends BaseRoute {
     ) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
+    var newPhone = UtilsHelper.parsePhone(phoneNumber, "+84");
     let shoppingCarts = await ShoppingCartModel.find({
       _id: { $in: shoppingCartIds },
     });
@@ -221,7 +223,7 @@ class ShoppingCartRoute extends BaseRoute {
     let order = new OrderModel({
       userId: tokenData._id,
       shoppingCartIds: shoppingCartIds,
-      phone: phoneNumber,
+      phone: newPhone,
       address: address,
       note: note,
       status: OrderStatusEnum.PENDING,

@@ -9,6 +9,9 @@ import { ErrorHelper } from "../../base/error";
 import { Request, Response } from "../../base/baseRoute";
 import phone from "phone";
 import { userService } from "../../models/user/user.service";
+import { BookModel } from "../../models/book/book.model";
+import { bookService } from "../../models/book/book.service";
+import { UtilsHelper } from "../../helper/utils.helper";
 class UserRoute extends BaseRoute {
   constructor() {
     super();
@@ -85,7 +88,8 @@ class UserRoute extends BaseRoute {
     if (!name || !phoneNumber || !password) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
-    let phoneCheck = phone(phoneNumber);
+    var newPhone = UtilsHelper.parsePhone(phoneNumber, "+84");
+    let phoneCheck = phone(newPhone);
     if (!phoneCheck.isValid) {
       throw ErrorHelper.requestDataInvalid("phone");
     }
@@ -269,6 +273,14 @@ class UserRoute extends BaseRoute {
       throw ErrorHelper.permissionDeny();
     }
     const { id, name, gender, address, email, isBlock } = req.body;
+    let books = await BookModel.find({});
+    books.map((item: any) => {
+      bookService.updateOne(item._id, {
+        $set: {
+          isHighlight: false,
+        },
+      });
+    });
     let userCheck = await UserModel.findById(id);
     if (!userCheck) {
       throw ErrorHelper.userNotExist();

@@ -50,6 +50,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var user_model_1 = require("../../models/user/user.model");
 var baseRoute_1 = require("../../base/baseRoute");
@@ -62,6 +65,8 @@ var order_service_1 = require("../..//models/order/order.service");
 var order_model_1 = require("../../models/order/order.model");
 var model_const_1 = require("../../constants/model.const");
 var shoppingCart_model_1 = require("../../models/shoppingCart/shoppingCart.model");
+var utils_helper_1 = require("../../helper/utils.helper");
+var phone_1 = __importDefault(require("phone"));
 var OrderRoute = /** @class */ (function (_super) {
     __extends(OrderRoute, _super);
     function OrderRoute() {
@@ -278,7 +283,7 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.createOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, bookId, quantity, address, note, phoneNumber, book, initialCost, shoppingCart, order;
+            var tokenData, _a, bookId, quantity, address, note, phoneNumber, book, newPhone, phoneCheck, initialCost, shoppingCart, order;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -292,6 +297,11 @@ var OrderRoute = /** @class */ (function (_super) {
                         book = _b.sent();
                         if (book) {
                             throw error_1.ErrorHelper.recoredNotFound("order!");
+                        }
+                        newPhone = utils_helper_1.UtilsHelper.parsePhone(phoneNumber, "+84");
+                        phoneCheck = (0, phone_1.default)(newPhone);
+                        if (!phoneCheck.isValid) {
+                            throw error_1.ErrorHelper.requestDataInvalid("phone");
                         }
                         initialCost = book.price * quantity;
                         shoppingCart = new shoppingCart_model_1.ShoppingCartModel({
@@ -313,7 +323,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             discountAmount: 0,
                             finalCost: initialCost + 30000,
                             userId: tokenData._id,
-                            phone: phoneNumber,
+                            phone: newPhone,
                             isPaid: true,
                             shippingFee: 30000,
                         });
@@ -355,7 +365,7 @@ var OrderRoute = /** @class */ (function (_super) {
     //update order for admin
     OrderRoute.prototype.updateOrderForAdmin = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, address, note, status, phoneNumber, noteUpdate, tokenData, order, shoppingCarts;
+            var _a, id, address, note, status, phoneNumber, noteUpdate, tokenData, order, newPhone, phoneCheck, shoppingCarts;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -382,11 +392,16 @@ var OrderRoute = /** @class */ (function (_super) {
                                 throw error_1.ErrorHelper.forbidden("The order is success!");
                             }
                         }
+                        newPhone = utils_helper_1.UtilsHelper.parsePhone(phoneNumber, "+84");
+                        phoneCheck = (0, phone_1.default)(newPhone);
+                        if (!phoneCheck.isValid) {
+                            throw error_1.ErrorHelper.requestDataInvalid("phone");
+                        }
                         return [4 /*yield*/, order_service_1.orderService.updateOne(order._id, {
                                 address: address || order.address,
                                 note: note || order.note,
                                 status: status || order.status,
-                                phone: phoneNumber || order.phone,
+                                phone: newPhone || order.phone,
                                 noteUpdate: noteUpdate || order.noteUpdate,
                             })];
                     case 2:

@@ -17,6 +17,8 @@ import {
 } from "../../constants/model.const";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
 import { userService } from "../../models/user/user.service";
+import { UtilsHelper } from "../../helper/utils.helper";
+import phone from "phone";
 class OrderRoute extends BaseRoute {
   constructor() {
     super();
@@ -233,6 +235,11 @@ class OrderRoute extends BaseRoute {
     if (book) {
       throw ErrorHelper.recoredNotFound("order!");
     }
+    var newPhone = UtilsHelper.parsePhone(phoneNumber, "+84");
+    let phoneCheck = phone(newPhone);
+    if (!phoneCheck.isValid) {
+      throw ErrorHelper.requestDataInvalid("phone");
+    }
     let initialCost = book.price * quantity;
     let shoppingCart = new ShoppingCartModel({
       bookId: book._id,
@@ -251,7 +258,7 @@ class OrderRoute extends BaseRoute {
       discountAmount: 0,
       finalCost: initialCost + 30000,
       userId: tokenData._id,
-      phone: phoneNumber,
+      phone: newPhone,
       isPaid: true,
       shippingFee: 30000,
     });
@@ -310,11 +317,16 @@ class OrderRoute extends BaseRoute {
         throw ErrorHelper.forbidden("The order is success!");
       }
     }
+    var newPhone = UtilsHelper.parsePhone(phoneNumber, "+84");
+    let phoneCheck = phone(newPhone);
+    if (!phoneCheck.isValid) {
+      throw ErrorHelper.requestDataInvalid("phone");
+    }
     await orderService.updateOne(order._id, {
       address: address || order.address,
       note: note || order.note,
       status: status || order.status,
-      phone: phoneNumber || order.phone,
+      phone: newPhone || order.phone,
       noteUpdate: noteUpdate || order.noteUpdate,
     });
     if (status == OrderStatusEnum.CANCEL) {
