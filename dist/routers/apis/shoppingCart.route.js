@@ -390,7 +390,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.deleteOne(shoppingCart._id)];
                     case 3:
                         _b.sent();
-                        _b.label = 4;
+                        return [3 /*break*/, 6];
                     case 4: return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.updateOne(shoppingCart._id, {
                             quantity: quantity,
                             initialCost: quantity * book.price,
@@ -398,8 +398,9 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         })];
                     case 5:
                         _b.sent();
-                        return [4 /*yield*/, book.save()];
-                    case 6:
+                        _b.label = 6;
+                    case 6: return [4 /*yield*/, book.save()];
+                    case 7:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,

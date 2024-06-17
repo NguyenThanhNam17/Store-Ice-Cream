@@ -289,12 +289,13 @@ class ShoppingCartRoute extends BaseRoute {
     }
     if (quantity == 0) {
       await ShoppingCartModel.deleteOne(shoppingCart._id);
+    } else {
+      await shoppingCartService.updateOne(shoppingCart._id, {
+        quantity: quantity,
+        initialCost: quantity * book.price,
+        finalCost: quantity * book.price,
+      });
     }
-    await shoppingCartService.updateOne(shoppingCart._id, {
-      quantity: quantity,
-      initialCost: quantity * book.price,
-      finalCost: quantity * book.price,
-    });
     await book.save();
     return res.status(200).json({
       status: 200,
