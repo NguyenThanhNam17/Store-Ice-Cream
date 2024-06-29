@@ -163,7 +163,6 @@ class ShoppingCartRoute extends BaseRoute {
     let shoppingCart = await ShoppingCartModel.findOne({
       userId: tokenData._id,
       bookId: bookId,
-      bookName: book.name,
       status: ShoppingCartStatusEnum.IN_CART,
     });
     if (shoppingCart) {

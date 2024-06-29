@@ -113,7 +113,7 @@ class OrderRoute extends BaseRoute {
     if (!page) {
       page = 1;
     }
-    if (tokenData.role_ != ROLES.ADMIN) {
+    if (![ROLES.ADMIN, ROLES.STAFF].includes(tokenData.role_)) {
       filter.userId = tokenData._id;
     }
     const orders = await orderService.fetch(
@@ -135,7 +135,7 @@ class OrderRoute extends BaseRoute {
   //getAllOrderForAdmin
   async getAllOrderForAdmin(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (tokenData.role_ != ROLES.ADMIN) {
+    if (![ROLES.ADMIN, ROLES.STAFF].includes(tokenData.role_)) {
       throw ErrorHelper.permissionDeny();
     }
     try {
@@ -303,7 +303,7 @@ class OrderRoute extends BaseRoute {
     if (!tokenData) {
       throw ErrorHelper.unauthorized();
     }
-    if (tokenData.role_ != ROLES.ADMIN) {
+    if (![ROLES.ADMIN, ROLES.STAFF].includes(tokenData.role_)) {
       throw ErrorHelper.permissionDeny();
     }
     let order = await OrderModel.findById(id);
@@ -357,7 +357,7 @@ class OrderRoute extends BaseRoute {
     if (!tokenData) {
       throw ErrorHelper.unauthorized();
     }
-    if (tokenData.role_ != ROLES.ADMIN) {
+    if (![ROLES.ADMIN, ROLES.STAFF].includes(tokenData.role_)) {
       throw ErrorHelper.permissionDeny();
     }
     let order = await OrderModel.findById(id);
@@ -417,7 +417,7 @@ class OrderRoute extends BaseRoute {
   }
 
   async deleteOneOrder(req: Request, res: Response) {
-    if (ROLES.ADMIN != req.tokenInfo.role_) {
+    if ([ROLES.ADMIN, ROLES.STAFF].includes(req.tokenInfo.role_)) {
       throw ErrorHelper.permissionDeny();
     }
     const { id } = req.body;

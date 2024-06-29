@@ -220,7 +220,7 @@ class UserRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const { password, name, phone, gender, address, email } = req.body;
+    const { password, name, phone, gender, address, email, role } = req.body;
 
     let userCheck = await UserModel.findOne({
       $or: [{ email: phone ?? "" }, { phone: phone ?? "" }],
@@ -237,6 +237,7 @@ class UserRoute extends BaseRoute {
       phone: phone,
       address: address,
       key: key,
+      role: role,
     });
     await user.save();
     return res.status(200).json({

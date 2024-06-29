@@ -219,7 +219,6 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findOne({
                                 userId: tokenData._id,
                                 bookId: bookId,
-                                bookName: book.name,
                                 status: model_const_1.ShoppingCartStatusEnum.IN_CART,
                             })];
                     case 2:

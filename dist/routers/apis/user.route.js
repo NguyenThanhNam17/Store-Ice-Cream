@@ -303,14 +303,14 @@ var UserRoute = /** @class */ (function (_super) {
     };
     UserRoute.prototype.createUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, password, name, phone, gender, address, email, userCheck, key, user;
+            var _a, password, name, phone, gender, address, email, role, userCheck, key, user;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, password = _a.password, name = _a.name, phone = _a.phone, gender = _a.gender, address = _a.address, email = _a.email;
+                        _a = req.body, password = _a.password, name = _a.name, phone = _a.phone, gender = _a.gender, address = _a.address, email = _a.email, role = _a.role;
                         return [4 /*yield*/, user_model_1.UserModel.findOne({
                                 $or: [{ email: phone !== null && phone !== void 0 ? phone : "" }, { phone: phone !== null && phone !== void 0 ? phone : "" }],
                             })];
@@ -328,6 +328,7 @@ var UserRoute = /** @class */ (function (_super) {
                             phone: phone,
                             address: address,
                             key: key,
+                            role: role,
                         });
                         return [4 /*yield*/, user.save()];
                     case 2:

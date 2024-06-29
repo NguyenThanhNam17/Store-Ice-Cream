@@ -143,7 +143,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (!page) {
                             page = 1;
                         }
-                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(tokenData.role_)) {
                             filter.userId = tokenData._id;
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
@@ -172,7 +172,7 @@ var OrderRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(tokenData.role_)) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
                         try {
@@ -375,7 +375,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
-                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(tokenData.role_)) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
                         return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
@@ -452,7 +452,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
-                        if (tokenData.role_ != role_const_1.ROLES.ADMIN) {
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(tokenData.role_)) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
                         return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
@@ -552,7 +552,7 @@ var OrderRoute = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
+                        if ([role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(req.tokenInfo.role_)) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
                         id = req.body.id;
