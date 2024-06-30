@@ -10,7 +10,6 @@ import {
 import { WalletModel } from "../../models/wallet/wallet.model";
 import { walletService } from "../../models/wallet/wallet.service";
 const axios = require("axios").default;
-var crypto = require("crypto");
 
 class WebhookRoute extends BaseRoute {
   constructor() {
