@@ -67,6 +67,7 @@ var model_const_1 = require("../../constants/model.const");
 var shoppingCart_model_1 = require("../../models/shoppingCart/shoppingCart.model");
 var utils_helper_1 = require("../../helper/utils.helper");
 var phone_1 = __importDefault(require("phone"));
+var invoice_model_1 = require("../../models/invoice/invoice.model");
 var OrderRoute = /** @class */ (function (_super) {
     __extends(OrderRoute, _super);
     function OrderRoute() {
@@ -283,12 +284,12 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.createOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, bookId, quantity, address, note, phoneNumber, book, newPhone, phoneCheck, initialCost, shoppingCart, order;
+            var tokenData, _a, bookId, quantity, address, note, phoneNumber, paymentMethod, book, newPhone, phoneCheck, initialCost, shoppingCart, order, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        _a = req.body, bookId = _a.bookId, quantity = _a.quantity, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber;
+                        _a = req.body, bookId = _a.bookId, quantity = _a.quantity, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber, paymentMethod = _a.paymentMethod;
                         if (!bookId || !quantity || !address || !phoneNumber) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
@@ -326,6 +327,10 @@ var OrderRoute = /** @class */ (function (_super) {
                             phone: newPhone,
                             isPaid: true,
                             shippingFee: 30000,
+                            status: paymentMethod == model_const_1.paymentMethodEnum.CASH
+                                ? model_const_1.OrderStatusEnum.PENDING
+                                : model_const_1.OrderStatusEnum.UNPAID,
+                            paymentMethod: paymentMethod || model_const_1.paymentMethodEnum.CASH,
                         });
                         return [4 /*yield*/, order.save()];
                     case 3:
@@ -350,14 +355,68 @@ var OrderRoute = /** @class */ (function (_super) {
                             ])];
                     case 4:
                         _b.sent();
+                        if (!(paymentMethod == "BANK_TRANSFER")) return [3 /*break*/, 9];
+                        invoice = new invoice_model_1.InvoiceModel({
+                            userId: tokenData._id,
+                            amount: Number(order.finalCost),
+                            type: "PAYMENT",
+                            orderId: order._id,
+                        });
+                        return [4 /*yield*/, invoice.save()];
+                    case 5:
+                        _b.sent();
+                        MERCHANT_KEY = process.env.MERCHANT_KEY;
+                        MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
+                        END_POINT = process.env.END_POINT_9PAY;
+                        time = Math.round(Date.now() / 1000);
+                        returnUrl = "https://www.youtube.com/";
+                        parameters = void 0;
+                        parameters = {
+                            merchantKey: MERCHANT_KEY,
+                            time: time,
+                            invoice_no: invoice._id,
+                            amount: Number(order.finalCost),
+                            description: "Thanh toán đơn hàng",
+                            return_url: returnUrl,
+                            method: "ATM_CARD",
+                        };
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
+                    case 6:
+                        httpQuery = _b.sent();
+                        message = "POST" +
+                            "\n" +
+                            END_POINT +
+                            "/payments/create" +
+                            "\n" +
+                            time +
+                            "\n" +
+                            httpQuery;
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
+                    case 7:
+                        signature = _b.sent();
+                        baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
+                        httpBuild = {
+                            baseEncode: baseEncode,
+                            signature: signature,
+                        };
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
+                    case 8:
+                        buildHttpQuery = _b.sent();
+                        directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: {
-                                    order: order,
-                                },
+                                data: directUrl,
                             })];
+                    case 9: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            data: {
+                                order: order,
+                            },
+                        })];
                 }
             });
         });

@@ -4,6 +4,7 @@ export enum UserRoleEnum {
   // STAFF = "STAFF",
 }
 export enum OrderStatusEnum {
+  UNPAID = "UNPAID",
   PENDING = "PENDING",
   PROCESSING = "PROCESSING",
   DELIVERING = "DELIVERING",

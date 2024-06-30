@@ -7,7 +7,7 @@ import { ROLES } from "../../constants/role.const";
 import { ErrorHelper } from "../../base/error";
 import { Request, Response } from "../../base/baseRoute";
 import { BookModel } from "../../models/book/book.model";
-import _ from "lodash";
+import _, { method } from "lodash";
 import { bookService } from "../../models/book/book.service";
 import { OrderModel } from "../../models/order/order.model";
 import {
@@ -19,6 +19,7 @@ import { shoppingCartService } from "../../models/shoppingCart/shoppingCart.serv
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
 import { userService } from "../../models/user/user.service";
 import { UtilsHelper } from "../../helper/utils.helper";
+import { InvoiceModel } from "../../models/invoice/invoice.model";
 class ShoppingCartRoute extends BaseRoute {
   constructor() {
     super();
@@ -197,7 +198,8 @@ class ShoppingCartRoute extends BaseRoute {
     if (!tokenData) {
       throw ErrorHelper.unauthorized();
     }
-    const { shoppingCartIds, address, note, phoneNumber } = req.body;
+    const { shoppingCartIds, address, note, phoneNumber, paymentMethod } =
+      req.body;
     if (
       !shoppingCartIds ||
       shoppingCartIds.length < 1 ||
@@ -225,12 +227,15 @@ class ShoppingCartRoute extends BaseRoute {
       phone: newPhone,
       address: address,
       note: note,
-      status: OrderStatusEnum.PENDING,
+      status:
+        paymentMethod == "CASH"
+          ? OrderStatusEnum.PENDING
+          : OrderStatusEnum.UNPAID,
       isPaid: true,
-      shippingFee: 30000,
+      shippingFee: 20000,
       initialCost: initialCost,
-      finalCost: initialCost + 30000,
-      paymentMethod: paymentMethodEnum.CASH,
+      finalCost: initialCost + 20000,
+      paymentMethod: paymentMethod || paymentMethodEnum.CASH,
     });
     await order.save();
     let bookCategoryIds: any = [];
@@ -262,6 +267,60 @@ class ShoppingCartRoute extends BaseRoute {
         }
       ),
     ]);
+    if (paymentMethod == "BANK_TRANSFER") {
+      const invoice = new InvoiceModel({
+        userId: tokenData._id,
+        amount: Number(order.finalCost),
+        type: "PAYMENT",
+        orderId: order._id,
+      });
+      await invoice.save();
+      const MERCHANT_KEY = process.env.MERCHANT_KEY;
+      const MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
+      const END_POINT = process.env.END_POINT_9PAY;
+      const time = Math.round(Date.now() / 1000);
+      const returnUrl = "https://www.youtube.com/";
+      let parameters;
+      parameters = {
+        merchantKey: MERCHANT_KEY,
+        time: time,
+        invoice_no: invoice._id,
+        amount: Number(order.finalCost),
+        description: "Thanh toán đơn hàng",
+        return_url: returnUrl,
+        method: "ATM_CARD",
+      };
+
+      const httpQuery = await UtilsHelper.buildHttpQuery(parameters);
+      const message =
+        "POST" +
+        "\n" +
+        END_POINT +
+        "/payments/create" +
+        "\n" +
+        time +
+        "\n" +
+        httpQuery;
+      const signature = await UtilsHelper.buildSignature(
+        message,
+        MERCHANT_SECRET_KEY
+      );
+      const baseEncode = Buffer.from(JSON.stringify(parameters)).toString(
+        "base64"
+      );
+      const httpBuild = {
+        baseEncode: baseEncode,
+        signature: signature,
+      };
+      const buildHttpQuery = await UtilsHelper.buildHttpQuery(httpBuild);
+      const directUrl = END_POINT + "/portal?" + buildHttpQuery;
+      return res.status(200).json({
+        status: 200,
+        code: "200",
+        message: "success",
+        data: directUrl,
+      });
+    }
     return res.status(200).json({
       status: 200,
       code: "200",
@@ -340,4 +399,5 @@ class ShoppingCartRoute extends BaseRoute {
     });
   }
 }
+
 export default new ShoppingCartRoute().router;

@@ -9,6 +9,7 @@ var UserRoleEnum;
 })(UserRoleEnum || (exports.UserRoleEnum = UserRoleEnum = {}));
 var OrderStatusEnum;
 (function (OrderStatusEnum) {
+    OrderStatusEnum["UNPAID"] = "UNPAID";
     OrderStatusEnum["PENDING"] = "PENDING";
     OrderStatusEnum["PROCESSING"] = "PROCESSING";
     OrderStatusEnum["DELIVERING"] = "DELIVERING";

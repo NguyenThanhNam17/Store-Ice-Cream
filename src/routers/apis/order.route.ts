@@ -14,11 +14,13 @@ import { OrderModel } from "../../models/order/order.model";
 import {
   OrderStatusEnum,
   ShoppingCartStatusEnum,
+  paymentMethodEnum,
 } from "../../constants/model.const";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
 import { userService } from "../../models/user/user.service";
 import { UtilsHelper } from "../../helper/utils.helper";
 import phone from "phone";
+import { InvoiceModel } from "../../models/invoice/invoice.model";
 class OrderRoute extends BaseRoute {
   constructor() {
     super();
@@ -227,7 +229,8 @@ class OrderRoute extends BaseRoute {
 
   async createOrder(req: Request, res: Response) {
     const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    const { bookId, quantity, address, note, phoneNumber } = req.body;
+    const { bookId, quantity, address, note, phoneNumber, paymentMethod } =
+      req.body;
     if (!bookId || !quantity || !address || !phoneNumber) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
@@ -261,6 +264,11 @@ class OrderRoute extends BaseRoute {
       phone: newPhone,
       isPaid: true,
       shippingFee: 30000,
+      status:
+        paymentMethod == paymentMethodEnum.CASH
+          ? OrderStatusEnum.PENDING
+          : OrderStatusEnum.UNPAID,
+      paymentMethod: paymentMethod || paymentMethodEnum.CASH,
     });
     await order.save();
     await Promise.all([
@@ -287,6 +295,60 @@ class OrderRoute extends BaseRoute {
         }
       ),
     ]);
+    if (paymentMethod == "BANK_TRANSFER") {
+      const invoice = new InvoiceModel({
+        userId: tokenData._id,
+        amount: Number(order.finalCost),
+        type: "PAYMENT",
+        orderId: order._id,
+      });
+      await invoice.save();
+      const MERCHANT_KEY = process.env.MERCHANT_KEY;
+      const MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
+      const END_POINT = process.env.END_POINT_9PAY;
+      const time = Math.round(Date.now() / 1000);
+      const returnUrl = "https://www.youtube.com/";
+      let parameters;
+      parameters = {
+        merchantKey: MERCHANT_KEY,
+        time: time,
+        invoice_no: invoice._id,
+        amount: Number(order.finalCost),
+        description: "Thanh toán đơn hàng",
+        return_url: returnUrl,
+        method: "ATM_CARD",
+      };
+
+      const httpQuery = await UtilsHelper.buildHttpQuery(parameters);
+      const message =
+        "POST" +
+        "\n" +
+        END_POINT +
+        "/payments/create" +
+        "\n" +
+        time +
+        "\n" +
+        httpQuery;
+      const signature = await UtilsHelper.buildSignature(
+        message,
+        MERCHANT_SECRET_KEY
+      );
+      const baseEncode = Buffer.from(JSON.stringify(parameters)).toString(
+        "base64"
+      );
+      const httpBuild = {
+        baseEncode: baseEncode,
+        signature: signature,
+      };
+      const buildHttpQuery = await UtilsHelper.buildHttpQuery(httpBuild);
+      const directUrl = END_POINT + "/portal?" + buildHttpQuery;
+      return res.status(200).json({
+        status: 200,
+        code: "200",
+        message: "success",
+        data: directUrl,
+      });
+    }
     return res.status(200).json({
       status: 200,
       code: "200",

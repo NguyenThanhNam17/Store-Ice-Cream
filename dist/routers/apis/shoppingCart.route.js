@@ -63,6 +63,7 @@ var model_const_1 = require("../../constants/model.const");
 var shoppingCart_service_1 = require("../../models/shoppingCart/shoppingCart.service");
 var shoppingCart_model_1 = require("../../models/shoppingCart/shoppingCart.model");
 var utils_helper_1 = require("../../helper/utils.helper");
+var invoice_model_1 = require("../../models/invoice/invoice.model");
 var ShoppingCartRoute = /** @class */ (function (_super) {
     __extends(ShoppingCartRoute, _super);
     function ShoppingCartRoute() {
@@ -262,7 +263,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.paymentShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, shoppingCartIds, address, note, phoneNumber, newPhone, shoppingCarts, initialCost, order, bookCategoryIds;
+            var tokenData, _a, shoppingCartIds, address, note, phoneNumber, paymentMethod, newPhone, shoppingCarts, initialCost, order, bookCategoryIds, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -271,7 +272,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         if (!tokenData) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
-                        _a = req.body, shoppingCartIds = _a.shoppingCartIds, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber;
+                        _a = req.body, shoppingCartIds = _a.shoppingCartIds, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber, paymentMethod = _a.paymentMethod;
                         if (!shoppingCartIds ||
                             shoppingCartIds.length < 1 ||
                             !phoneNumber ||
@@ -307,12 +308,14 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             phone: newPhone,
                             address: address,
                             note: note,
-                            status: model_const_1.OrderStatusEnum.PENDING,
+                            status: paymentMethod == "CASH"
+                                ? model_const_1.OrderStatusEnum.PENDING
+                                : model_const_1.OrderStatusEnum.UNPAID,
                             isPaid: true,
-                            shippingFee: 30000,
+                            shippingFee: 20000,
                             initialCost: initialCost,
-                            finalCost: initialCost + 30000,
-                            paymentMethod: model_const_1.paymentMethodEnum.CASH,
+                            finalCost: initialCost + 20000,
+                            paymentMethod: paymentMethod || model_const_1.paymentMethodEnum.CASH,
                         });
                         return [4 /*yield*/, order.save()];
                     case 2:
@@ -350,14 +353,68 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             ])];
                     case 3:
                         _b.sent();
+                        if (!(paymentMethod == "BANK_TRANSFER")) return [3 /*break*/, 8];
+                        invoice = new invoice_model_1.InvoiceModel({
+                            userId: tokenData._id,
+                            amount: Number(order.finalCost),
+                            type: "PAYMENT",
+                            orderId: order._id,
+                        });
+                        return [4 /*yield*/, invoice.save()];
+                    case 4:
+                        _b.sent();
+                        MERCHANT_KEY = process.env.MERCHANT_KEY;
+                        MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
+                        END_POINT = process.env.END_POINT_9PAY;
+                        time = Math.round(Date.now() / 1000);
+                        returnUrl = "https://www.youtube.com/";
+                        parameters = void 0;
+                        parameters = {
+                            merchantKey: MERCHANT_KEY,
+                            time: time,
+                            invoice_no: invoice._id,
+                            amount: Number(order.finalCost),
+                            description: "Thanh toán đơn hàng",
+                            return_url: returnUrl,
+                            method: "ATM_CARD",
+                        };
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
+                    case 5:
+                        httpQuery = _b.sent();
+                        message = "POST" +
+                            "\n" +
+                            END_POINT +
+                            "/payments/create" +
+                            "\n" +
+                            time +
+                            "\n" +
+                            httpQuery;
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
+                    case 6:
+                        signature = _b.sent();
+                        baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
+                        httpBuild = {
+                            baseEncode: baseEncode,
+                            signature: signature,
+                        };
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
+                    case 7:
+                        buildHttpQuery = _b.sent();
+                        directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: {
-                                    order: order,
-                                },
+                                data: directUrl,
                             })];
+                    case 8: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            data: {
+                                order: order,
+                            },
+                        })];
                 }
             });
         });
