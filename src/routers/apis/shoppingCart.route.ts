@@ -203,6 +203,7 @@ class ShoppingCartRoute extends BaseRoute {
     }
     const { shoppingCartIds, address, note, phoneNumber, paymentMethod } =
       req.body;
+    console.log(shoppingCartIds.length);
     if (
       !shoppingCartIds ||
       shoppingCartIds.length < 1 ||

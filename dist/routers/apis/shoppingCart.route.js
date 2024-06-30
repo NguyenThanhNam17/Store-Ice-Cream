@@ -275,6 +275,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.unauthorized();
                         }
                         _a = req.body, shoppingCartIds = _a.shoppingCartIds, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber, paymentMethod = _a.paymentMethod;
+                        console.log(shoppingCartIds.length);
                         if (!shoppingCartIds ||
                             shoppingCartIds.length < 1 ||
                             !phoneNumber ||
