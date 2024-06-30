@@ -100,7 +100,7 @@ var WebhookRoute = /** @class */ (function (_super) {
                     case 0:
                         data = req.body;
                         console.log(data);
-                        checksum_key = process.env.checkSumKey;
+                        checksum_key = process.env.CHECKSUM_KEY;
                         sha256Data = CryptoJS.SHA256(data.result.toString() + checksum_key);
                         console.log(sha256Data.toString().toUpperCase());
                         buff = Buffer.from(data.result.toString(), "base64");

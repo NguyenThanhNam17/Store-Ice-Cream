@@ -24,7 +24,7 @@ class WebhookRoute extends BaseRoute {
   async ninePay(req: Request, res: Response) {
     const data = req.body;
     console.log(data);
-    const checksum_key = process.env.checkSumKey;
+    const checksum_key = process.env.CHECKSUM_KEY;
     const sha256Data = CryptoJS.SHA256(data.result.toString() + checksum_key);
     console.log(sha256Data.toString().toUpperCase());
     let buff = Buffer.from(data.result.toString(), "base64");
