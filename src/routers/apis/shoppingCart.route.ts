@@ -12,6 +12,7 @@ import { bookService } from "../../models/book/book.service";
 import { OrderModel } from "../../models/order/order.model";
 import {
   OrderStatusEnum,
+  PaymentStatusEnum,
   ShoppingCartStatusEnum,
   paymentMethodEnum,
 } from "../../constants/model.const";
@@ -236,6 +237,7 @@ class ShoppingCartRoute extends BaseRoute {
       initialCost: initialCost,
       finalCost: initialCost + 20000,
       paymentMethod: paymentMethod || paymentMethodEnum.CASH,
+      paymentStatus: PaymentStatusEnum.PENDING,
     });
     await order.save();
     let bookCategoryIds: any = [];

@@ -23,3 +23,8 @@ export enum ShoppingCartStatusEnum {
   IN_CART = "IN_CART",
   SUCCESS = "SUCCESS",
 }
+export enum PaymentStatusEnum {
+  PENDING = "PENDING",
+  SUCCESS = "SUCCESS",
+  FAIL = "FAIL",
+}

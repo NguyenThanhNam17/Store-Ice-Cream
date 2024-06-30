@@ -121,19 +121,23 @@ var WebhookRoute = /** @class */ (function (_super) {
                                 throw error_1.ErrorHelper.recoredNotFound("order!");
                             }
                         }
-                        if (![5, 16].includes(parseText.status)) return [3 /*break*/, 5];
-                        order.isPaid = true;
-                        order.status = model_const_1.OrderStatusEnum.PENDING;
+                        if ([5, 16].includes(parseText.status)) {
+                            order.isPaid = true;
+                            order.status = model_const_1.OrderStatusEnum.PENDING;
+                            order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
+                        }
+                        else if ([6, 8, 9].includes(parseText.status)) {
+                            order.paymentStatus = model_const_1.PaymentStatusEnum.FAIL;
+                        }
                         return [4 /*yield*/, order.save()];
                     case 4:
                         _a.sent();
-                        _a.label = 5;
-                    case 5: return [2 /*return*/, res.status(200).json({
-                            status: 200,
-                            code: "200",
-                            message: "success",
-                            parseText: parseText,
-                        })];
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                parseText: parseText,
+                            })];
                 }
             });
         });

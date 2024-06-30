@@ -316,6 +316,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             initialCost: initialCost,
                             finalCost: initialCost + 20000,
                             paymentMethod: paymentMethod || model_const_1.paymentMethodEnum.CASH,
+                            paymentStatus: model_const_1.PaymentStatusEnum.PENDING,
                         });
                         return [4 /*yield*/, order.save()];
                     case 2:

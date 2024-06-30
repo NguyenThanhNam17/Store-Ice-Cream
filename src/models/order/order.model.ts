@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { BaseDocument } from "../../base/baseModel";
 import {
   OrderStatusEnum,
+  PaymentStatusEnum,
   paymentMethodEnum,
 } from "../../constants/model.const";
 
@@ -21,6 +22,7 @@ export type IOrder = BaseDocument & {
   isPaid?: boolean;
   paymentMethod?: string;
   noteUpdate?: string;
+  paymentStatus?: String;
 };
 
 const orderSchema = new mongoose.Schema(
@@ -47,6 +49,11 @@ const orderSchema = new mongoose.Schema(
       default: paymentMethodEnum.CASH,
     },
     noteUpdate: { type: String },
+    paymentStatus: {
+      type: String,
+      enum: Object.values(PaymentStatusEnum),
+      default: PaymentStatusEnum.SUCCESS,
+    },
   },
   { timestamps: true }
   //virtual populate

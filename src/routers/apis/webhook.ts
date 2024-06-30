@@ -3,7 +3,10 @@ import { BaseRoute, Request, Response } from "../../base/baseRoute";
 import { ErrorHelper } from "../../base/error";
 import * as CryptoJS from "crypto-js";
 import { OrderModel } from "../../models/order/order.model";
-import { OrderStatusEnum } from "../../constants/model.const";
+import {
+  OrderStatusEnum,
+  PaymentStatusEnum,
+} from "../../constants/model.const";
 const axios = require("axios").default;
 var crypto = require("crypto");
 
@@ -39,8 +42,11 @@ class WebhookRoute extends BaseRoute {
     if ([5, 16].includes(parseText.status)) {
       order.isPaid = true;
       order.status = OrderStatusEnum.PENDING;
-      await order.save();
+      order.paymentStatus = PaymentStatusEnum.SUCCESS;
+    } else if ([6, 8, 9].includes(parseText.status)) {
+      order.paymentStatus = PaymentStatusEnum.FAIL;
     }
+    await order.save();
     return res.status(200).json({
       status: 200,
       code: "200",

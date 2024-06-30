@@ -49,6 +49,11 @@ var orderSchema = new mongoose_1.default.Schema({
         default: model_const_1.paymentMethodEnum.CASH,
     },
     noteUpdate: { type: String },
+    paymentStatus: {
+        type: String,
+        enum: Object.values(model_const_1.PaymentStatusEnum),
+        default: model_const_1.PaymentStatusEnum.SUCCESS,
+    },
 }, { timestamps: true }
 //virtual populate
 );
