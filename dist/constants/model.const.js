@@ -20,7 +20,7 @@ var OrderStatusEnum;
 var paymentMethodEnum;
 (function (paymentMethodEnum) {
     paymentMethodEnum["CASH"] = "CASH";
-    paymentMethodEnum["BANK_TRANSFER"] = "BANK_TRANSFER";
+    paymentMethodEnum["ATM"] = "ATM";
     paymentMethodEnum["WALLET"] = "WALLET";
 })(paymentMethodEnum || (exports.paymentMethodEnum = paymentMethodEnum = {}));
 var ShoppingCartStatusEnum;

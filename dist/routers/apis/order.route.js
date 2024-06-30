@@ -371,7 +371,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             ])];
                     case 7:
                         _b.sent();
-                        if (!(paymentMethod == "BANK_TRANSFER")) return [3 /*break*/, 12];
+                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 12];
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: tokenData._id,
                             amount: Number(order.finalCost),

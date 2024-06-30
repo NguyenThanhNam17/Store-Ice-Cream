@@ -336,7 +336,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             initialCost: initialCost,
                             finalCost: initialCost + 20000,
                             paymentMethod: paymentMethod || model_const_1.paymentMethodEnum.CASH,
-                            paymentStatus: paymentMethod == model_const_1.paymentMethodEnum.BANK_TRANSFER
+                            paymentStatus: paymentMethod == model_const_1.paymentMethodEnum.ATM
                                 ? model_const_1.PaymentStatusEnum.PENDING
                                 : model_const_1.PaymentStatusEnum.SUCCESS,
                         });
@@ -376,7 +376,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             ])];
                     case 6:
                         _b.sent();
-                        if (!(paymentMethod == "BANK_TRANSFER")) return [3 /*break*/, 11];
+                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 11];
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: tokenData._id,
                             amount: Number(order.finalCost),

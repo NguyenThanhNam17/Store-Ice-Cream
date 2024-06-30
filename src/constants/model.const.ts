@@ -15,7 +15,7 @@ export enum OrderStatusEnum {
 
 export enum paymentMethodEnum {
   CASH = "CASH",
-  BANK_TRANSFER = "BANK_TRANSFER",
+  ATM = "ATM",
   WALLET = "WALLET",
 }
 

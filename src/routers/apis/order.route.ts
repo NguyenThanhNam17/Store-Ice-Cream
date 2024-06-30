@@ -308,7 +308,7 @@ class OrderRoute extends BaseRoute {
         }
       ),
     ]);
-    if (paymentMethod == "BANK_TRANSFER") {
+    if (paymentMethod == "ATM") {
       const invoice = new InvoiceModel({
         userId: tokenData._id,
         amount: Number(order.finalCost),
