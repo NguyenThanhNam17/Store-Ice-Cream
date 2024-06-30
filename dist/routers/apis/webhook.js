@@ -91,6 +91,7 @@ var WebhookRoute = /** @class */ (function (_super) {
     }
     WebhookRoute.prototype.customRouting = function () {
         this.router.post("/9payment", this.route(this.ninePay));
+        this.router.post("/sendData9Pay", this.route(this.sendData9Pay));
     };
     WebhookRoute.prototype.ninePay = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
@@ -156,6 +157,36 @@ var WebhookRoute = /** @class */ (function (_super) {
                             message: "success",
                             parseText: parseText,
                         })];
+                }
+            });
+        });
+    };
+    WebhookRoute.prototype.sendData9Pay = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data, options;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        data = req.body;
+                        options = {
+                            method: "POST",
+                            baseURL: "https://api-book-store-voz2iwzoba-as.a.run.app",
+                            url: "/api/webhook/9payment",
+                            // headers: headers,
+                            data: {
+                                result: data.result,
+                                checksum: data.checksum,
+                            },
+                        };
+                        return [4 /*yield*/, axios(options)
+                                .then(function (chunk) {
+                                return "success";
+                            })
+                                .catch(function (error) {
+                                console.log("Error sending message:", error.response.data);
+                                return error.response.data;
+                            })];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });

@@ -19,6 +19,7 @@ class WebhookRoute extends BaseRoute {
 
   customRouting() {
     this.router.post("/9payment", this.route(this.ninePay));
+    this.router.post("/sendData9Pay", this.route(this.sendData9Pay));
   }
 
   async ninePay(req: Request, res: Response) {
@@ -67,6 +68,27 @@ class WebhookRoute extends BaseRoute {
       message: "success",
       parseText,
     });
+  }
+  async sendData9Pay(req: Request, res: Response) {
+    const data = req.body;
+    const options = {
+      method: "POST",
+      baseURL: "https://api-book-store-voz2iwzoba-as.a.run.app",
+      url: "/api/webhook/9payment",
+      // headers: headers,
+      data: {
+        result: data.result,
+        checksum: data.checksum,
+      },
+    };
+    return await axios(options)
+      .then(function (chunk: any) {
+        return "success";
+      })
+      .catch(function (error: any) {
+        console.log("Error sending message:", error.response.data);
+        return error.response.data;
+      });
   }
 }
 
