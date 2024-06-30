@@ -66,6 +66,8 @@ var user_service_1 = require("../../models/user/user.service");
 var book_model_1 = require("../../models/book/book.model");
 var book_service_1 = require("../../models/book/book.service");
 var utils_helper_1 = require("../../helper/utils.helper");
+var wallet_model_1 = require("../../models/wallet/wallet.model");
+var invoice_model_1 = require("../../models/invoice/invoice.model");
 var UserRoute = /** @class */ (function (_super) {
     __extends(UserRoute, _super);
     function UserRoute() {
@@ -518,6 +520,80 @@ var UserRoute = /** @class */ (function (_super) {
                                 data: {
                                     user: user,
                                 },
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.depositToWallet = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var balance, userCheck, wallet, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        balance = req.body.balance;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
+                    case 1:
+                        userCheck = _a.sent();
+                        if (!userCheck) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: req.tokenInfo._id })];
+                    case 2:
+                        wallet = _a.sent();
+                        if (!wallet) {
+                            throw error_1.ErrorHelper.recoredNotFound("wallet!");
+                        }
+                        invoice = new invoice_model_1.InvoiceModel({
+                            userId: req.tokenInfo._id,
+                            amount: balance,
+                            type: "DEPOSIT",
+                        });
+                        return [4 /*yield*/, invoice.save()];
+                    case 3:
+                        _a.sent();
+                        MERCHANT_KEY = process.env.MERCHANT_KEY;
+                        MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
+                        END_POINT = process.env.END_POINT_9PAY;
+                        time = Math.round(Date.now() / 1000);
+                        returnUrl = "https://www.youtube.com/";
+                        parameters = {
+                            merchantKey: MERCHANT_KEY,
+                            time: time,
+                            invoice_no: invoice._id,
+                            amount: balance,
+                            description: "Nạp tiền vào ví",
+                            return_url: returnUrl,
+                            method: "ATM_CARD",
+                        };
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
+                    case 4:
+                        httpQuery = _a.sent();
+                        message = "POST" +
+                            "\n" +
+                            END_POINT +
+                            "/payments/create" +
+                            "\n" +
+                            time +
+                            "\n" +
+                            httpQuery;
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
+                    case 5:
+                        signature = _a.sent();
+                        baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
+                        httpBuild = {
+                            baseEncode: baseEncode,
+                            signature: signature,
+                        };
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
+                    case 6:
+                        buildHttpQuery = _a.sent();
+                        directUrl = END_POINT + "/portal?" + buildHttpQuery;
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: directUrl,
                             })];
                 }
             });

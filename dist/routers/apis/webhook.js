@@ -80,6 +80,8 @@ var error_1 = require("../../base/error");
 var CryptoJS = __importStar(require("crypto-js"));
 var order_model_1 = require("../../models/order/order.model");
 var model_const_1 = require("../../constants/model.const");
+var wallet_model_1 = require("../../models/wallet/wallet.model");
+var wallet_service_1 = require("../../models/wallet/wallet.service");
 var axios = require("axios").default;
 var crypto = require("crypto");
 var WebhookRoute = /** @class */ (function (_super) {
@@ -92,7 +94,7 @@ var WebhookRoute = /** @class */ (function (_super) {
     };
     WebhookRoute.prototype.ninePay = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var data, checksum_key, sha256Data, buff, text, parseText, invoice, order;
+            var data, checksum_key, sha256Data, buff, text, parseText, invoice, order, wallet;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -121,6 +123,7 @@ var WebhookRoute = /** @class */ (function (_super) {
                                 throw error_1.ErrorHelper.recoredNotFound("order!");
                             }
                         }
+                        if (!(invoice.type == "PAYMENT")) return [3 /*break*/, 5];
                         if ([5, 16].includes(parseText.status)) {
                             order.isPaid = true;
                             order.status = model_const_1.OrderStatusEnum.PENDING;
@@ -132,12 +135,27 @@ var WebhookRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, order.save()];
                     case 4:
                         _a.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                parseText: parseText,
+                        return [3 /*break*/, 8];
+                    case 5:
+                        if (!(invoice.type == "DEPOSIT")) return [3 /*break*/, 8];
+                        if (![5, 16].includes(parseText.status)) return [3 /*break*/, 8];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: invoice.userId })];
+                    case 6:
+                        wallet = _a.sent();
+                        return [4 /*yield*/, wallet_service_1.walletService.updateOne(wallet._id, {
+                                $inc: {
+                                    balance: invoice.amount,
+                                },
                             })];
+                    case 7:
+                        _a.sent();
+                        _a.label = 8;
+                    case 8: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            parseText: parseText,
+                        })];
                 }
             });
         });

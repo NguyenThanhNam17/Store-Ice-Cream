@@ -22,6 +22,13 @@ var userSchema = new mongoose_1.default.Schema({
 userSchema.index({ username: "text", name: "text" }, { weights: { username: 4, name: 2 } });
 userSchema.index({ phone: 1 }, { unique: true });
 userSchema.index({ email: 1 }, { unique: true });
+userSchema.set("toObject", { virtuals: true });
+userSchema.set("toJSON", { virtuals: true });
+userSchema.virtual("wallet", {
+    ref: "Wallet",
+    localField: "walletId",
+    foreignField: "_id",
+});
 var UserModel = mongoose_1.default.model("User", userSchema);
 exports.UserModel = UserModel;
 //# sourceMappingURL=user.model.js.map

@@ -7,6 +7,7 @@ export type IInvoice = BaseDocument & {
   amount?: number;
   type?: string;
   orderId?: string;
+  status?: string;
 };
 
 const invoiceSchema = new mongoose.Schema(
@@ -15,6 +16,7 @@ const invoiceSchema = new mongoose.Schema(
     amount: { type: Number },
     type: { type: String },
     orderId: { type: Schema.Types.ObjectId, ref: "Order" },
+    stauts: { type: String },
   },
   { timestamps: true }
 );

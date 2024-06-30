@@ -23,15 +23,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InvoiceModel = void 0;
+exports.WalletModel = void 0;
 var mongoose_1 = __importStar(require("mongoose"));
-var invoiceSchema = new mongoose_1.default.Schema({
+var walletSchema = new mongoose_1.default.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
-    amount: { type: Number },
-    type: { type: String },
-    orderId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Order" },
-    stauts: { type: String },
+    balance: { type: Number },
 }, { timestamps: true });
-var InvoiceModel = mongoose_1.default.model("Invoice", invoiceSchema);
-exports.InvoiceModel = InvoiceModel;
-//# sourceMappingURL=invoice.model.js.map
+walletSchema.set("toObject", { virtuals: true });
+walletSchema.set("toJSON", { virtuals: true });
+walletSchema.virtual("user", {
+    ref: "User",
+    localField: "userId",
+    foreignField: "_id",
+});
+var WalletModel = mongoose_1.default.model("Wallet", walletSchema);
+exports.WalletModel = WalletModel;
+//# sourceMappingURL=wallet.model.js.map

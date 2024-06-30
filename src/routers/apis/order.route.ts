@@ -21,6 +21,9 @@ import { userService } from "../../models/user/user.service";
 import { UtilsHelper } from "../../helper/utils.helper";
 import phone from "phone";
 import { InvoiceModel } from "../../models/invoice/invoice.model";
+import { OrderHelper } from "../../models/order/order.helper";
+import { WalletModel } from "../../models/wallet/wallet.model";
+import { walletService } from "../../models/wallet/wallet.service";
 class OrderRoute extends BaseRoute {
   constructor() {
     super();
@@ -244,6 +247,14 @@ class OrderRoute extends BaseRoute {
       throw ErrorHelper.requestDataInvalid("phone");
     }
     let initialCost = book.price * quantity;
+    if (paymentMethod == paymentMethodEnum.WALLET) {
+      let wallet = await WalletModel.findOne({ userId: tokenData._id });
+
+      if (wallet.balance < initialCost + 20000) {
+        throw ErrorHelper.forbidden("Wallet balance is not enough!");
+      }
+    }
+
     let shoppingCart = new ShoppingCartModel({
       bookId: book._id,
       bookName: book.name,
@@ -252,18 +263,20 @@ class OrderRoute extends BaseRoute {
       status: ShoppingCartStatusEnum.SUCCESS,
     });
     await shoppingCart.save();
+    let code = await OrderHelper.generateOrderCode();
     const order = new OrderModel({
+      code: code,
       shoppingCartIds: [shoppingCart._id],
       quantity: quantity,
       address: address,
       note: note || "",
       initialCost: initialCost,
       discountAmount: 0,
-      finalCost: initialCost + 30000,
+      finalCost: initialCost + 20000,
       userId: tokenData._id,
       phone: newPhone,
       isPaid: true,
-      shippingFee: 30000,
+      shippingFee: 20000,
       status:
         paymentMethod == paymentMethodEnum.CASH
           ? OrderStatusEnum.PENDING
@@ -403,6 +416,12 @@ class OrderRoute extends BaseRoute {
         });
       });
     }
+    let wallet = await WalletModel.findOne({ userId: req.tokenInfo._id });
+    await walletService.updateOne(wallet._id, {
+      $inc: {
+        balance: -order.finalCost,
+      },
+    });
     return res.status(200).json({
       status: 200,
       code: "200",
@@ -468,6 +487,12 @@ class OrderRoute extends BaseRoute {
       });
     });
     await order.save();
+    let wallet = await WalletModel.findOne({ userId: req.tokenInfo._id });
+    await walletService.updateOne(wallet._id, {
+      $inc: {
+        balance: -order.finalCost,
+      },
+    });
     return res.status(200).json({
       status: 200,
       code: "200",

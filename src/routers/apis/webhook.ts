@@ -7,6 +7,8 @@ import {
   OrderStatusEnum,
   PaymentStatusEnum,
 } from "../../constants/model.const";
+import { WalletModel } from "../../models/wallet/wallet.model";
+import { walletService } from "../../models/wallet/wallet.service";
 const axios = require("axios").default;
 var crypto = require("crypto");
 
@@ -39,14 +41,26 @@ class WebhookRoute extends BaseRoute {
         throw ErrorHelper.recoredNotFound("order!");
       }
     }
-    if ([5, 16].includes(parseText.status)) {
-      order.isPaid = true;
-      order.status = OrderStatusEnum.PENDING;
-      order.paymentStatus = PaymentStatusEnum.SUCCESS;
-    } else if ([6, 8, 9].includes(parseText.status)) {
-      order.paymentStatus = PaymentStatusEnum.FAIL;
+    if (invoice.type == "PAYMENT") {
+      if ([5, 16].includes(parseText.status)) {
+        order.isPaid = true;
+        order.status = OrderStatusEnum.PENDING;
+        order.paymentStatus = PaymentStatusEnum.SUCCESS;
+      } else if ([6, 8, 9].includes(parseText.status)) {
+        order.paymentStatus = PaymentStatusEnum.FAIL;
+      }
+      await order.save();
+    } else if (invoice.type == "DEPOSIT") {
+      if ([5, 16].includes(parseText.status)) {
+        let wallet = await WalletModel.findOne({ userId: invoice.userId });
+        await walletService.updateOne(wallet._id, {
+          $inc: {
+            balance: invoice.amount,
+          },
+        });
+      }
     }
-    await order.save();
+
     return res.status(200).json({
       status: 200,
       code: "200",

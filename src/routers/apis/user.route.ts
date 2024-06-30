@@ -12,6 +12,9 @@ import { userService } from "../../models/user/user.service";
 import { BookModel } from "../../models/book/book.model";
 import { bookService } from "../../models/book/book.service";
 import { UtilsHelper } from "../../helper/utils.helper";
+import { WalletModel } from "../../models/wallet/wallet.model";
+import { walletService } from "../../models/wallet/wallet.service";
+import { InvoiceModel } from "../../models/invoice/invoice.model";
 class UserRoute extends BaseRoute {
   constructor() {
     super();
@@ -368,6 +371,69 @@ class UserRoute extends BaseRoute {
       data: {
         user,
       },
+    });
+  }
+  async depositToWallet(req: Request, res: Response) {
+    const { balance } = req.body;
+
+    let userCheck = await UserModel.findById(req.tokenInfo._id);
+    if (!userCheck) {
+      throw ErrorHelper.userNotExist();
+    }
+    let wallet = await WalletModel.findOne({ userId: req.tokenInfo._id });
+    if (!wallet) {
+      throw ErrorHelper.recoredNotFound("wallet!");
+    }
+    const invoice = new InvoiceModel({
+      userId: req.tokenInfo._id,
+      amount: balance,
+      type: "DEPOSIT",
+    });
+    await invoice.save();
+    const MERCHANT_KEY = process.env.MERCHANT_KEY;
+    const MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
+    const END_POINT = process.env.END_POINT_9PAY;
+    const time = Math.round(Date.now() / 1000);
+    const returnUrl = "https://www.youtube.com/";
+    let parameters;
+    parameters = {
+      merchantKey: MERCHANT_KEY,
+      time: time,
+      invoice_no: invoice._id,
+      amount: balance,
+      description: "Nạp tiền vào ví",
+      return_url: returnUrl,
+      method: "ATM_CARD",
+    };
+
+    const httpQuery = await UtilsHelper.buildHttpQuery(parameters);
+    const message =
+      "POST" +
+      "\n" +
+      END_POINT +
+      "/payments/create" +
+      "\n" +
+      time +
+      "\n" +
+      httpQuery;
+    const signature = await UtilsHelper.buildSignature(
+      message,
+      MERCHANT_SECRET_KEY
+    );
+    const baseEncode = Buffer.from(JSON.stringify(parameters)).toString(
+      "base64"
+    );
+    const httpBuild = {
+      baseEncode: baseEncode,
+      signature: signature,
+    };
+    const buildHttpQuery = await UtilsHelper.buildHttpQuery(httpBuild);
+    const directUrl = END_POINT + "/portal?" + buildHttpQuery;
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: directUrl,
     });
   }
 }

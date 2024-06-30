@@ -8,6 +8,7 @@ import {
 
 // Định nghĩa type cho user
 export type IOrder = BaseDocument & {
+  code?: string;
   userId?: string;
   shoppingCartIds?: string[];
   quantity?: number;
@@ -27,6 +28,7 @@ export type IOrder = BaseDocument & {
 
 const orderSchema = new mongoose.Schema(
   {
+    code: { type: String },
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     shoppingCartIds: [{ type: Schema.Types.ObjectId, ref: "ShoppingCart" }],
     quantity: { type: Number },

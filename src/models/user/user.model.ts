@@ -40,5 +40,13 @@ userSchema.index(
 
 userSchema.index({ phone: 1 }, { unique: true });
 userSchema.index({ email: 1 }, { unique: true });
+userSchema.set("toObject", { virtuals: true });
+
+userSchema.set("toJSON", { virtuals: true });
+userSchema.virtual("wallet", {
+  ref: "Wallet",
+  localField: "walletId",
+  foreignField: "_id",
+});
 const UserModel = mongoose.model<IUser>("User", userSchema);
 export { UserModel };

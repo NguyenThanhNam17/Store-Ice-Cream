@@ -21,6 +21,8 @@ import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model"
 import { userService } from "../../models/user/user.service";
 import { UtilsHelper } from "../../helper/utils.helper";
 import { InvoiceModel } from "../../models/invoice/invoice.model";
+import { OrderHelper } from "../../models/order/order.helper";
+import { WalletModel } from "../../models/wallet/wallet.model";
 class ShoppingCartRoute extends BaseRoute {
   constructor() {
     super();
@@ -217,12 +219,23 @@ class ShoppingCartRoute extends BaseRoute {
       throw ErrorHelper.recoredNotFound("order!");
     }
     let initialCost = 0;
+    if (paymentMethod == paymentMethodEnum.WALLET) {
+      let wallet = await WalletModel.findOne({ userId: tokenData._id });
+      shoppingCarts.map(async (shoppingCart) => {
+        initialCost += shoppingCart.initialCost;
+      });
+      if (wallet.balance < initialCost + 20000) {
+        throw ErrorHelper.forbidden("Wallet balance is not enough!");
+      }
+    }
+
     shoppingCarts.map(async (shoppingCart) => {
-      initialCost += shoppingCart.initialCost;
       shoppingCart.status = ShoppingCartStatusEnum.SUCCESS;
       await shoppingCart.save();
     });
+    let code = await OrderHelper.generateOrderCode();
     let order = new OrderModel({
+      code: code,
       userId: tokenData._id,
       shoppingCartIds: shoppingCartIds,
       phone: newPhone,
@@ -237,7 +250,10 @@ class ShoppingCartRoute extends BaseRoute {
       initialCost: initialCost,
       finalCost: initialCost + 20000,
       paymentMethod: paymentMethod || paymentMethodEnum.CASH,
-      paymentStatus: PaymentStatusEnum.PENDING,
+      paymentStatus:
+        paymentMethod == paymentMethodEnum.BANK_TRANSFER
+          ? PaymentStatusEnum.PENDING
+          : PaymentStatusEnum.SUCCESS,
     });
     await order.save();
     let bookCategoryIds: any = [];
