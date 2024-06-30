@@ -390,7 +390,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
                         END_POINT = process.env.END_POINT_9PAY;
                         time = Math.round(Date.now() / 1000);
-                        returnUrl = "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app/books";
+                        returnUrl = "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app";
                         parameters = void 0;
                         parameters = {
                             merchantKey: MERCHANT_KEY,

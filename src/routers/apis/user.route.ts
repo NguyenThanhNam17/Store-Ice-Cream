@@ -397,7 +397,7 @@ class UserRoute extends BaseRoute {
     const END_POINT = process.env.END_POINT_9PAY;
     const time = Math.round(Date.now() / 1000);
     const returnUrl =
-      "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app/books";
+      "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app";
     let parameters;
     parameters = {
       merchantKey: MERCHANT_KEY,
