@@ -284,7 +284,7 @@ var UserRoute = /** @class */ (function (_super) {
             var user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
+                    case 0: return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id).populate("wallet")];
                     case 1:
                         user = _a.sent();
                         if (!user) {

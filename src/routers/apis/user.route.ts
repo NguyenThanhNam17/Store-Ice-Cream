@@ -205,7 +205,9 @@ class UserRoute extends BaseRoute {
   }
   //getMe
   async getMe(req: Request, res: Response) {
-    const user: any = await UserModel.findById(req.tokenInfo._id);
+    const user: any = await UserModel.findById(req.tokenInfo._id).populate(
+      "wallet"
+    );
     if (!user) {
       //throw lỗi không tìm thấy
       throw ErrorHelper.userNotExist();
