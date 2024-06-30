@@ -8,8 +8,8 @@ export class OrderHelper {
   }
   static async generateOrderCode() {
     const orderCounter = await CounterModel.findOneAndUpdate(
-      { name: "trip" },
-      { $setOnInsert: { value: 2000000000 } },
+      { name: "order" },
+      { $setOnInsert: { value: 10000 } },
       { upsert: true, new: true }
     );
     return orderCounter

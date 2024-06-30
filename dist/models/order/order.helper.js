@@ -50,7 +50,7 @@ var OrderHelper = /** @class */ (function () {
             var orderCounter;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, counter_model_1.CounterModel.findOneAndUpdate({ name: "trip" }, { $setOnInsert: { value: 2000000000 } }, { upsert: true, new: true })];
+                    case 0: return [4 /*yield*/, counter_model_1.CounterModel.findOneAndUpdate({ name: "order" }, { $setOnInsert: { value: 10000 } }, { upsert: true, new: true })];
                     case 1:
                         orderCounter = _a.sent();
                         return [2 /*return*/, orderCounter
