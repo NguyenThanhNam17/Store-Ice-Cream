@@ -63,8 +63,6 @@ var user_helper_1 = require("../../models/user/user.helper");
 var error_1 = require("../../base/error");
 var phone_1 = __importDefault(require("phone"));
 var user_service_1 = require("../../models/user/user.service");
-var book_model_1 = require("../../models/book/book.model");
-var book_service_1 = require("../../models/book/book.service");
 var utils_helper_1 = require("../../helper/utils.helper");
 var wallet_model_1 = require("../../models/wallet/wallet.model");
 var invoice_model_1 = require("../../models/invoice/invoice.model");
@@ -382,7 +380,7 @@ var UserRoute = /** @class */ (function (_super) {
     };
     UserRoute.prototype.updateUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, name, gender, address, email, isBlock, books, userCheck;
+            var _a, id, name, gender, address, email, isBlock, userCheck;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -390,18 +388,8 @@ var UserRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
                         _a = req.body, id = _a.id, name = _a.name, gender = _a.gender, address = _a.address, email = _a.email, isBlock = _a.isBlock;
-                        return [4 /*yield*/, book_model_1.BookModel.find({})];
-                    case 1:
-                        books = _b.sent();
-                        books.map(function (item) {
-                            book_service_1.bookService.updateOne(item._id, {
-                                $set: {
-                                    isHighlight: false,
-                                },
-                            });
-                        });
                         return [4 /*yield*/, user_model_1.UserModel.findById(id)];
-                    case 2:
+                    case 1:
                         userCheck = _b.sent();
                         if (!userCheck) {
                             throw error_1.ErrorHelper.userNotExist();
@@ -414,7 +402,7 @@ var UserRoute = /** @class */ (function (_super) {
                             userCheck.isBlock = isBlock;
                         }
                         return [4 /*yield*/, userCheck.save()];
-                    case 3:
+                    case 2:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,

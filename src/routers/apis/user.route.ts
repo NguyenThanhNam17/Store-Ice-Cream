@@ -284,14 +284,6 @@ class UserRoute extends BaseRoute {
       throw ErrorHelper.permissionDeny();
     }
     const { id, name, gender, address, email, isBlock } = req.body;
-    let books = await BookModel.find({});
-    books.map((item: any) => {
-      bookService.updateOne(item._id, {
-        $set: {
-          isHighlight: false,
-        },
-      });
-    });
     let userCheck = await UserModel.findById(id);
     if (!userCheck) {
       throw ErrorHelper.userNotExist();
