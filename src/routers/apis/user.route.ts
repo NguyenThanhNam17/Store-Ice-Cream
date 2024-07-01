@@ -188,7 +188,6 @@ class UserRoute extends BaseRoute {
       toDate = moment(toDate).endOf("day").toDate();
       _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
     }
-    _.set(req, "body.order.createdAt", -1);
     const users = await userService.fetch({
       filter: filter,
       order: order,

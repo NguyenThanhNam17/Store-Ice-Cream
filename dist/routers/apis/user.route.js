@@ -239,7 +239,6 @@ var UserRoute = /** @class */ (function (_super) {
                             toDate = (0, moment_timezone_1.default)(toDate).endOf("day").toDate();
                             lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
                         }
-                        lodash_1.default.set(req, "body.order.createdAt", -1);
                         return [4 /*yield*/, user_service_1.userService.fetch({
                                 filter: filter,
                                 order: order,
