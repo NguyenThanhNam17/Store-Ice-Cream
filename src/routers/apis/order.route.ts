@@ -511,7 +511,7 @@ class OrderRoute extends BaseRoute {
     let wallet = await WalletModel.findById(user.walletId);
     await walletService.updateOne(wallet._id, {
       $inc: {
-        balance: -order.finalCost,
+        balance: order.finalCost,
       },
     });
     return res.status(200).json({
