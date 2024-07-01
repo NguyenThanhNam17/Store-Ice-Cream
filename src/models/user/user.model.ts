@@ -36,8 +36,8 @@ const userSchema = new mongoose.Schema(
 );
 // Index for search
 userSchema.index(
-  { username: "text", name: "text" },
-  { weights: { username: 4, name: 2 } }
+  { username: "text", name: "text", phone: "text" },
+  { weights: { phone: 6, name: 4, username: 2 } }
 );
 
 userSchema.index({ phone: 1 }, { unique: true });

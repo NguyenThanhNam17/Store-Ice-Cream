@@ -40,7 +40,7 @@ var userSchema = new mongoose_1.default.Schema({
     walletId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Wallet" },
 }, { timestamps: true });
 // Index for search
-userSchema.index({ username: "text", name: "text" }, { weights: { username: 4, name: 2 } });
+userSchema.index({ username: "text", name: "text", phone: "text" }, { weights: { phone: 6, name: 4, username: 2 } });
 userSchema.index({ phone: 1 }, { unique: true });
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.set("toObject", { virtuals: true });
