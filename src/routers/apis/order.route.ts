@@ -175,7 +175,9 @@ class OrderRoute extends BaseRoute {
       fromDate = moment(fromDate).startOf("day").toDate();
       toDate = moment(toDate).endOf("day").toDate();
       _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
+      console.log(fromDate, toDate);
     }
+
     const orders = await orderService.fetch(
       {
         filter: filter,

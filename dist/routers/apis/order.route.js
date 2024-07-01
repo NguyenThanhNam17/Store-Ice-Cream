@@ -209,6 +209,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             fromDate = (0, moment_timezone_1.default)(fromDate).startOf("day").toDate();
                             toDate = (0, moment_timezone_1.default)(toDate).endOf("day").toDate();
                             lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
+                            console.log(fromDate, toDate);
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
                                 filter: filter,
