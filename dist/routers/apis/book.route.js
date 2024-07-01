@@ -108,7 +108,7 @@ var BookRoute = /** @class */ (function (_super) {
                     case 3: return [3 /*break*/, 5];
                     case 4:
                         _a = _b.sent();
-                        throw error_1.ErrorHelper.userWasOut();
+                        throw error_1.ErrorHelper.unauthorized();
                     case 5: return [2 /*return*/];
                 }
             });

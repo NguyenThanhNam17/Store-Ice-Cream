@@ -61,7 +61,7 @@ class BookRoute extends BaseRoute {
         throw ErrorHelper.permissionDeny();
       }
     } catch {
-      throw ErrorHelper.userWasOut();
+      throw ErrorHelper.unauthorized();
     }
   }
   //getAllBook
