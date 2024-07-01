@@ -236,6 +236,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                     case 4:
                         shoppingCart = new shoppingCart_model_1.ShoppingCartModel({
                             bookId: bookId,
+                            bookName: book.name,
                             quantity: quantity,
                             initialCost: book.price * quantity,
                             userId: tokenData._id,

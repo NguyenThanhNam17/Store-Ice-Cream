@@ -176,6 +176,7 @@ class ShoppingCartRoute extends BaseRoute {
     } else {
       shoppingCart = new ShoppingCartModel({
         bookId: bookId,
+        bookName: book.name,
         quantity: quantity,
         initialCost: book.price * quantity,
         userId: tokenData._id,
