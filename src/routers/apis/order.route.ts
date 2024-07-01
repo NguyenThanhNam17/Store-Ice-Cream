@@ -267,7 +267,7 @@ class OrderRoute extends BaseRoute {
       }
       await walletService.updateOne(wallet._id, {
         $inc: {
-          balance: -initialCost + 20000,
+          balance: -(initialCost + 20000),
         },
       });
     }

@@ -331,7 +331,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         }
                         return [4 /*yield*/, wallet_service_1.walletService.updateOne(wallet._id, {
                                 $inc: {
-                                    balance: -initialCost + 20000,
+                                    balance: -(initialCost + 20000),
                                 },
                             })];
                     case 4:
