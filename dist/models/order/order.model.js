@@ -58,6 +58,8 @@ var orderSchema = new mongoose_1.default.Schema({
 }, { timestamps: true }
 //virtual populate
 );
+// Index for search
+orderSchema.index({ code: "text" }, { weights: { code: 2 } });
 orderSchema.set("toObject", { virtuals: true });
 orderSchema.set("toJSON", { virtuals: true });
 orderSchema.virtual("user", {
