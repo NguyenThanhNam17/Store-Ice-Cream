@@ -154,7 +154,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             filter.userId = tokenData._id;
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
-                                filter: filter,
+                                filter: req.body.filter,
                                 order: order,
                                 search: search,
                                 limit: limit,
@@ -208,11 +208,11 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (fromDate && toDate) {
                             fromDate = (0, moment_timezone_1.default)(fromDate).startOf("day").toDate();
                             toDate = (0, moment_timezone_1.default)(toDate).endOf("day").toDate();
-                            lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
+                            lodash_1.default.set(req.body, "filter.createdAt", { $gte: fromDate, $lte: toDate });
                             console.log(fromDate, toDate);
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
-                                filter: filter,
+                                filter: req.body.filter,
                                 search: search,
                                 order: order,
                                 limit: limit,

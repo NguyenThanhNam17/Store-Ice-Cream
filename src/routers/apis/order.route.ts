@@ -130,7 +130,7 @@ class OrderRoute extends BaseRoute {
     }
     const orders = await orderService.fetch(
       {
-        filter: filter,
+        filter: req.body.filter,
         order: order,
         search: search,
         limit: limit,
@@ -174,13 +174,13 @@ class OrderRoute extends BaseRoute {
     if (fromDate && toDate) {
       fromDate = moment(fromDate).startOf("day").toDate();
       toDate = moment(toDate).endOf("day").toDate();
-      _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
+      _.set(req.body, "filter.createdAt", { $gte: fromDate, $lte: toDate });
       console.log(fromDate, toDate);
     }
 
     const orders = await orderService.fetch(
       {
-        filter: filter,
+        filter: req.body.filter,
         search: search,
         order: order,
         limit: limit,

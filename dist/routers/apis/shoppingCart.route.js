@@ -147,7 +147,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             userId: req.tokenInfo._id,
                         };
                         return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.fetch({
-                                filter: filter,
+                                filter: req.body.filter,
                                 order: order,
                                 search: search,
                                 limit: limit,

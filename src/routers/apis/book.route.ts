@@ -155,7 +155,7 @@ class BookRoute extends BaseRoute {
 
     const books = await bookService.fetch(
       {
-        filter: filter,
+        filter: req.body.filter,
         order: order,
         search: search,
         limit: limit,
