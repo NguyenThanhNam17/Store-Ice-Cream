@@ -61,23 +61,19 @@ class ShoppingCartRoute extends BaseRoute {
   }
   //Auth
   async authentication(req: Request, res: Response, next: NextFunction) {
-    try {
-      if (!req.get("x-token")) {
-        throw ErrorHelper.unauthorized();
-      }
-      const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-      if ([ROLES.ADMIN, ROLES.CLIENT, ROLES.STAFF].includes(tokenData.role_)) {
-        const user: any = await UserModel.findById(tokenData._id);
-        if (!user) {
-          throw ErrorHelper.userNotExist();
-        }
-        req.tokenInfo = tokenData;
-        next();
-      } else {
-        throw ErrorHelper.permissionDeny();
-      }
-    } catch {
+    if (!req.get("x-token")) {
       throw ErrorHelper.unauthorized();
+    }
+    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    if ([ROLES.ADMIN, ROLES.CLIENT, ROLES.STAFF].includes(tokenData.role_)) {
+      const user: any = await UserModel.findById(tokenData._id);
+      if (!user) {
+        throw ErrorHelper.userNotExist();
+      }
+      req.tokenInfo = tokenData;
+      next();
+    } else {
+      throw ErrorHelper.permissionDeny();
     }
   }
   //getAllShoppingCart
