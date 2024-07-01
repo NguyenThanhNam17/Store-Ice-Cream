@@ -87,7 +87,11 @@ class WebhookRoute extends BaseRoute {
     };
     return await axios(options)
       .then(function (chunk: any) {
-        return "success";
+        return res.status(200).json({
+          status: 200,
+          code: "200",
+          message: "success",
+        });
       })
       .catch(function (error: any) {
         console.log("Error sending message:", error.response.data);

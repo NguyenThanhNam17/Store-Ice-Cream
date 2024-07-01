@@ -186,7 +186,11 @@ var WebhookRoute = /** @class */ (function (_super) {
                         };
                         return [4 /*yield*/, axios(options)
                                 .then(function (chunk) {
-                                return "success";
+                                return res.status(200).json({
+                                    status: 200,
+                                    code: "200",
+                                    message: "success",
+                                });
                             })
                                 .catch(function (error) {
                                 console.log("Error sending message:", error.response.data);
