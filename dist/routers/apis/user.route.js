@@ -235,8 +235,8 @@ var UserRoute = /** @class */ (function (_super) {
                             page = 1;
                         }
                         if (fromDate && toDate) {
-                            fromDate = (0, moment_timezone_1.default)(fromDate).startOf("day").toDate();
-                            toDate = (0, moment_timezone_1.default)(toDate).endOf("day").toDate();
+                            fromDate = (0, moment_timezone_1.default)(fromDate).startOf("day").subtract(7, "hours").toDate();
+                            toDate = (0, moment_timezone_1.default)(toDate).endOf("day").subtract(7, "hours").toDate();
                             lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
                         }
                         return [4 /*yield*/, user_service_1.userService.fetch({

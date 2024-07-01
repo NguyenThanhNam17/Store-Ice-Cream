@@ -148,8 +148,8 @@ class BookRoute extends BaseRoute {
       }
     }
     if (fromDate && toDate) {
-      fromDate = moment(fromDate).startOf("day").toDate();
-      toDate = moment(toDate).endOf("day").toDate();
+      fromDate = moment(fromDate).startOf("day").subtract(7, "hours").toDate();
+      toDate = moment(toDate).endOf("day").subtract(7, "hours").toDate();
       _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
     }
 
