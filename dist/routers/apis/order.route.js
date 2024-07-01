@@ -352,7 +352,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             finalCost: initialCost + 20000,
                             userId: tokenData._id,
                             phone: newPhone,
-                            isPaid: true,
+                            isPaid: paymentMethod == model_const_1.PaymentMethodEnum.ATM ? false : true,
                             shippingFee: 20000,
                             status: paymentMethod == model_const_1.PaymentMethodEnum.CASH
                                 ? model_const_1.OrderStatusEnum.PENDING

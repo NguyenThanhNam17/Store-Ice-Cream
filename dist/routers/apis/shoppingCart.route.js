@@ -332,7 +332,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             status: paymentMethod == "CASH"
                                 ? model_const_1.OrderStatusEnum.PENDING
                                 : model_const_1.OrderStatusEnum.UNPAID,
-                            isPaid: true,
+                            isPaid: paymentMethod == model_const_1.PaymentMethodEnum.ATM ? false : true,
                             shippingFee: 20000,
                             initialCost: initialCost,
                             finalCost: initialCost + 20000,

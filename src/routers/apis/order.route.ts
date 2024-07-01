@@ -287,7 +287,7 @@ class OrderRoute extends BaseRoute {
       finalCost: initialCost + 20000,
       userId: tokenData._id,
       phone: newPhone,
-      isPaid: true,
+      isPaid: paymentMethod == PaymentMethodEnum.ATM ? false : true,
       shippingFee: 20000,
       status:
         paymentMethod == PaymentMethodEnum.CASH
