@@ -391,16 +391,21 @@ class OrderRoute extends BaseRoute {
   //update order for admin
   async updateOrderForAdmin(req: Request, res: Response) {
     const { id, address, note, status, phoneNumber, noteUpdate } = req.body;
-    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (!tokenData) {
-      throw ErrorHelper.unauthorized();
-    }
-    if (![ROLES.ADMIN, ROLES.STAFF].includes(tokenData.role_)) {
+    // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    // if (!tokenData) {
+    //   throw ErrorHelper.unauthorized();
+    // }
+    if (![ROLES.ADMIN, ROLES.STAFF].includes(req.tokenInfo.role_)) {
       throw ErrorHelper.permissionDeny();
     }
+
     let order = await OrderModel.findById(id);
     if (!order) {
       throw ErrorHelper.recoredNotFound("Book");
+    }
+    let user = await UserModel.findById(order.userId);
+    if (!user) {
+      throw ErrorHelper.userNotExist();
     }
     if (OrderStatusEnum.CANCEL == order.status) {
       throw ErrorHelper.forbidden("The order is canceled!");
@@ -432,13 +437,14 @@ class OrderRoute extends BaseRoute {
           },
         });
       });
+      let wallet = await WalletModel.findById(user.walletId);
+      await walletService.updateOne(wallet._id, {
+        $inc: {
+          balance: -order.finalCost,
+        },
+      });
     }
-    let wallet = await WalletModel.findOne({ userId: req.tokenInfo._id });
-    await walletService.updateOne(wallet._id, {
-      $inc: {
-        balance: -order.finalCost,
-      },
-    });
+
     return res.status(200).json({
       status: 200,
       code: "200",

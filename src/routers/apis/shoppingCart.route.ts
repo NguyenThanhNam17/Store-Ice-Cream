@@ -82,10 +82,10 @@ class ShoppingCartRoute extends BaseRoute {
   }
   //getAllShoppingCart
   async getAllShoppingCart(req: Request, res: Response) {
-    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (!tokenData) {
-      throw ErrorHelper.unauthorized();
-    }
+    // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    // if (!tokenData) {
+    //   throw ErrorHelper.unauthorized();
+    // }
     try {
       req.body.limit = parseInt(req.body.limit);
     } catch (err) {
@@ -105,7 +105,7 @@ class ShoppingCartRoute extends BaseRoute {
     }
     let filter: any = {
       status: ShoppingCartStatusEnum.IN_CART,
-      userId: tokenData._id,
+      userId: req.tokenInfo._id,
     };
     const shoppingCarts = await shoppingCartService.fetch(
       {
@@ -126,10 +126,10 @@ class ShoppingCartRoute extends BaseRoute {
 
   //getOneShoppingCart
   async getOneShoppingCart(req: Request, res: Response) {
-    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (!tokenData) {
-      throw ErrorHelper.unauthorized();
-    }
+    // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    // if (!tokenData) {
+    //   throw ErrorHelper.unauthorized();
+    // }
     let { id } = req.params;
     const shoppingCart = await ShoppingCartModel.findById(id)
       .populate("user")
@@ -149,10 +149,10 @@ class ShoppingCartRoute extends BaseRoute {
   }
 
   async addBookToCart(req: Request, res: Response) {
-    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (!tokenData) {
-      throw ErrorHelper.unauthorized();
-    }
+    // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    // if (!tokenData) {
+    //   throw ErrorHelper.unauthorized();
+    // }
     const { bookId, quantity } = req.body;
     if (!bookId || !quantity) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
@@ -165,7 +165,7 @@ class ShoppingCartRoute extends BaseRoute {
       throw ErrorHelper.forbidden("Out of stock!");
     }
     let shoppingCart = await ShoppingCartModel.findOne({
-      userId: tokenData._id,
+      userId: req.tokenInfo._id,
       bookId: bookId,
       status: ShoppingCartStatusEnum.IN_CART,
     });
@@ -179,7 +179,7 @@ class ShoppingCartRoute extends BaseRoute {
         bookName: book.name,
         quantity: quantity,
         initialCost: book.price * quantity,
-        userId: tokenData._id,
+        userId: req.tokenInfo._id,
       });
       await shoppingCart.save();
     }
@@ -198,10 +198,10 @@ class ShoppingCartRoute extends BaseRoute {
     });
   }
   async paymentShoppingCart(req: Request, res: Response) {
-    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (!tokenData) {
-      throw ErrorHelper.unauthorized();
-    }
+    // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    // if (!tokenData) {
+    //   throw ErrorHelper.unauthorized();
+    // }
     const { shoppingCartIds, address, note, phoneNumber, paymentMethod } =
       req.body;
     if (
@@ -212,6 +212,7 @@ class ShoppingCartRoute extends BaseRoute {
     ) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
+    let user = await UserModel.findById(req.tokenInfo._id);
     var newPhone = UtilsHelper.parsePhone(phoneNumber, "+84");
     let shoppingCarts = await ShoppingCartModel.find({
       _id: { $in: shoppingCartIds },
@@ -224,7 +225,7 @@ class ShoppingCartRoute extends BaseRoute {
       initialCost += shoppingCart.initialCost;
     });
     if (paymentMethod == PaymentMethodEnum.WALLET) {
-      let wallet = await WalletModel.findOne({ userId: tokenData._id });
+      let wallet = await WalletModel.findById(user.walletId);
       if (wallet.balance < initialCost + 20000) {
         throw ErrorHelper.forbidden("Wallet balance is not enough!");
       }
@@ -237,7 +238,7 @@ class ShoppingCartRoute extends BaseRoute {
     let code = await OrderHelper.generateOrderCode();
     let order = new OrderModel({
       code: code,
-      userId: tokenData._id,
+      userId: req.tokenInfo._id,
       shoppingCartIds: shoppingCartIds,
       phone: newPhone,
       address: address,
@@ -288,7 +289,7 @@ class ShoppingCartRoute extends BaseRoute {
     ]);
     if (paymentMethod == "ATM") {
       const invoice = new InvoiceModel({
-        userId: tokenData._id,
+        userId: req.tokenInfo._id,
         amount: Number(order.finalCost),
         type: "PAYMENT",
         orderId: order._id,
@@ -351,10 +352,10 @@ class ShoppingCartRoute extends BaseRoute {
   }
 
   async updateQuantityBookInCart(req: Request, res: Response) {
-    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (!tokenData) {
-      throw ErrorHelper.unauthorized();
-    }
+    // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    // if (!tokenData) {
+    //   throw ErrorHelper.unauthorized();
+    // }
     const { shoppingCartId, quantity } = req.body;
     let shoppingCart = await ShoppingCartModel.findById(shoppingCartId);
     if (!shoppingCart) {
@@ -389,10 +390,10 @@ class ShoppingCartRoute extends BaseRoute {
     });
   }
   async deleteProductInCart(req: Request, res: Response) {
-    const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-    if (!tokenData) {
-      throw ErrorHelper.unauthorized();
-    }
+    // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+    // if (!tokenData) {
+    //   throw ErrorHelper.unauthorized();
+    // }
     const { shoppingCartId } = req.body;
     let shoppingCart = await ShoppingCartModel.findById(shoppingCartId);
     if (!shoppingCart) {

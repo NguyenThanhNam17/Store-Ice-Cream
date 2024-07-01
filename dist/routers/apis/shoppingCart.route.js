@@ -114,14 +114,14 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     //getAllShoppingCart
     ShoppingCartRoute.prototype.getAllShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, shoppingCarts;
+            var _a, limit, page, search, filter, shoppingCarts;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (!tokenData) {
-                            throw error_1.ErrorHelper.unauthorized();
-                        }
+                        // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+                        // if (!tokenData) {
+                        //   throw ErrorHelper.unauthorized();
+                        // }
                         try {
                             req.body.limit = parseInt(req.body.limit);
                         }
@@ -143,7 +143,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         }
                         filter = {
                             status: model_const_1.ShoppingCartStatusEnum.IN_CART,
-                            userId: tokenData._id,
+                            userId: req.tokenInfo._id,
                         };
                         return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.fetch({
                                 filter: filter,
@@ -166,14 +166,10 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     //getOneShoppingCart
     ShoppingCartRoute.prototype.getOneShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, id, shoppingCart;
+            var id, shoppingCart;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (!tokenData) {
-                            throw error_1.ErrorHelper.unauthorized();
-                        }
                         id = req.params.id;
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(id)
                                 .populate("user")
@@ -198,14 +194,10 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.addBookToCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, bookId, quantity, book, shoppingCart;
+            var _a, bookId, quantity, book, shoppingCart;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (!tokenData) {
-                            throw error_1.ErrorHelper.unauthorized();
-                        }
                         _a = req.body, bookId = _a.bookId, quantity = _a.quantity;
                         if (!bookId || !quantity) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
@@ -220,7 +212,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.forbidden("Out of stock!");
                         }
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findOne({
-                                userId: tokenData._id,
+                                userId: req.tokenInfo._id,
                                 bookId: bookId,
                                 status: model_const_1.ShoppingCartStatusEnum.IN_CART,
                             })];
@@ -239,7 +231,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             bookName: book.name,
                             quantity: quantity,
                             initialCost: book.price * quantity,
-                            userId: tokenData._id,
+                            userId: req.tokenInfo._id,
                         });
                         return [4 /*yield*/, shoppingCart.save()];
                     case 5:
@@ -266,15 +258,11 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.paymentShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, shoppingCartIds, address, note, phoneNumber, paymentMethod, newPhone, shoppingCarts, initialCost, wallet, code, order, bookCategoryIds, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
+            var _a, shoppingCartIds, address, note, phoneNumber, paymentMethod, user, newPhone, shoppingCarts, initialCost, wallet, code, order, bookCategoryIds, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (!tokenData) {
-                            throw error_1.ErrorHelper.unauthorized();
-                        }
                         _a = req.body, shoppingCartIds = _a.shoppingCartIds, address = _a.address, note = _a.note, phoneNumber = _a.phoneNumber, paymentMethod = _a.paymentMethod;
                         if (!shoppingCartIds ||
                             shoppingCartIds.length < 1 ||
@@ -282,11 +270,14 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             !address) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
+                        return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
+                    case 1:
+                        user = _b.sent();
                         newPhone = utils_helper_1.UtilsHelper.parsePhone(phoneNumber, "+84");
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
                                 _id: { $in: shoppingCartIds },
                             })];
-                    case 1:
+                    case 2:
                         shoppingCarts = _b.sent();
                         if (shoppingCarts.length < 1) {
                             throw error_1.ErrorHelper.recoredNotFound("order!");
@@ -298,15 +289,15 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 return [2 /*return*/];
                             });
                         }); });
-                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 3];
-                        return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: tokenData._id })];
-                    case 2:
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
+                    case 3:
                         wallet = _b.sent();
                         if (wallet.balance < initialCost + 20000) {
                             throw error_1.ErrorHelper.forbidden("Wallet balance is not enough!");
                         }
-                        _b.label = 3;
-                    case 3:
+                        _b.label = 4;
+                    case 4:
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
@@ -320,11 +311,11 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             });
                         }); });
                         return [4 /*yield*/, order_helper_1.OrderHelper.generateOrderCode()];
-                    case 4:
+                    case 5:
                         code = _b.sent();
                         order = new order_model_1.OrderModel({
                             code: code,
-                            userId: tokenData._id,
+                            userId: req.tokenInfo._id,
                             shoppingCartIds: shoppingCartIds,
                             phone: newPhone,
                             address: address,
@@ -342,7 +333,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 : model_const_1.PaymentStatusEnum.SUCCESS,
                         });
                         return [4 /*yield*/, order.save()];
-                    case 5:
+                    case 6:
                         _b.sent();
                         bookCategoryIds = [];
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
@@ -375,17 +366,17 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                     },
                                 }),
                             ])];
-                    case 6:
+                    case 7:
                         _b.sent();
-                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 11];
+                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 12];
                         invoice = new invoice_model_1.InvoiceModel({
-                            userId: tokenData._id,
+                            userId: req.tokenInfo._id,
                             amount: Number(order.finalCost),
                             type: "PAYMENT",
                             orderId: order._id,
                         });
                         return [4 /*yield*/, invoice.save()];
-                    case 7:
+                    case 8:
                         _b.sent();
                         MERCHANT_KEY = process.env.MERCHANT_KEY;
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
@@ -403,7 +394,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             method: "ATM_CARD",
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
-                    case 8:
+                    case 9:
                         httpQuery = _b.sent();
                         message = "POST" +
                             "\n" +
@@ -414,7 +405,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             "\n" +
                             httpQuery;
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
-                    case 9:
+                    case 10:
                         signature = _b.sent();
                         baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
                         httpBuild = {
@@ -422,7 +413,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             signature: signature,
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
-                    case 10:
+                    case 11:
                         buildHttpQuery = _b.sent();
                         directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
@@ -431,7 +422,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 11: return [2 /*return*/, res.status(200).json({
+                    case 12: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",
@@ -445,14 +436,10 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.updateQuantityBookInCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, shoppingCartId, quantity, shoppingCart, book;
+            var _a, shoppingCartId, quantity, shoppingCart, book;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (!tokenData) {
-                            throw error_1.ErrorHelper.unauthorized();
-                        }
                         _a = req.body, shoppingCartId = _a.shoppingCartId, quantity = _a.quantity;
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(shoppingCartId)];
                     case 1:
@@ -503,14 +490,10 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     };
     ShoppingCartRoute.prototype.deleteProductInCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, shoppingCartId, shoppingCart, book;
+            var shoppingCartId, shoppingCart, book;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (!tokenData) {
-                            throw error_1.ErrorHelper.unauthorized();
-                        }
                         shoppingCartId = req.body.shoppingCartId;
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.findById(shoppingCartId)];
                     case 1:

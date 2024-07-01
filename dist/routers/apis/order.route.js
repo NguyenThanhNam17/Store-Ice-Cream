@@ -461,17 +461,17 @@ var OrderRoute = /** @class */ (function (_super) {
     //update order for admin
     OrderRoute.prototype.updateOrderForAdmin = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, address, note, status, phoneNumber, noteUpdate, tokenData, order, newPhone, phoneCheck, shoppingCarts, wallet;
+            var _a, id, address, note, status, phoneNumber, noteUpdate, order, user, newPhone, phoneCheck, shoppingCarts, wallet;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _a = req.body, id = _a.id, address = _a.address, note = _a.note, status = _a.status, phoneNumber = _a.phoneNumber, noteUpdate = _a.noteUpdate;
-                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
-                        if (!tokenData) {
-                            throw error_1.ErrorHelper.unauthorized();
-                        }
-                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(tokenData.role_)) {
+                        // const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+                        // if (!tokenData) {
+                        //   throw ErrorHelper.unauthorized();
+                        // }
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(req.tokenInfo.role_)) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
                         return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
@@ -479,6 +479,12 @@ var OrderRoute = /** @class */ (function (_super) {
                         order = _b.sent();
                         if (!order) {
                             throw error_1.ErrorHelper.recoredNotFound("Book");
+                        }
+                        return [4 /*yield*/, user_model_1.UserModel.findById(order.userId)];
+                    case 2:
+                        user = _b.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
                         }
                         if (model_const_1.OrderStatusEnum.CANCEL == order.status) {
                             throw error_1.ErrorHelper.forbidden("The order is canceled!");
@@ -500,13 +506,13 @@ var OrderRoute = /** @class */ (function (_super) {
                                 phone: newPhone || order.phone,
                                 noteUpdate: noteUpdate || order.noteUpdate,
                             })];
-                    case 2:
+                    case 3:
                         _b.sent();
-                        if (!(status == model_const_1.OrderStatusEnum.CANCEL)) return [3 /*break*/, 4];
+                        if (!(status == model_const_1.OrderStatusEnum.CANCEL)) return [3 /*break*/, 7];
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
                                 _id: order.shoppingCartIds,
                             })];
-                    case 3:
+                    case 4:
                         shoppingCarts = _b.sent();
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
@@ -522,8 +528,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 }
                             });
                         }); });
-                        _b.label = 4;
-                    case 4: return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: req.tokenInfo._id })];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
                     case 5:
                         wallet = _b.sent();
                         return [4 /*yield*/, wallet_service_1.walletService.updateOne(wallet._id, {
@@ -533,14 +538,15 @@ var OrderRoute = /** @class */ (function (_super) {
                             })];
                     case 6:
                         _b.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: {
-                                    order: order,
-                                },
-                            })];
+                        _b.label = 7;
+                    case 7: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            data: {
+                                order: order,
+                            },
+                        })];
                 }
             });
         });
