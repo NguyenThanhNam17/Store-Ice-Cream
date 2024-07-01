@@ -307,7 +307,7 @@ class OrderRoute extends BaseRoute {
         {
           $addToSet: {
             searchs: {
-              $each: book.categoryId,
+              $each: [book.categoryId],
             },
           },
         }

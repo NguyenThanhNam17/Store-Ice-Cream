@@ -376,7 +376,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 user_model_1.UserModel.updateOne({ _id: order.userId }, {
                                     $addToSet: {
                                         searchs: {
-                                            $each: book.categoryId,
+                                            $each: [book.categoryId],
                                         },
                                     },
                                 }),
