@@ -66,6 +66,7 @@ var utils_helper_1 = require("../../helper/utils.helper");
 var invoice_model_1 = require("../../models/invoice/invoice.model");
 var order_helper_1 = require("../../models/order/order.helper");
 var wallet_model_1 = require("../../models/wallet/wallet.model");
+var wallet_service_1 = require("../../models/wallet/wallet.service");
 var ShoppingCartRoute = /** @class */ (function (_super) {
     __extends(ShoppingCartRoute, _super);
     function ShoppingCartRoute() {
@@ -289,15 +290,20 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 return [2 /*return*/];
                             });
                         }); });
-                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 4];
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 5];
                         return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
                     case 3:
                         wallet = _b.sent();
                         if (wallet.balance < initialCost + 20000) {
                             throw error_1.ErrorHelper.forbidden("Wallet balance is not enough!");
                         }
-                        _b.label = 4;
+                        return [4 /*yield*/, wallet_service_1.walletService.updateOne(wallet._id, {
+                                $inc: { balance: -(initialCost + 20000) },
+                            })];
                     case 4:
+                        _b.sent();
+                        _b.label = 5;
+                    case 5:
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
@@ -311,7 +317,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             });
                         }); });
                         return [4 /*yield*/, order_helper_1.OrderHelper.generateOrderCode()];
-                    case 5:
+                    case 6:
                         code = _b.sent();
                         order = new order_model_1.OrderModel({
                             code: code,
@@ -333,7 +339,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 : model_const_1.PaymentStatusEnum.SUCCESS,
                         });
                         return [4 /*yield*/, order.save()];
-                    case 6:
+                    case 7:
                         _b.sent();
                         bookCategoryIds = [];
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
@@ -366,9 +372,9 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                     },
                                 }),
                             ])];
-                    case 7:
+                    case 8:
                         _b.sent();
-                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 12];
+                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 13];
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: req.tokenInfo._id,
                             amount: Number(order.finalCost),
@@ -376,7 +382,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             orderId: order._id,
                         });
                         return [4 /*yield*/, invoice.save()];
-                    case 8:
+                    case 9:
                         _b.sent();
                         MERCHANT_KEY = process.env.MERCHANT_KEY;
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
@@ -394,7 +400,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             method: "ATM_CARD",
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
-                    case 9:
+                    case 10:
                         httpQuery = _b.sent();
                         message = "POST" +
                             "\n" +
@@ -405,7 +411,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             "\n" +
                             httpQuery;
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
-                    case 10:
+                    case 11:
                         signature = _b.sent();
                         baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
                         httpBuild = {
@@ -413,7 +419,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             signature: signature,
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
-                    case 11:
+                    case 12:
                         buildHttpQuery = _b.sent();
                         directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
@@ -422,7 +428,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 12: return [2 /*return*/, res.status(200).json({
+                    case 13: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",

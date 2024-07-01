@@ -23,6 +23,7 @@ import { UtilsHelper } from "../../helper/utils.helper";
 import { InvoiceModel } from "../../models/invoice/invoice.model";
 import { OrderHelper } from "../../models/order/order.helper";
 import { WalletModel } from "../../models/wallet/wallet.model";
+import { walletService } from "../../models/wallet/wallet.service";
 class ShoppingCartRoute extends BaseRoute {
   constructor() {
     super();
@@ -229,6 +230,9 @@ class ShoppingCartRoute extends BaseRoute {
       if (wallet.balance < initialCost + 20000) {
         throw ErrorHelper.forbidden("Wallet balance is not enough!");
       }
+      await walletService.updateOne(wallet._id, {
+        $inc: { balance: -(initialCost + 20000) },
+      });
     }
 
     shoppingCarts.map(async (shoppingCart) => {
