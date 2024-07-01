@@ -220,11 +220,11 @@ class ShoppingCartRoute extends BaseRoute {
       throw ErrorHelper.recoredNotFound("order!");
     }
     let initialCost = 0;
+    shoppingCarts.map(async (shoppingCart) => {
+      initialCost += shoppingCart.initialCost;
+    });
     if (paymentMethod == PaymentMethodEnum.WALLET) {
       let wallet = await WalletModel.findOne({ userId: tokenData._id });
-      shoppingCarts.map(async (shoppingCart) => {
-        initialCost += shoppingCart.initialCost;
-      });
       if (wallet.balance < initialCost + 20000) {
         throw ErrorHelper.forbidden("Wallet balance is not enough!");
       }

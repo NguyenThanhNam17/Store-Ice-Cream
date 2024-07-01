@@ -292,16 +292,16 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.recoredNotFound("order!");
                         }
                         initialCost = 0;
-                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 3];
-                        return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: tokenData._id })];
-                    case 2:
-                        wallet = _b.sent();
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 initialCost += shoppingCart.initialCost;
                                 return [2 /*return*/];
                             });
                         }); });
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: tokenData._id })];
+                    case 2:
+                        wallet = _b.sent();
                         if (wallet.balance < initialCost + 20000) {
                             throw error_1.ErrorHelper.forbidden("Wallet balance is not enough!");
                         }
