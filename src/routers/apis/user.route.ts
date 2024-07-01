@@ -63,6 +63,11 @@ class UserRoute extends BaseRoute {
       [this.authentication],
       this.route(this.changePassword)
     );
+    this.router.post(
+      "/depositToWallet",
+      [this.authentication],
+      this.route(this.depositToWallet)
+    );
   }
 
   async authentication(req: Request, res: Response, next: NextFunction) {
@@ -377,12 +382,12 @@ class UserRoute extends BaseRoute {
   }
   async depositToWallet(req: Request, res: Response) {
     const { balance } = req.body;
-
     let userCheck = await UserModel.findById(req.tokenInfo._id);
+    console.log(userCheck);
     if (!userCheck) {
       throw ErrorHelper.userNotExist();
     }
-    let wallet = await WalletModel.findOne({ userId: req.tokenInfo._id });
+    let wallet = await WalletModel.findById(userCheck.walletId);
     if (!wallet) {
       throw ErrorHelper.recoredNotFound("wallet!");
     }
@@ -396,8 +401,7 @@ class UserRoute extends BaseRoute {
     const MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
     const END_POINT = process.env.END_POINT_9PAY;
     const time = Math.round(Date.now() / 1000);
-    const returnUrl =
-      "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app";
+    const returnUrl = "http://localhost:3000";
     let parameters;
     parameters = {
       merchantKey: MERCHANT_KEY,

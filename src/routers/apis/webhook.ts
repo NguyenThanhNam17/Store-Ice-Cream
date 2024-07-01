@@ -9,6 +9,7 @@ import {
 } from "../../constants/model.const";
 import { WalletModel } from "../../models/wallet/wallet.model";
 import { walletService } from "../../models/wallet/wallet.service";
+import { UserModel } from "../../models/user/user.model";
 const axios = require("axios").default;
 
 class WebhookRoute extends BaseRoute {
@@ -41,6 +42,10 @@ class WebhookRoute extends BaseRoute {
         throw ErrorHelper.recoredNotFound("order!");
       }
     }
+    let user = await UserModel.findById(invoice.userId);
+    if (!user) {
+      throw ErrorHelper.userNotExist();
+    }
     if (invoice.type == "PAYMENT") {
       if ([5, 16].includes(parseText.status)) {
         order.isPaid = true;
@@ -52,7 +57,7 @@ class WebhookRoute extends BaseRoute {
       await order.save();
     } else if (invoice.type == "DEPOSIT") {
       if ([5, 16].includes(parseText.status)) {
-        let wallet = await WalletModel.findOne({ userId: invoice.userId });
+        let wallet = await WalletModel.findById(user.walletId);
         await walletService.updateOne(wallet._id, {
           $inc: {
             balance: invoice.amount,

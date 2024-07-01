@@ -85,6 +85,7 @@ var UserRoute = /** @class */ (function (_super) {
         this.router.post("/deleteOneUser", [this.authentication], this.route(this.deleteOneUser));
         this.router.post("/changePasswordForAdmin", [this.authentication], this.route(this.changePasswordForAdmin));
         this.router.post("/changePassword", [this.authentication], this.route(this.changePassword));
+        this.router.post("/depositToWallet", [this.authentication], this.route(this.depositToWallet));
     };
     UserRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
@@ -535,10 +536,11 @@ var UserRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
                     case 1:
                         userCheck = _a.sent();
+                        console.log(userCheck);
                         if (!userCheck) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: req.tokenInfo._id })];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(userCheck.walletId)];
                     case 2:
                         wallet = _a.sent();
                         if (!wallet) {
@@ -556,7 +558,7 @@ var UserRoute = /** @class */ (function (_super) {
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
                         END_POINT = process.env.END_POINT_9PAY;
                         time = Math.round(Date.now() / 1000);
-                        returnUrl = "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app";
+                        returnUrl = "http://localhost:3000";
                         parameters = {
                             merchantKey: MERCHANT_KEY,
                             time: time,

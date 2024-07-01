@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { BaseDocument } from "../../base/baseModel";
 
 // Định nghĩa type cho user
@@ -14,6 +14,7 @@ export type IUser = BaseDocument & {
   key?: string;
   searchs?: string[];
   isBlock?: boolean;
+  walletId?: string;
 };
 
 const userSchema = new mongoose.Schema(
@@ -29,6 +30,7 @@ const userSchema = new mongoose.Schema(
     key: { type: String },
     searchs: [{ type: String }],
     isBlock: { type: Boolean, default: false },
+    walletId: { type: Schema.Types.ObjectId, ref: "Wallet" },
   },
   { timestamps: true }
 );
