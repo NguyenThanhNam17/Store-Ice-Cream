@@ -291,7 +291,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.recoredNotFound("order!");
                         }
                         initialCost = 0;
-                        if (!(paymentMethod == model_const_1.paymentMethodEnum.WALLET)) return [3 /*break*/, 3];
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 3];
                         return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: tokenData._id })];
                     case 2:
                         wallet = _b.sent();
@@ -335,8 +335,8 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             shippingFee: 20000,
                             initialCost: initialCost,
                             finalCost: initialCost + 20000,
-                            paymentMethod: paymentMethod || model_const_1.paymentMethodEnum.CASH,
-                            paymentStatus: paymentMethod == model_const_1.paymentMethodEnum.ATM
+                            paymentMethod: paymentMethod || model_const_1.PaymentMethodEnum.CASH,
+                            paymentStatus: paymentMethod == model_const_1.PaymentMethodEnum.ATM
                                 ? model_const_1.PaymentStatusEnum.PENDING
                                 : model_const_1.PaymentStatusEnum.SUCCESS,
                         });

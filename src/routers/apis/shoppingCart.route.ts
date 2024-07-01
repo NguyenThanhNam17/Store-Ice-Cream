@@ -14,7 +14,7 @@ import {
   OrderStatusEnum,
   PaymentStatusEnum,
   ShoppingCartStatusEnum,
-  paymentMethodEnum,
+  PaymentMethodEnum,
 } from "../../constants/model.const";
 import { shoppingCartService } from "../../models/shoppingCart/shoppingCart.service";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
@@ -219,7 +219,7 @@ class ShoppingCartRoute extends BaseRoute {
       throw ErrorHelper.recoredNotFound("order!");
     }
     let initialCost = 0;
-    if (paymentMethod == paymentMethodEnum.WALLET) {
+    if (paymentMethod == PaymentMethodEnum.WALLET) {
       let wallet = await WalletModel.findOne({ userId: tokenData._id });
       shoppingCarts.map(async (shoppingCart) => {
         initialCost += shoppingCart.initialCost;
@@ -249,9 +249,9 @@ class ShoppingCartRoute extends BaseRoute {
       shippingFee: 20000,
       initialCost: initialCost,
       finalCost: initialCost + 20000,
-      paymentMethod: paymentMethod || paymentMethodEnum.CASH,
+      paymentMethod: paymentMethod || PaymentMethodEnum.CASH,
       paymentStatus:
-        paymentMethod == paymentMethodEnum.ATM
+        paymentMethod == PaymentMethodEnum.ATM
           ? PaymentStatusEnum.PENDING
           : PaymentStatusEnum.SUCCESS,
     });

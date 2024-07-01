@@ -3,7 +3,7 @@ import { BaseDocument } from "../../base/baseModel";
 import {
   OrderStatusEnum,
   ShoppingCartStatusEnum,
-  paymentMethodEnum,
+  PaymentMethodEnum,
 } from "../../constants/model.const";
 
 // Định nghĩa type cho user

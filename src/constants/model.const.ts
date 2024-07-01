@@ -13,7 +13,7 @@ export enum OrderStatusEnum {
   //IN_CART = "IN_CART",
 }
 
-export enum paymentMethodEnum {
+export enum PaymentMethodEnum {
   CASH = "CASH",
   ATM = "ATM",
   WALLET = "WALLET",

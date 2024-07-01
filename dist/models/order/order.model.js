@@ -46,8 +46,8 @@ var orderSchema = new mongoose_1.default.Schema({
     isPaid: { type: Boolean, default: false },
     paymentMethod: {
         type: String,
-        enum: Object.values(model_const_1.paymentMethodEnum),
-        default: model_const_1.paymentMethodEnum.CASH,
+        enum: Object.values(model_const_1.PaymentMethodEnum),
+        default: model_const_1.PaymentMethodEnum.CASH,
     },
     noteUpdate: { type: String },
     paymentStatus: {

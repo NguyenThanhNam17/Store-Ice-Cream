@@ -86,6 +86,7 @@ var OrderRoute = /** @class */ (function (_super) {
         this.router.post("/createOrder", [this.authentication], this.route(this.createOrder));
         this.router.post("/deleteOneOrder", [this.authentication], this.route(this.deleteOneOrder));
         this.router.post("/cancelOrder", [this.authentication], this.route(this.cancelOrder));
+        this.router.post("/rePaymentOrder", [this.authentication], this.route(this.rePaymentOrder));
     };
     //Auth
     OrderRoute.prototype.authentication = function (req, res, next) {
@@ -308,7 +309,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.requestDataInvalid("phone");
                         }
                         initialCost = book.price * quantity;
-                        if (!(paymentMethod == model_const_1.paymentMethodEnum.WALLET)) return [3 /*break*/, 3];
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 3];
                         return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: tokenData._id })];
                     case 2:
                         wallet = _b.sent();
@@ -343,10 +344,10 @@ var OrderRoute = /** @class */ (function (_super) {
                             phone: newPhone,
                             isPaid: true,
                             shippingFee: 20000,
-                            status: paymentMethod == model_const_1.paymentMethodEnum.CASH
+                            status: paymentMethod == model_const_1.PaymentMethodEnum.CASH
                                 ? model_const_1.OrderStatusEnum.PENDING
                                 : model_const_1.OrderStatusEnum.UNPAID,
-                            paymentMethod: paymentMethod || model_const_1.paymentMethodEnum.CASH,
+                            paymentMethod: paymentMethod || model_const_1.PaymentMethodEnum.CASH,
                         });
                         return [4 /*yield*/, order.save()];
                     case 6:
@@ -668,6 +669,115 @@ var OrderRoute = /** @class */ (function (_super) {
                                     order: order,
                                 },
                             })];
+                }
+            });
+        });
+    };
+    OrderRoute.prototype.rePaymentOrder = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, orderId, paymentMethod, mine, order, wallet, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, orderId = _a.orderId, paymentMethod = _a.paymentMethod;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
+                    case 1:
+                        mine = _b.sent();
+                        if (!mine) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        return [4 /*yield*/, order_model_1.OrderModel.findById(orderId)];
+                    case 2:
+                        order = _b.sent();
+                        if (!order) {
+                            throw error_1.ErrorHelper.recoredNotFound("order!");
+                        }
+                        if (order.isPaid) {
+                            throw error_1.ErrorHelper.forbidden("The order is paid");
+                        }
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.CASH)) return [3 /*break*/, 3];
+                        order.paymentMethod = model_const_1.PaymentMethodEnum.CASH;
+                        order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
+                        order.isPaid = true;
+                        return [3 /*break*/, 13];
+                    case 3:
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 8];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(mine.walletId)];
+                    case 4:
+                        wallet = _b.sent();
+                        if (!(wallet.balance < order.finalCost)) return [3 /*break*/, 5];
+                        throw error_1.ErrorHelper.forbidden("Wallet balance is not enough!");
+                    case 5: return [4 /*yield*/, wallet_service_1.walletService.updateOne(mine.walletId, {
+                            $inc: {
+                                balance: -order.finalCost,
+                            },
+                        })];
+                    case 6:
+                        _b.sent();
+                        order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
+                        order.isPaid = true;
+                        _b.label = 7;
+                    case 7: return [3 /*break*/, 13];
+                    case 8:
+                        invoice = new invoice_model_1.InvoiceModel({
+                            userId: req.tokenInfo._id,
+                            amount: order.finalCost,
+                            type: "PAYMENT",
+                            orderId: order._id,
+                        });
+                        return [4 /*yield*/, invoice.save()];
+                    case 9:
+                        _b.sent();
+                        MERCHANT_KEY = process.env.MERCHANT_KEY;
+                        MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
+                        END_POINT = process.env.END_POINT_9PAY;
+                        time = Math.round(Date.now() / 1000);
+                        returnUrl = "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app";
+                        parameters = void 0;
+                        parameters = {
+                            merchantKey: MERCHANT_KEY,
+                            time: time,
+                            invoice_no: invoice._id,
+                            amount: order.finalCost,
+                            description: "Thanh toán đơn hàng",
+                            return_url: returnUrl,
+                            method: "ATM_CARD",
+                        };
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
+                    case 10:
+                        httpQuery = _b.sent();
+                        message = "POST" +
+                            "\n" +
+                            END_POINT +
+                            "/payments/create" +
+                            "\n" +
+                            time +
+                            "\n" +
+                            httpQuery;
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
+                    case 11:
+                        signature = _b.sent();
+                        baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
+                        httpBuild = {
+                            baseEncode: baseEncode,
+                            signature: signature,
+                        };
+                        return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
+                    case 12:
+                        buildHttpQuery = _b.sent();
+                        directUrl = END_POINT + "/portal?" + buildHttpQuery;
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: directUrl,
+                            })];
+                    case 13: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            data: {},
+                        })];
                 }
             });
         });

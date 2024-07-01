@@ -66,6 +66,9 @@ var user_service_1 = require("../../models/user/user.service");
 var utils_helper_1 = require("../../helper/utils.helper");
 var wallet_model_1 = require("../../models/wallet/wallet.model");
 var invoice_model_1 = require("../../models/invoice/invoice.model");
+var order_model_1 = require("../../models/order/order.model");
+var model_const_1 = require("../../constants/model.const");
+var moment_timezone_1 = __importDefault(require("moment-timezone"));
 var UserRoute = /** @class */ (function (_super) {
     __extends(UserRoute, _super);
     function UserRoute() {
@@ -84,6 +87,7 @@ var UserRoute = /** @class */ (function (_super) {
         this.router.post("/changePasswordForAdmin", [this.authentication], this.route(this.changePasswordForAdmin));
         this.router.post("/changePassword", [this.authentication], this.route(this.changePassword));
         this.router.post("/depositToWallet", [this.authentication], this.route(this.depositToWallet));
+        this.router.post("/getStatsForDashboard", [this.authentication], this.route(this.getStatsForDashboard));
     };
     UserRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
@@ -584,6 +588,152 @@ var UserRoute = /** @class */ (function (_super) {
                                 code: "200",
                                 message: "success",
                                 data: directUrl,
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.getStatsForDashboard = function (req, res) {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        return __awaiter(this, void 0, void 0, function () {
+            var startOfDay, endOfDate, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, getStatsUser, getStatsBook, getStatsRevenue;
+            return __generator(this, function (_j) {
+                switch (_j.label) {
+                    case 0:
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(req.tokenInfo.role_)) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        startOfDay = (0, moment_timezone_1.default)().startOf("day").toDate();
+                        endOfDate = (0, moment_timezone_1.default)().endOf("day").toDate();
+                        startOfWeek = (0, moment_timezone_1.default)().startOf("week").toDate();
+                        endOfWeek = (0, moment_timezone_1.default)().endOf("week").toDate();
+                        startOfMonth = (0, moment_timezone_1.default)().startOf("month").toDate();
+                        endOfMonth = (0, moment_timezone_1.default)().endOf("month").toDate();
+                        startOfYear = (0, moment_timezone_1.default)().startOf("year").toDate();
+                        endOfYear = (0, moment_timezone_1.default)().endOf("year").toDate();
+                        return [4 /*yield*/, user_model_1.UserModel.aggregate([
+                                {
+                                    $group: {
+                                        _id: null,
+                                        countStaff: {
+                                            $sum: {
+                                                $cond: [{ $eq: ["$role", role_const_1.ROLES.STAFF] }, 1, 0],
+                                            },
+                                        },
+                                        countClient: {
+                                            $sum: {
+                                                $cond: [{ $eq: ["$role", role_const_1.ROLES.CLIENT] }, 1, 0],
+                                            },
+                                        },
+                                    },
+                                },
+                            ])];
+                    case 1:
+                        getStatsUser = _j.sent();
+                        return [4 /*yield*/, user_model_1.UserModel.aggregate([
+                                {
+                                    $group: {
+                                        _id: null,
+                                        countBook: {
+                                            $sum: 1,
+                                        },
+                                    },
+                                },
+                            ])];
+                    case 2:
+                        getStatsBook = _j.sent();
+                        return [4 /*yield*/, order_model_1.OrderModel.aggregate([
+                                {
+                                    $group: {
+                                        _id: null,
+                                        revenue: {
+                                            $sum: {
+                                                $cond: [
+                                                    { $eq: ["$status", model_const_1.OrderStatusEnum.SUCCESS] },
+                                                    "$finalCost",
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                        revenueToDay: {
+                                            $sum: {
+                                                $cond: [
+                                                    {
+                                                        $and: [
+                                                            { $gte: ["$createdAt", startOfDay] },
+                                                            { $lte: ["$createdAt", endOfDate] },
+                                                            { $eq: ["$status", model_const_1.OrderStatusEnum.SUCCESS] },
+                                                        ],
+                                                    },
+                                                    "$finalCost",
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                        revenueThisWeek: {
+                                            $sum: {
+                                                $cond: [
+                                                    {
+                                                        $and: [
+                                                            { $gte: ["$createdAt", startOfWeek] },
+                                                            { $lte: ["$createdAt", endOfWeek] },
+                                                            { $eq: ["$status", model_const_1.OrderStatusEnum.SUCCESS] },
+                                                        ],
+                                                    },
+                                                    "$finalCost",
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                        revenueThisMonth: {
+                                            $sum: {
+                                                $cond: [
+                                                    {
+                                                        $and: [
+                                                            { $gte: ["$createdAt", startOfMonth] },
+                                                            { $lte: ["$createdAt", endOfMonth] },
+                                                            { $eq: ["$status", model_const_1.OrderStatusEnum.SUCCESS] },
+                                                        ],
+                                                    },
+                                                    "$finalCost",
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                        revenueThisYear: {
+                                            $sum: {
+                                                $cond: [
+                                                    {
+                                                        $and: [
+                                                            { $gte: ["$createdAt", startOfYear] },
+                                                            { $lte: ["$createdAt", endOfYear] },
+                                                            { $eq: ["$status", model_const_1.OrderStatusEnum.SUCCESS] },
+                                                        ],
+                                                    },
+                                                    "$finalCost",
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                    },
+                                },
+                            ])];
+                    case 3:
+                        getStatsRevenue = _j.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    totalClients: ((_a = getStatsUser[0]) === null || _a === void 0 ? void 0 : _a.countClients) || 0,
+                                    totalStaffs: ((_b = getStatsUser[0]) === null || _b === void 0 ? void 0 : _b.countClients) || 0,
+                                    totalBooks: ((_c = getStatsBook[0]) === null || _c === void 0 ? void 0 : _c.countBook) || 0,
+                                    revenue: ((_d = getStatsRevenue[0]) === null || _d === void 0 ? void 0 : _d.revenue) || 0,
+                                    revenueToDay: ((_e = getStatsRevenue[0]) === null || _e === void 0 ? void 0 : _e.revenueToDay) || 0,
+                                    revenueThisWeek: ((_f = getStatsRevenue[0]) === null || _f === void 0 ? void 0 : _f.revenueThisWeek) || 0,
+                                    revenueThisMonth: ((_g = getStatsRevenue[0]) === null || _g === void 0 ? void 0 : _g.revenueThisMonth) || 0,
+                                    revenueThisYear: ((_h = getStatsRevenue[0]) === null || _h === void 0 ? void 0 : _h.revenueThisYear) || 0,
+                                },
                             })];
                 }
             });

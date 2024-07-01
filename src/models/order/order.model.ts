@@ -3,7 +3,7 @@ import { BaseDocument } from "../../base/baseModel";
 import {
   OrderStatusEnum,
   PaymentStatusEnum,
-  paymentMethodEnum,
+  PaymentMethodEnum,
 } from "../../constants/model.const";
 
 // Định nghĩa type cho user
@@ -47,8 +47,8 @@ const orderSchema = new mongoose.Schema(
     isPaid: { type: Boolean, default: false },
     paymentMethod: {
       type: String,
-      enum: Object.values(paymentMethodEnum),
-      default: paymentMethodEnum.CASH,
+      enum: Object.values(PaymentMethodEnum),
+      default: PaymentMethodEnum.CASH,
     },
     noteUpdate: { type: String },
     paymentStatus: {

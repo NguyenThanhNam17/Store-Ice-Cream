@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentStatusEnum = exports.ShoppingCartStatusEnum = exports.paymentMethodEnum = exports.OrderStatusEnum = exports.UserRoleEnum = void 0;
+exports.PaymentStatusEnum = exports.ShoppingCartStatusEnum = exports.PaymentMethodEnum = exports.OrderStatusEnum = exports.UserRoleEnum = void 0;
 var UserRoleEnum;
 (function (UserRoleEnum) {
     UserRoleEnum["ADMIN"] = "ADMIN";
@@ -17,12 +17,12 @@ var OrderStatusEnum;
     OrderStatusEnum["CANCEL"] = "CANCEL";
     //IN_CART = "IN_CART",
 })(OrderStatusEnum || (exports.OrderStatusEnum = OrderStatusEnum = {}));
-var paymentMethodEnum;
-(function (paymentMethodEnum) {
-    paymentMethodEnum["CASH"] = "CASH";
-    paymentMethodEnum["ATM"] = "ATM";
-    paymentMethodEnum["WALLET"] = "WALLET";
-})(paymentMethodEnum || (exports.paymentMethodEnum = paymentMethodEnum = {}));
+var PaymentMethodEnum;
+(function (PaymentMethodEnum) {
+    PaymentMethodEnum["CASH"] = "CASH";
+    PaymentMethodEnum["ATM"] = "ATM";
+    PaymentMethodEnum["WALLET"] = "WALLET";
+})(PaymentMethodEnum || (exports.PaymentMethodEnum = PaymentMethodEnum = {}));
 var ShoppingCartStatusEnum;
 (function (ShoppingCartStatusEnum) {
     ShoppingCartStatusEnum["IN_CART"] = "IN_CART";

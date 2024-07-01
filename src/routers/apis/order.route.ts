@@ -13,8 +13,9 @@ import { orderService } from "../..//models/order/order.service";
 import { OrderModel } from "../../models/order/order.model";
 import {
   OrderStatusEnum,
+  PaymentMethodEnum,
+  PaymentStatusEnum,
   ShoppingCartStatusEnum,
-  paymentMethodEnum,
 } from "../../constants/model.const";
 import { ShoppingCartModel } from "../../models/shoppingCart/shoppingCart.model";
 import { userService } from "../../models/user/user.service";
@@ -74,6 +75,11 @@ class OrderRoute extends BaseRoute {
       "/cancelOrder",
       [this.authentication],
       this.route(this.cancelOrder)
+    );
+    this.router.post(
+      "/rePaymentOrder",
+      [this.authentication],
+      this.route(this.rePaymentOrder)
     );
   }
   //Auth
@@ -247,7 +253,7 @@ class OrderRoute extends BaseRoute {
       throw ErrorHelper.requestDataInvalid("phone");
     }
     let initialCost = book.price * quantity;
-    if (paymentMethod == paymentMethodEnum.WALLET) {
+    if (paymentMethod == PaymentMethodEnum.WALLET) {
       let wallet = await WalletModel.findOne({ userId: tokenData._id });
 
       if (wallet.balance < initialCost + 20000) {
@@ -278,10 +284,10 @@ class OrderRoute extends BaseRoute {
       isPaid: true,
       shippingFee: 20000,
       status:
-        paymentMethod == paymentMethodEnum.CASH
+        paymentMethod == PaymentMethodEnum.CASH
           ? OrderStatusEnum.PENDING
           : OrderStatusEnum.UNPAID,
-      paymentMethod: paymentMethod || paymentMethodEnum.CASH,
+      paymentMethod: paymentMethod || PaymentMethodEnum.CASH,
     });
     await order.save();
     await Promise.all([
@@ -521,6 +527,99 @@ class OrderRoute extends BaseRoute {
       data: {
         order,
       },
+    });
+  }
+
+  async rePaymentOrder(req: Request, res: Response) {
+    let { orderId, paymentMethod } = req.body;
+    let mine = await UserModel.findById(req.tokenInfo._id);
+    if (!mine) {
+      throw ErrorHelper.userNotExist();
+    }
+    let order = await OrderModel.findById(orderId);
+    if (!order) {
+      throw ErrorHelper.recoredNotFound("order!");
+    }
+    if (order.isPaid) {
+      throw ErrorHelper.forbidden("The order is paid");
+    }
+    if (paymentMethod == PaymentMethodEnum.CASH) {
+      order.paymentMethod = PaymentMethodEnum.CASH;
+      order.paymentStatus = PaymentStatusEnum.SUCCESS;
+      order.isPaid = true;
+    } else if (paymentMethod == PaymentMethodEnum.WALLET) {
+      let wallet = await WalletModel.findById(mine.walletId);
+      if (wallet.balance < order.finalCost) {
+        throw ErrorHelper.forbidden("Wallet balance is not enough!");
+      } else {
+        await walletService.updateOne(mine.walletId, {
+          $inc: {
+            balance: -order.finalCost,
+          },
+        });
+        order.paymentStatus = PaymentStatusEnum.SUCCESS;
+        order.isPaid = true;
+      }
+    } else {
+      const invoice = new InvoiceModel({
+        userId: req.tokenInfo._id,
+        amount: order.finalCost,
+        type: "PAYMENT",
+        orderId: order._id,
+      });
+      await invoice.save();
+      const MERCHANT_KEY = process.env.MERCHANT_KEY;
+      const MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
+      const END_POINT = process.env.END_POINT_9PAY;
+      const time = Math.round(Date.now() / 1000);
+      const returnUrl =
+        "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app";
+      let parameters;
+      parameters = {
+        merchantKey: MERCHANT_KEY,
+        time: time,
+        invoice_no: invoice._id,
+        amount: order.finalCost,
+        description: "Thanh toán đơn hàng",
+        return_url: returnUrl,
+        method: "ATM_CARD",
+      };
+
+      const httpQuery = await UtilsHelper.buildHttpQuery(parameters);
+      const message =
+        "POST" +
+        "\n" +
+        END_POINT +
+        "/payments/create" +
+        "\n" +
+        time +
+        "\n" +
+        httpQuery;
+      const signature = await UtilsHelper.buildSignature(
+        message,
+        MERCHANT_SECRET_KEY
+      );
+      const baseEncode = Buffer.from(JSON.stringify(parameters)).toString(
+        "base64"
+      );
+      const httpBuild = {
+        baseEncode: baseEncode,
+        signature: signature,
+      };
+      const buildHttpQuery = await UtilsHelper.buildHttpQuery(httpBuild);
+      const directUrl = END_POINT + "/portal?" + buildHttpQuery;
+      return res.status(200).json({
+        status: 200,
+        code: "200",
+        message: "success",
+        data: directUrl,
+      });
+    }
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {},
     });
   }
 }

@@ -15,6 +15,9 @@ import { UtilsHelper } from "../../helper/utils.helper";
 import { WalletModel } from "../../models/wallet/wallet.model";
 import { walletService } from "../../models/wallet/wallet.service";
 import { InvoiceModel } from "../../models/invoice/invoice.model";
+import { OrderModel } from "../../models/order/order.model";
+import { OrderStatusEnum } from "../../constants/model.const";
+import moment from "moment-timezone";
 class UserRoute extends BaseRoute {
   constructor() {
     super();
@@ -67,6 +70,11 @@ class UserRoute extends BaseRoute {
       "/depositToWallet",
       [this.authentication],
       this.route(this.depositToWallet)
+    );
+    this.router.post(
+      "/getStatsForDashboard",
+      [this.authentication],
+      this.route(this.getStatsForDashboard)
     );
   }
 
@@ -433,6 +441,138 @@ class UserRoute extends BaseRoute {
       code: "200",
       message: "success",
       data: directUrl,
+    });
+  }
+  async getStatsForDashboard(req: Request, res: Response) {
+    if (![ROLES.ADMIN, ROLES.STAFF].includes(req.tokenInfo.role_)) {
+      throw ErrorHelper.permissionDeny();
+    }
+    let startOfDay = moment().startOf("day").toDate();
+    let endOfDate = moment().endOf("day").toDate();
+    let startOfWeek = moment().startOf("week").toDate();
+    let endOfWeek = moment().endOf("week").toDate();
+    let startOfMonth = moment().startOf("month").toDate();
+    let endOfMonth = moment().endOf("month").toDate();
+    let startOfYear = moment().startOf("year").toDate();
+    let endOfYear = moment().endOf("year").toDate();
+    let getStatsUser = await UserModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          countStaff: {
+            $sum: {
+              $cond: [{ $eq: ["$role", ROLES.STAFF] }, 1, 0],
+            },
+          },
+          countClient: {
+            $sum: {
+              $cond: [{ $eq: ["$role", ROLES.CLIENT] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+    let getStatsBook = await UserModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          countBook: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+    let getStatsRevenue = await OrderModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          revenue: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", OrderStatusEnum.SUCCESS] },
+                "$finalCost",
+                0,
+              ],
+            },
+          },
+          revenueToDay: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$createdAt", startOfDay] },
+                    { $lte: ["$createdAt", endOfDate] },
+                    { $eq: ["$status", OrderStatusEnum.SUCCESS] },
+                  ],
+                },
+                "$finalCost",
+                0,
+              ],
+            },
+          },
+          revenueThisWeek: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$createdAt", startOfWeek] },
+                    { $lte: ["$createdAt", endOfWeek] },
+                    { $eq: ["$status", OrderStatusEnum.SUCCESS] },
+                  ],
+                },
+                "$finalCost",
+                0,
+              ],
+            },
+          },
+          revenueThisMonth: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$createdAt", startOfMonth] },
+                    { $lte: ["$createdAt", endOfMonth] },
+                    { $eq: ["$status", OrderStatusEnum.SUCCESS] },
+                  ],
+                },
+                "$finalCost",
+                0,
+              ],
+            },
+          },
+          revenueThisYear: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$createdAt", startOfYear] },
+                    { $lte: ["$createdAt", endOfYear] },
+                    { $eq: ["$status", OrderStatusEnum.SUCCESS] },
+                  ],
+                },
+                "$finalCost",
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        totalClients: getStatsUser[0]?.countClients || 0,
+        totalStaffs: getStatsUser[0]?.countClients || 0,
+        totalBooks: getStatsBook[0]?.countBook || 0,
+        revenue: getStatsRevenue[0]?.revenue || 0,
+        revenueToDay: getStatsRevenue[0]?.revenueToDay || 0,
+        revenueThisWeek: getStatsRevenue[0]?.revenueThisWeek || 0,
+        revenueThisMonth: getStatsRevenue[0]?.revenueThisMonth || 0,
+        revenueThisYear: getStatsRevenue[0]?.revenueThisYear || 0,
+      },
     });
   }
 }
