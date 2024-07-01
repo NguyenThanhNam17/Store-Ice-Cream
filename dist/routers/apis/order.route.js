@@ -595,7 +595,7 @@ var OrderRoute = /** @class */ (function (_super) {
     //cancel order
     OrderRoute.prototype.cancelOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, order, shoppingCarts, wallet;
+            var id, order, user, shoppingCarts, wallet;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -607,11 +607,17 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (!order) {
                             throw error_1.ErrorHelper.recoredNotFound("Book!");
                         }
+                        return [4 /*yield*/, user_model_1.UserModel.findById(order.userId)];
+                    case 2:
+                        user = _a.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
                         order.status = model_const_1.OrderStatusEnum.CANCEL;
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
                                 _id: order.shoppingCartIds,
                             })];
-                    case 2:
+                    case 3:
                         shoppingCarts = _a.sent();
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
@@ -628,17 +634,17 @@ var OrderRoute = /** @class */ (function (_super) {
                             });
                         }); });
                         return [4 /*yield*/, order.save()];
-                    case 3:
-                        _a.sent();
-                        return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: req.tokenInfo._id })];
                     case 4:
+                        _a.sent();
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
+                    case 5:
                         wallet = _a.sent();
                         return [4 /*yield*/, wallet_service_1.walletService.updateOne(wallet._id, {
                                 $inc: {
                                     balance: -order.finalCost,
                                 },
                             })];
-                    case 5:
+                    case 6:
                         _a.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,

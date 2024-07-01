@@ -488,6 +488,10 @@ class OrderRoute extends BaseRoute {
     if (!order) {
       throw ErrorHelper.recoredNotFound("Book!");
     }
+    let user = await UserModel.findById(order.userId);
+    if (!user) {
+      throw ErrorHelper.userNotExist();
+    }
     order.status = OrderStatusEnum.CANCEL;
     let shoppingCarts = await ShoppingCartModel.find({
       _id: order.shoppingCartIds,
@@ -500,7 +504,7 @@ class OrderRoute extends BaseRoute {
       });
     });
     await order.save();
-    let wallet = await WalletModel.findOne({ userId: req.tokenInfo._id });
+    let wallet = await WalletModel.findById(user.walletId);
     await walletService.updateOne(wallet._id, {
       $inc: {
         balance: -order.finalCost,
