@@ -273,7 +273,7 @@ class ShoppingCartRoute extends BaseRoute {
         { _id: order.userId },
         {
           $addToSet: {
-            searchs: {
+            categoryIds: {
               $each: bookCategoryIds,
             },
           },
@@ -284,7 +284,7 @@ class ShoppingCartRoute extends BaseRoute {
         { _id: order.userId },
         {
           $push: {
-            searchs: {
+            categoryIds: {
               $each: [],
               $slice: -10,
             },

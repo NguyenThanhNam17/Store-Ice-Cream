@@ -87,64 +87,69 @@ class BookRoute extends BaseRoute {
     if (!page) {
       page = 1;
     }
-    if (search && tokenData) {
+    if (tokenData) {
       if (tokenData.role_ != ROLES.ADMIN) {
         let mine = await UserModel.findById(tokenData._id);
         if (!mine) {
           throw ErrorHelper.userNotExist();
         }
-        const keywords = mine.searchs.join("|");
-        _.set(req.body, "filter", {
-          content: { $regex: keywords, $options: "i" },
-        });
-        const text = search;
-        const tokenizer = vntk.posTag();
-        const words: any = tokenizer.tag(text);
+        if (mine.searchs.length > 0) {
+          const keywords = mine.searchs.join("|");
+          _.set(req.body, "filter.name", { $regex: keywords, $options: "i" });
+        }
+        if (mine.categoryIds.length > 0) {
+          _.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
+        }
+        if (search) {
+          const text = search;
+          const tokenizer = vntk.posTag();
+          const words: any = tokenizer.tag(text);
 
-        const nouns = words.filter(
-          (word: any) => word[1] === "N" || word[1] === "M" || word[1] === "Np"
-        );
+          const nouns = words.filter(
+            (word: any) =>
+              word[1] === "N" || word[1] === "M" || word[1] === "Np"
+          );
 
-        const tfidf = new vntk.TfIdf();
-        tfidf.addDocument(text);
-        const importantWords = nouns.map((word: any) => {
-          return {
-            word: word[0],
-            tfidf: tfidf.tfidfs(word[0], function (i, measure) {
-              console.log("document #" + i + " is " + measure);
-            }),
-          };
-        });
+          const tfidf = new vntk.TfIdf();
+          tfidf.addDocument(text);
+          const importantWords = nouns.map((word: any) => {
+            return {
+              word: word[0],
+              tfidf: tfidf.tfidfs(word[0], function (i, measure) {
+                console.log("document #" + i + " is " + measure);
+              }),
+            };
+          });
 
-        const topKeywords = importantWords
-          .sort((a: any, b: any) => b.tfidf - a.tfidf)
-          .slice(0, 3);
-        const result = topKeywords.map((item: any) => item.word);
-
-        await Promise.all([
-          UserModel.updateOne(
-            { _id: mine._id },
-            {
-              $addToSet: {
-                searchs: {
-                  $each: result,
+          const topKeywords = importantWords
+            .sort((a: any, b: any) => b.tfidf - a.tfidf)
+            .slice(0, 3);
+          const result = topKeywords.map((item: any) => item.word);
+          await Promise.all([
+            UserModel.updateOne(
+              { _id: mine._id },
+              {
+                $addToSet: {
+                  searchs: {
+                    $each: result,
+                  },
                 },
-              },
-            }
-          ),
-          //limit array size
-          UserModel.updateOne(
-            { _id: mine._id },
-            {
-              $push: {
-                searchs: {
-                  $each: [],
-                  $slice: -10,
+              }
+            ),
+            //limit array size
+            UserModel.updateOne(
+              { _id: mine._id },
+              {
+                $push: {
+                  searchs: {
+                    $each: [],
+                    $slice: -10,
+                  },
                 },
-              },
-            }
-          ),
-        ]);
+              }
+            ),
+          ]);
+        }
       }
     }
     if (fromDate && toDate) {

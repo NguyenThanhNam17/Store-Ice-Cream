@@ -143,7 +143,7 @@ var BookRoute = /** @class */ (function (_super) {
                         if (!page) {
                             page = 1;
                         }
-                        if (!(search && tokenData)) return [3 /*break*/, 3];
+                        if (!tokenData) return [3 /*break*/, 3];
                         if (!(tokenData.role_ != role_const_1.ROLES.ADMIN)) return [3 /*break*/, 3];
                         return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
                     case 1:
@@ -151,14 +151,20 @@ var BookRoute = /** @class */ (function (_super) {
                         if (!mine) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        keywords = mine.searchs.join("|");
-                        lodash_1.default.set(req.body, "filter", {
-                            content: { $regex: keywords, $options: "i" },
-                        });
+                        if (mine.searchs.length > 0) {
+                            keywords = mine.searchs.join("|");
+                            lodash_1.default.set(req.body, "filter.name", { $regex: keywords, $options: "i" });
+                        }
+                        if (mine.categoryIds.length > 0) {
+                            lodash_1.default.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
+                        }
+                        if (!search) return [3 /*break*/, 3];
                         text = search;
                         tokenizer = vntk_1.default.posTag();
                         words = tokenizer.tag(text);
-                        nouns = words.filter(function (word) { return word[1] === "N" || word[1] === "M" || word[1] === "Np"; });
+                        nouns = words.filter(function (word) {
+                            return word[1] === "N" || word[1] === "M" || word[1] === "Np";
+                        });
                         tfidf_1 = new vntk_1.default.TfIdf();
                         tfidf_1.addDocument(text);
                         importantWords = nouns.map(function (word) {

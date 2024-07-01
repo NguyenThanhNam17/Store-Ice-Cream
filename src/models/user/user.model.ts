@@ -15,6 +15,7 @@ export type IUser = BaseDocument & {
   searchs?: string[];
   isBlock?: boolean;
   walletId?: string;
+  categoryIds?: string[];
 };
 
 const userSchema = new mongoose.Schema(
@@ -29,6 +30,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String },
     key: { type: String },
     searchs: [{ type: String }],
+    categoryIds: [{ type: Schema.Types.ObjectId, ref: "BookCategory" }],
     isBlock: { type: Boolean, default: false },
     walletId: { type: Schema.Types.ObjectId, ref: "Wallet" },
   },

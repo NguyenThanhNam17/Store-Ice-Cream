@@ -377,7 +377,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, Promise.all([
                                 user_model_1.UserModel.updateOne({ _id: order.userId }, {
                                     $addToSet: {
-                                        searchs: {
+                                        categoryIds: {
                                             $each: [book.categoryId],
                                         },
                                     },
@@ -385,7 +385,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 //limit array size
                                 user_model_1.UserModel.updateOne({ _id: order.userId }, {
                                     $push: {
-                                        searchs: {
+                                        categoryIds: {
                                             $each: [],
                                             $slice: -10,
                                         },

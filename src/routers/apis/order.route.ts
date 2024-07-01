@@ -309,7 +309,7 @@ class OrderRoute extends BaseRoute {
         { _id: order.userId },
         {
           $addToSet: {
-            searchs: {
+            categoryIds: {
               $each: [book.categoryId],
             },
           },
@@ -320,7 +320,7 @@ class OrderRoute extends BaseRoute {
         { _id: order.userId },
         {
           $push: {
-            searchs: {
+            categoryIds: {
               $each: [],
               $slice: -10,
             },

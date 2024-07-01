@@ -36,6 +36,7 @@ var userSchema = new mongoose_1.default.Schema({
     password: { type: String },
     key: { type: String },
     searchs: [{ type: String }],
+    categoryIds: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "BookCategory" }],
     isBlock: { type: Boolean, default: false },
     walletId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Wallet" },
 }, { timestamps: true });
