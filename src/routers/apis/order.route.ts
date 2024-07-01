@@ -546,7 +546,7 @@ class OrderRoute extends BaseRoute {
     if (!order) {
       throw ErrorHelper.recoredNotFound("order!");
     }
-    if (order.isPaid) {
+    if (order.isPaid == true) {
       throw ErrorHelper.forbidden("The order is paid");
     }
     if (paymentMethod == PaymentMethodEnum.CASH) {

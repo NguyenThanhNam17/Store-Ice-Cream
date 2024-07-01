@@ -702,7 +702,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (!order) {
                             throw error_1.ErrorHelper.recoredNotFound("order!");
                         }
-                        if (order.isPaid) {
+                        if (order.isPaid == true) {
                             throw error_1.ErrorHelper.forbidden("The order is paid");
                         }
                         if (!(paymentMethod == model_const_1.PaymentMethodEnum.CASH)) return [3 /*break*/, 3];
