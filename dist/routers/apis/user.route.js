@@ -600,11 +600,11 @@ var UserRoute = /** @class */ (function (_super) {
         });
     };
     UserRoute.prototype.getStatsForDashboard = function (req, res) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         return __awaiter(this, void 0, void 0, function () {
             var startOfDay, endOfDate, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, getStatsUser, getStatsBook, getStatsRevenue;
-            return __generator(this, function (_j) {
-                switch (_j.label) {
+            return __generator(this, function (_k) {
+                switch (_k.label) {
                     case 0:
                         if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(req.tokenInfo.role_)) {
                             throw error_1.ErrorHelper.permissionDeny();
@@ -635,7 +635,7 @@ var UserRoute = /** @class */ (function (_super) {
                                 },
                             ])];
                     case 1:
-                        getStatsUser = _j.sent();
+                        getStatsUser = _k.sent();
                         return [4 /*yield*/, user_model_1.UserModel.aggregate([
                                 {
                                     $group: {
@@ -647,11 +647,14 @@ var UserRoute = /** @class */ (function (_super) {
                                 },
                             ])];
                     case 2:
-                        getStatsBook = _j.sent();
+                        getStatsBook = _k.sent();
                         return [4 /*yield*/, order_model_1.OrderModel.aggregate([
                                 {
                                     $group: {
                                         _id: null,
+                                        countOrders: {
+                                            $sum: 1,
+                                        },
                                         revenue: {
                                             $sum: {
                                                 $cond: [
@@ -725,7 +728,7 @@ var UserRoute = /** @class */ (function (_super) {
                                 },
                             ])];
                     case 3:
-                        getStatsRevenue = _j.sent();
+                        getStatsRevenue = _k.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
@@ -734,11 +737,12 @@ var UserRoute = /** @class */ (function (_super) {
                                     totalClients: ((_a = getStatsUser[0]) === null || _a === void 0 ? void 0 : _a.countClients) || 0,
                                     totalStaffs: ((_b = getStatsUser[0]) === null || _b === void 0 ? void 0 : _b.countClients) || 0,
                                     totalBooks: ((_c = getStatsBook[0]) === null || _c === void 0 ? void 0 : _c.countBook) || 0,
-                                    revenue: ((_d = getStatsRevenue[0]) === null || _d === void 0 ? void 0 : _d.revenue) || 0,
-                                    revenueToDay: ((_e = getStatsRevenue[0]) === null || _e === void 0 ? void 0 : _e.revenueToDay) || 0,
-                                    revenueThisWeek: ((_f = getStatsRevenue[0]) === null || _f === void 0 ? void 0 : _f.revenueThisWeek) || 0,
-                                    revenueThisMonth: ((_g = getStatsRevenue[0]) === null || _g === void 0 ? void 0 : _g.revenueThisMonth) || 0,
-                                    revenueThisYear: ((_h = getStatsRevenue[0]) === null || _h === void 0 ? void 0 : _h.revenueThisYear) || 0,
+                                    totalOrders: ((_d = getStatsRevenue[0]) === null || _d === void 0 ? void 0 : _d.countOrders) || 0,
+                                    revenue: ((_e = getStatsRevenue[0]) === null || _e === void 0 ? void 0 : _e.revenue) || 0,
+                                    revenueToDay: ((_f = getStatsRevenue[0]) === null || _f === void 0 ? void 0 : _f.revenueToDay) || 0,
+                                    revenueThisWeek: ((_g = getStatsRevenue[0]) === null || _g === void 0 ? void 0 : _g.revenueThisWeek) || 0,
+                                    revenueThisMonth: ((_h = getStatsRevenue[0]) === null || _h === void 0 ? void 0 : _h.revenueThisMonth) || 0,
+                                    revenueThisYear: ((_j = getStatsRevenue[0]) === null || _j === void 0 ? void 0 : _j.revenueThisYear) || 0,
                                 },
                             })];
                 }

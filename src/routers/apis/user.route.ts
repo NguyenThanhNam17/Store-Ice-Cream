@@ -492,6 +492,9 @@ class UserRoute extends BaseRoute {
       {
         $group: {
           _id: null,
+          countOrders: {
+            $sum: 1,
+          },
           revenue: {
             $sum: {
               $cond: [
@@ -573,6 +576,7 @@ class UserRoute extends BaseRoute {
         totalClients: getStatsUser[0]?.countClients || 0,
         totalStaffs: getStatsUser[0]?.countClients || 0,
         totalBooks: getStatsBook[0]?.countBook || 0,
+        totalOrders: getStatsRevenue[0]?.countOrders || 0,
         revenue: getStatsRevenue[0]?.revenue || 0,
         revenueToDay: getStatsRevenue[0]?.revenueToDay || 0,
         revenueThisWeek: getStatsRevenue[0]?.revenueThisWeek || 0,
