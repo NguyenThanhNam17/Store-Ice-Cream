@@ -298,7 +298,7 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.createOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, bookId, quantity, address, note, phoneNumber, paymentMethod, book, newPhone, phoneCheck, initialCost, wallet, shoppingCart, code, order, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
+            var tokenData, _a, bookId, quantity, address, note, phoneNumber, paymentMethod, mine, book, newPhone, phoneCheck, initialCost, wallet, shoppingCart, code, order, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -307,8 +307,11 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (!bookId || !quantity || !address || !phoneNumber) {
                             throw error_1.ErrorHelper.requestDataInvalid("Invalid data!");
                         }
-                        return [4 /*yield*/, book_model_1.BookModel.findById(bookId)];
+                        return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
                     case 1:
+                        mine = _b.sent();
+                        return [4 /*yield*/, book_model_1.BookModel.findById(bookId)];
+                    case 2:
                         book = _b.sent();
                         if (!book) {
                             throw error_1.ErrorHelper.recoredNotFound("book!");
@@ -319,15 +322,22 @@ var OrderRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.requestDataInvalid("phone");
                         }
                         initialCost = book.price * quantity;
-                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 3];
-                        return [4 /*yield*/, wallet_model_1.WalletModel.findOne({ userId: tokenData._id })];
-                    case 2:
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 5];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(mine.walletId)];
+                    case 3:
                         wallet = _b.sent();
                         if (wallet.balance < initialCost + 20000) {
                             throw error_1.ErrorHelper.forbidden("Wallet balance is not enough!");
                         }
-                        _b.label = 3;
-                    case 3:
+                        return [4 /*yield*/, wallet_service_1.walletService.updateOne(wallet._id, {
+                                $inc: {
+                                    balance: -initialCost + 20000,
+                                },
+                            })];
+                    case 4:
+                        _b.sent();
+                        _b.label = 5;
+                    case 5:
                         shoppingCart = new shoppingCart_model_1.ShoppingCartModel({
                             bookId: book._id,
                             bookName: book.name,
@@ -336,10 +346,10 @@ var OrderRoute = /** @class */ (function (_super) {
                             status: model_const_1.ShoppingCartStatusEnum.SUCCESS,
                         });
                         return [4 /*yield*/, shoppingCart.save()];
-                    case 4:
+                    case 6:
                         _b.sent();
                         return [4 /*yield*/, order_helper_1.OrderHelper.generateOrderCode()];
-                    case 5:
+                    case 7:
                         code = _b.sent();
                         order = new order_model_1.OrderModel({
                             code: code,
@@ -360,7 +370,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             paymentMethod: paymentMethod || model_const_1.PaymentMethodEnum.CASH,
                         });
                         return [4 /*yield*/, order.save()];
-                    case 6:
+                    case 8:
                         _b.sent();
                         return [4 /*yield*/, Promise.all([
                                 user_model_1.UserModel.updateOne({ _id: order.userId }, {
@@ -380,9 +390,9 @@ var OrderRoute = /** @class */ (function (_super) {
                                     },
                                 }),
                             ])];
-                    case 7:
+                    case 9:
                         _b.sent();
-                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 12];
+                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 14];
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: tokenData._id,
                             amount: Number(order.finalCost),
@@ -390,7 +400,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             orderId: order._id,
                         });
                         return [4 /*yield*/, invoice.save()];
-                    case 8:
+                    case 10:
                         _b.sent();
                         MERCHANT_KEY = process.env.MERCHANT_KEY;
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
@@ -408,7 +418,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             method: "ATM_CARD",
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
-                    case 9:
+                    case 11:
                         httpQuery = _b.sent();
                         message = "POST" +
                             "\n" +
@@ -419,7 +429,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             "\n" +
                             httpQuery;
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
-                    case 10:
+                    case 12:
                         signature = _b.sent();
                         baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
                         httpBuild = {
@@ -427,7 +437,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             signature: signature,
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
-                    case 11:
+                    case 13:
                         buildHttpQuery = _b.sent();
                         directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
@@ -436,7 +446,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 12: return [2 /*return*/, res.status(200).json({
+                    case 14: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",

@@ -249,6 +249,7 @@ class OrderRoute extends BaseRoute {
     if (!bookId || !quantity || !address || !phoneNumber) {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
+    let mine = await UserModel.findById(req.tokenInfo._id);
     let book = await BookModel.findById(bookId);
     if (!book) {
       throw ErrorHelper.recoredNotFound("book!");
@@ -260,11 +261,15 @@ class OrderRoute extends BaseRoute {
     }
     let initialCost = book.price * quantity;
     if (paymentMethod == PaymentMethodEnum.WALLET) {
-      let wallet = await WalletModel.findOne({ userId: tokenData._id });
-
+      let wallet = await WalletModel.findById(mine.walletId);
       if (wallet.balance < initialCost + 20000) {
         throw ErrorHelper.forbidden("Wallet balance is not enough!");
       }
+      await walletService.updateOne(wallet._id, {
+        $inc: {
+          balance: -initialCost + 20000,
+        },
+      });
     }
 
     let shoppingCart = new ShoppingCartModel({
