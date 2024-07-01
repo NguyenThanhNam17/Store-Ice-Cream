@@ -298,8 +298,7 @@ class ShoppingCartRoute extends BaseRoute {
       const MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
       const END_POINT = process.env.END_POINT_9PAY;
       const time = Math.round(Date.now() / 1000);
-      const returnUrl =
-        "https://bookstore-client-64hy9o9zy-thuanaaas-projects.vercel.app";
+      const returnUrl = "https://bookstore-client-phi.vercel.app";
       let parameters;
       parameters = {
         merchantKey: MERCHANT_KEY,
