@@ -80,7 +80,7 @@ class BookRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, filter } = req.body;
+    var { limit, page, search, filter, fromDate, toDate } = req.body;
     if (!limit) {
       limit = 10;
     }
@@ -147,6 +147,12 @@ class BookRoute extends BaseRoute {
         ]);
       }
     }
+    if (fromDate && toDate) {
+      fromDate = moment(fromDate).startOf("day").toDate();
+      toDate = moment(toDate).endOf("day").toDate();
+      _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
+    }
+
     const books = await bookService.fetch(
       {
         filter: filter,

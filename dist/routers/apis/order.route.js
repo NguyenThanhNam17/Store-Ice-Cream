@@ -60,6 +60,7 @@ var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var error_1 = require("../../base/error");
 var book_model_1 = require("../../models/book/book.model");
+var lodash_1 = __importDefault(require("lodash"));
 var book_service_1 = require("../../models/book/book.service");
 var order_service_1 = require("../..//models/order/order.service");
 var order_model_1 = require("../../models/order/order.model");
@@ -71,6 +72,7 @@ var invoice_model_1 = require("../../models/invoice/invoice.model");
 var order_helper_1 = require("../../models/order/order.helper");
 var wallet_model_1 = require("../../models/wallet/wallet.model");
 var wallet_service_1 = require("../../models/wallet/wallet.service");
+var moment_timezone_1 = __importDefault(require("moment-timezone"));
 var OrderRoute = /** @class */ (function (_super) {
     __extends(OrderRoute, _super);
     function OrderRoute() {
@@ -172,7 +174,7 @@ var OrderRoute = /** @class */ (function (_super) {
     //getAllOrderForAdmin
     OrderRoute.prototype.getAllOrderForAdmin = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, orders;
+            var tokenData, _a, limit, page, search, filter, fromDate, toDate, orders;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -192,12 +194,20 @@ var OrderRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
                         if (!limit) {
                             limit = 10;
                         }
                         if (!page) {
                             page = 1;
+                        }
+                        // if (filter.status) {
+                        //   filter.status = { $nin: [OrderStatusEnum.IN_CART] };
+                        // }
+                        if (fromDate && toDate) {
+                            fromDate = (0, moment_timezone_1.default)(fromDate).startOf("day").toDate();
+                            toDate = (0, moment_timezone_1.default)(toDate).endOf("day").toDate();
+                            lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
                                 filter: filter,

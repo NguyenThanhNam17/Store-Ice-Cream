@@ -18,6 +18,7 @@ import { InvoiceModel } from "../../models/invoice/invoice.model";
 import { OrderModel } from "../../models/order/order.model";
 import { OrderStatusEnum } from "../../constants/model.const";
 import moment from "moment-timezone";
+import _ from "lodash";
 class UserRoute extends BaseRoute {
   constructor() {
     super();
@@ -175,12 +176,17 @@ class UserRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, filter } = req.body;
+    var { limit, page, search, filter, fromDate, toDate } = req.body;
     if (!limit) {
       limit = 10;
     }
     if (!page) {
       page = 1;
+    }
+    if (fromDate && toDate) {
+      fromDate = moment(fromDate).startOf("day").toDate();
+      toDate = moment(toDate).endOf("day").toDate();
+      _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
     }
     const users = await userService.fetch({
       filter: filter,

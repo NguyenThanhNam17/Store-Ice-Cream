@@ -25,6 +25,7 @@ import { InvoiceModel } from "../../models/invoice/invoice.model";
 import { OrderHelper } from "../../models/order/order.helper";
 import { WalletModel } from "../../models/wallet/wallet.model";
 import { walletService } from "../../models/wallet/wallet.service";
+import moment from "moment-timezone";
 class OrderRoute extends BaseRoute {
   constructor() {
     super();
@@ -159,7 +160,7 @@ class OrderRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, filter } = req.body;
+    var { limit, page, search, filter, fromDate, toDate } = req.body;
     if (!limit) {
       limit = 10;
     }
@@ -169,6 +170,11 @@ class OrderRoute extends BaseRoute {
     // if (filter.status) {
     //   filter.status = { $nin: [OrderStatusEnum.IN_CART] };
     // }
+    if (fromDate && toDate) {
+      fromDate = moment(fromDate).startOf("day").toDate();
+      toDate = moment(toDate).endOf("day").toDate();
+      _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
+    }
     const orders = await orderService.fetch(
       {
         filter: filter,

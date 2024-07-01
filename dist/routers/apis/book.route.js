@@ -60,6 +60,7 @@ var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var error_1 = require("../../base/error");
 var book_model_1 = require("../../models/book/book.model");
+var moment_1 = __importDefault(require("moment"));
 var lodash_1 = __importDefault(require("lodash"));
 var book_service_1 = require("../../models/book/book.service");
 var vntk_1 = __importDefault(require("vntk"));
@@ -116,7 +117,7 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
+            var tokenData, _a, limit, page, search, filter, fromDate, toDate, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -135,7 +136,7 @@ var BookRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
                         if (!limit) {
                             limit = 10;
                         }
@@ -193,12 +194,18 @@ var BookRoute = /** @class */ (function (_super) {
                     case 2:
                         _b.sent();
                         _b.label = 3;
-                    case 3: return [4 /*yield*/, book_service_1.bookService.fetch({
-                            filter: filter,
-                            search: search,
-                            limit: limit,
-                            page: page,
-                        }, ["category"])];
+                    case 3:
+                        if (fromDate && toDate) {
+                            fromDate = (0, moment_1.default)(fromDate).startOf("day").toDate();
+                            toDate = (0, moment_1.default)(toDate).endOf("day").toDate();
+                            lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
+                        }
+                        return [4 /*yield*/, book_service_1.bookService.fetch({
+                                filter: filter,
+                                search: search,
+                                limit: limit,
+                                page: page,
+                            }, ["category"])];
                     case 4:
                         books = _b.sent();
                         return [2 /*return*/, res.status(200).json({

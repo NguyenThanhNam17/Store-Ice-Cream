@@ -69,6 +69,7 @@ var invoice_model_1 = require("../../models/invoice/invoice.model");
 var order_model_1 = require("../../models/order/order.model");
 var model_const_1 = require("../../constants/model.const");
 var moment_timezone_1 = __importDefault(require("moment-timezone"));
+var lodash_1 = __importDefault(require("lodash"));
 var UserRoute = /** @class */ (function (_super) {
     __extends(UserRoute, _super);
     function UserRoute() {
@@ -207,7 +208,7 @@ var UserRoute = /** @class */ (function (_super) {
     //getAllUser
     UserRoute.prototype.getAllUser = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, limit, page, search, filter, users;
+            var _a, limit, page, search, filter, fromDate, toDate, users;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -226,12 +227,17 @@ var UserRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
                         if (!limit) {
                             limit = 10;
                         }
                         if (!page) {
                             page = 1;
+                        }
+                        if (fromDate && toDate) {
+                            fromDate = (0, moment_timezone_1.default)(fromDate).startOf("day").toDate();
+                            toDate = (0, moment_timezone_1.default)(toDate).endOf("day").toDate();
+                            lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
                         }
                         return [4 /*yield*/, user_service_1.userService.fetch({
                                 filter: filter,
