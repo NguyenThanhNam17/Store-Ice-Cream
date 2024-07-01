@@ -429,7 +429,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: directUrl,
+                                data: { order: order, url: directUrl },
                             })];
                     case 11: return [2 /*return*/, res.status(200).json({
                             status: 200,

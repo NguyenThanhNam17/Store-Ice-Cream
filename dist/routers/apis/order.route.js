@@ -434,7 +434,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: directUrl,
+                                data: { order: order, url: directUrl },
                             })];
                     case 12: return [2 /*return*/, res.status(200).json({
                             status: 200,
@@ -780,7 +780,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 status: 200,
                                 code: "200",
                                 message: "success",
-                                data: directUrl,
+                                data: { order: order, url: directUrl },
                             })];
                     case 13: return [2 /*return*/, res.status(200).json({
                             status: 200,

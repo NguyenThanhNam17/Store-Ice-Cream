@@ -372,7 +372,7 @@ class OrderRoute extends BaseRoute {
         status: 200,
         code: "200",
         message: "success",
-        data: directUrl,
+        data: { order: order, url: directUrl },
       });
     }
     return res.status(200).json({
@@ -618,7 +618,7 @@ class OrderRoute extends BaseRoute {
         status: 200,
         code: "200",
         message: "success",
-        data: directUrl,
+        data: { order: order, url: directUrl },
       });
     }
     return res.status(200).json({
