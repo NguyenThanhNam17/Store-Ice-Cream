@@ -25,7 +25,7 @@ const bookSchema = new mongoose.Schema(
     price: { type: Number },
     images: [{ type: String }],
     isHighlight: { type: Boolean, default: false },
-    soldQuantity: { type: Number },
+    soldQuantity: { type: Number, default: 0 },
     bookCategoryIds: [{ type: Schema.Types.ObjectId, ref: "BookCategory" }],
   },
   { timestamps: true }

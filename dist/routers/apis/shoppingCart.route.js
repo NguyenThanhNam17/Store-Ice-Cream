@@ -115,7 +115,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
     //getAllShoppingCart
     ShoppingCartRoute.prototype.getAllShoppingCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, limit, page, search, filter, shoppingCarts;
+            var _a, limit, page, search, order, filter, shoppingCarts;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -135,7 +135,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order;
                         if (!limit) {
                             limit = 10;
                         }
@@ -148,6 +148,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                         };
                         return [4 /*yield*/, shoppingCart_service_1.shoppingCartService.fetch({
                                 filter: filter,
+                                order: order,
                                 search: search,
                                 limit: limit,
                                 page: page,

@@ -97,7 +97,7 @@ class ShoppingCartRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search } = req.body;
+    var { limit, page, search, order } = req.body;
     if (!limit) {
       limit = 10;
     }
@@ -111,6 +111,7 @@ class ShoppingCartRoute extends BaseRoute {
     const shoppingCarts = await shoppingCartService.fetch(
       {
         filter: filter,
+        order: order,
         search: search,
         limit: limit,
         page: page,

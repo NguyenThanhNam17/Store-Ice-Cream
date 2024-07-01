@@ -125,7 +125,7 @@ var OrderRoute = /** @class */ (function (_super) {
     //getAllOrder
     OrderRoute.prototype.getAllOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, orders;
+            var tokenData, _a, limit, page, search, order, filter, orders;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -142,7 +142,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order;
                         filter = (req === null || req === void 0 ? void 0 : req.body) || {};
                         if (!limit) {
                             limit = 10;
@@ -155,6 +155,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
                                 filter: filter,
+                                order: order,
                                 search: search,
                                 limit: limit,
                                 page: page,
@@ -174,7 +175,7 @@ var OrderRoute = /** @class */ (function (_super) {
     //getAllOrderForAdmin
     OrderRoute.prototype.getAllOrderForAdmin = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, fromDate, toDate, orders;
+            var tokenData, _a, limit, page, search, order, filter, fromDate, toDate, orders;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -194,7 +195,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
                         if (!limit) {
                             limit = 10;
                         }
@@ -212,6 +213,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, order_service_1.orderService.fetch({
                                 filter: filter,
                                 search: search,
+                                order: order,
                                 limit: limit,
                                 page: page,
                             }, ["user", "shoppingCarts"])];

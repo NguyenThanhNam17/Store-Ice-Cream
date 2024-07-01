@@ -176,7 +176,7 @@ class UserRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, filter, fromDate, toDate } = req.body;
+    var { limit, page, search, order, filter, fromDate, toDate } = req.body;
     if (!limit) {
       limit = 10;
     }
@@ -188,8 +188,10 @@ class UserRoute extends BaseRoute {
       toDate = moment(toDate).endOf("day").toDate();
       _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
     }
+    _.set(req, "body.order.createdAt", -1);
     const users = await userService.fetch({
       filter: filter,
+      order: order,
       search: search,
       limit: limit,
       page: page,

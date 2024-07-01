@@ -117,7 +117,7 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, fromDate, toDate, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
+            var tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -136,7 +136,7 @@ var BookRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter, order = _a.order, fromDate = _a.fromDate, toDate = _a.toDate;
                         if (!limit) {
                             limit = 10;
                         }
@@ -202,6 +202,7 @@ var BookRoute = /** @class */ (function (_super) {
                         }
                         return [4 /*yield*/, book_service_1.bookService.fetch({
                                 filter: filter,
+                                order: order,
                                 search: search,
                                 limit: limit,
                                 page: page,

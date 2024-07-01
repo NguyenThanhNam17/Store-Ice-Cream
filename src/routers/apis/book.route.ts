@@ -80,7 +80,7 @@ class BookRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, filter, fromDate, toDate } = req.body;
+    var { limit, page, search, filter, order, fromDate, toDate } = req.body;
     if (!limit) {
       limit = 10;
     }
@@ -156,6 +156,7 @@ class BookRoute extends BaseRoute {
     const books = await bookService.fetch(
       {
         filter: filter,
+        order: order,
         search: search,
         limit: limit,
         page: page,

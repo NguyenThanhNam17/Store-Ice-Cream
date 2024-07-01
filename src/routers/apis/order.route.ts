@@ -117,7 +117,7 @@ class OrderRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search } = req.body;
+    var { limit, page, search, order } = req.body;
     let filter = req?.body || {};
     if (!limit) {
       limit = 10;
@@ -131,6 +131,7 @@ class OrderRoute extends BaseRoute {
     const orders = await orderService.fetch(
       {
         filter: filter,
+        order: order,
         search: search,
         limit: limit,
         page: page,
@@ -160,7 +161,7 @@ class OrderRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, filter, fromDate, toDate } = req.body;
+    var { limit, page, search, order, filter, fromDate, toDate } = req.body;
     if (!limit) {
       limit = 10;
     }
@@ -179,6 +180,7 @@ class OrderRoute extends BaseRoute {
       {
         filter: filter,
         search: search,
+        order: order,
         limit: limit,
         page: page,
       },
