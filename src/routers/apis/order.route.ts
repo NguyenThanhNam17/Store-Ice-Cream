@@ -250,8 +250,8 @@ class OrderRoute extends BaseRoute {
       throw ErrorHelper.requestDataInvalid("Invalid data!");
     }
     let book = await BookModel.findById(bookId);
-    if (book) {
-      throw ErrorHelper.recoredNotFound("order!");
+    if (!book) {
+      throw ErrorHelper.recoredNotFound("book!");
     }
     var newPhone = UtilsHelper.parsePhone(phoneNumber, "+84");
     let phoneCheck = phone(newPhone);

@@ -310,8 +310,8 @@ var OrderRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, book_model_1.BookModel.findById(bookId)];
                     case 1:
                         book = _b.sent();
-                        if (book) {
-                            throw error_1.ErrorHelper.recoredNotFound("order!");
+                        if (!book) {
+                            throw error_1.ErrorHelper.recoredNotFound("book!");
                         }
                         newPhone = utils_helper_1.UtilsHelper.parsePhone(phoneNumber, "+84");
                         phoneCheck = (0, phone_1.default)(newPhone);
