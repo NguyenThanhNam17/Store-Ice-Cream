@@ -484,7 +484,10 @@ class UserRoute extends BaseRoute {
         $group: {
           _id: null,
           countBook: {
-            $sum: 1,
+            $sum: "$quantity",
+          },
+          countSoldBook: {
+            $sum: "$soldQuantity",
           },
         },
       },
@@ -577,6 +580,7 @@ class UserRoute extends BaseRoute {
         totalClients: getStatsUser[0]?.countClients || 0,
         totalStaffs: getStatsUser[0]?.countClients || 0,
         totalBooks: getStatsBook[0]?.countBook || 0,
+        totalSoldBooks: getStatsBook[0]?.countSoldBook || 0,
         totalOrders: getStatsRevenue[0]?.countOrders || 0,
         revenue: getStatsRevenue[0]?.revenue || 0,
         revenueToDay: getStatsRevenue[0]?.revenueToDay || 0,

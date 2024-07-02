@@ -601,11 +601,11 @@ var UserRoute = /** @class */ (function (_super) {
         });
     };
     UserRoute.prototype.getStatsForDashboard = function (req, res) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         return __awaiter(this, void 0, void 0, function () {
             var startOfDay, endOfDate, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, getStatsUser, getStatsBook, getStatsRevenue;
-            return __generator(this, function (_k) {
-                switch (_k.label) {
+            return __generator(this, function (_l) {
+                switch (_l.label) {
                     case 0:
                         if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(req.tokenInfo.role_)) {
                             throw error_1.ErrorHelper.permissionDeny();
@@ -636,19 +636,22 @@ var UserRoute = /** @class */ (function (_super) {
                                 },
                             ])];
                     case 1:
-                        getStatsUser = _k.sent();
+                        getStatsUser = _l.sent();
                         return [4 /*yield*/, user_model_1.UserModel.aggregate([
                                 {
                                     $group: {
                                         _id: null,
                                         countBook: {
-                                            $sum: 1,
+                                            $sum: "$quantity",
+                                        },
+                                        countSoldBook: {
+                                            $sum: "$soldQuantity",
                                         },
                                     },
                                 },
                             ])];
                     case 2:
-                        getStatsBook = _k.sent();
+                        getStatsBook = _l.sent();
                         return [4 /*yield*/, order_model_1.OrderModel.aggregate([
                                 {
                                     $group: {
@@ -729,7 +732,7 @@ var UserRoute = /** @class */ (function (_super) {
                                 },
                             ])];
                     case 3:
-                        getStatsRevenue = _k.sent();
+                        getStatsRevenue = _l.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
@@ -738,12 +741,13 @@ var UserRoute = /** @class */ (function (_super) {
                                     totalClients: ((_a = getStatsUser[0]) === null || _a === void 0 ? void 0 : _a.countClients) || 0,
                                     totalStaffs: ((_b = getStatsUser[0]) === null || _b === void 0 ? void 0 : _b.countClients) || 0,
                                     totalBooks: ((_c = getStatsBook[0]) === null || _c === void 0 ? void 0 : _c.countBook) || 0,
-                                    totalOrders: ((_d = getStatsRevenue[0]) === null || _d === void 0 ? void 0 : _d.countOrders) || 0,
-                                    revenue: ((_e = getStatsRevenue[0]) === null || _e === void 0 ? void 0 : _e.revenue) || 0,
-                                    revenueToDay: ((_f = getStatsRevenue[0]) === null || _f === void 0 ? void 0 : _f.revenueToDay) || 0,
-                                    revenueThisWeek: ((_g = getStatsRevenue[0]) === null || _g === void 0 ? void 0 : _g.revenueThisWeek) || 0,
-                                    revenueThisMonth: ((_h = getStatsRevenue[0]) === null || _h === void 0 ? void 0 : _h.revenueThisMonth) || 0,
-                                    revenueThisYear: ((_j = getStatsRevenue[0]) === null || _j === void 0 ? void 0 : _j.revenueThisYear) || 0,
+                                    totalSoldBooks: ((_d = getStatsBook[0]) === null || _d === void 0 ? void 0 : _d.countSoldBook) || 0,
+                                    totalOrders: ((_e = getStatsRevenue[0]) === null || _e === void 0 ? void 0 : _e.countOrders) || 0,
+                                    revenue: ((_f = getStatsRevenue[0]) === null || _f === void 0 ? void 0 : _f.revenue) || 0,
+                                    revenueToDay: ((_g = getStatsRevenue[0]) === null || _g === void 0 ? void 0 : _g.revenueToDay) || 0,
+                                    revenueThisWeek: ((_h = getStatsRevenue[0]) === null || _h === void 0 ? void 0 : _h.revenueThisWeek) || 0,
+                                    revenueThisMonth: ((_j = getStatsRevenue[0]) === null || _j === void 0 ? void 0 : _j.revenueThisMonth) || 0,
+                                    revenueThisYear: ((_k = getStatsRevenue[0]) === null || _k === void 0 ? void 0 : _k.revenueThisYear) || 0,
                                 },
                             })];
                 }
