@@ -608,11 +608,11 @@ var UserRoute = /** @class */ (function (_super) {
         });
     };
     UserRoute.prototype.getStatsForDashboard = function (req, res) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         return __awaiter(this, void 0, void 0, function () {
             var startOfDay, endOfDate, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, getStatsUser, getStatsBook, getStatsRevenue;
-            return __generator(this, function (_l) {
-                switch (_l.label) {
+            return __generator(this, function (_o) {
+                switch (_o.label) {
                     case 0:
                         if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(req.tokenInfo.role_)) {
                             throw error_1.ErrorHelper.permissionDeny();
@@ -639,11 +639,41 @@ var UserRoute = /** @class */ (function (_super) {
                                                 $cond: [{ $eq: ["$role", role_const_1.ROLES.CLIENT] }, 1, 0],
                                             },
                                         },
+                                        countClientThisMonth: {
+                                            $sum: {
+                                                $cond: [
+                                                    {
+                                                        $and: [
+                                                            { $gte: ["$createdAt", startOfMonth] },
+                                                            { $lte: ["$createdAt", endOfMonth] },
+                                                            { $eq: ["$role", role_const_1.ROLES.CLIENT] },
+                                                        ],
+                                                    },
+                                                    1,
+                                                    0,
+                                                ],
+                                            },
+                                        },
+                                        countStaffThisMonth: {
+                                            $sum: {
+                                                $cond: [
+                                                    {
+                                                        $and: [
+                                                            { $gte: ["$createdAt", startOfMonth] },
+                                                            { $lte: ["$createdAt", endOfMonth] },
+                                                            { $eq: ["$role", role_const_1.ROLES.CLIENT] },
+                                                        ],
+                                                    },
+                                                    1,
+                                                    0,
+                                                ],
+                                            },
+                                        },
                                     },
                                 },
                             ])];
                     case 1:
-                        getStatsUser = _l.sent();
+                        getStatsUser = _o.sent();
                         return [4 /*yield*/, book_model_1.BookModel.aggregate([
                                 {
                                     $group: {
@@ -658,7 +688,7 @@ var UserRoute = /** @class */ (function (_super) {
                                 },
                             ])];
                     case 2:
-                        getStatsBook = _l.sent();
+                        getStatsBook = _o.sent();
                         return [4 /*yield*/, order_model_1.OrderModel.aggregate([
                                 {
                                     $group: {
@@ -739,22 +769,24 @@ var UserRoute = /** @class */ (function (_super) {
                                 },
                             ])];
                     case 3:
-                        getStatsRevenue = _l.sent();
+                        getStatsRevenue = _o.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
                                 data: {
                                     totalClients: ((_a = getStatsUser[0]) === null || _a === void 0 ? void 0 : _a.countClient) || 0,
-                                    totalStaffs: ((_b = getStatsUser[0]) === null || _b === void 0 ? void 0 : _b.countStaff) || 0,
-                                    totalBooks: ((_c = getStatsBook[0]) === null || _c === void 0 ? void 0 : _c.countBook) || 0,
-                                    totalSoldBooks: ((_d = getStatsBook[0]) === null || _d === void 0 ? void 0 : _d.countSoldBook) || 0,
-                                    totalOrders: ((_e = getStatsRevenue[0]) === null || _e === void 0 ? void 0 : _e.countOrders) || 0,
-                                    revenue: ((_f = getStatsRevenue[0]) === null || _f === void 0 ? void 0 : _f.revenue) || 0,
-                                    revenueToDay: ((_g = getStatsRevenue[0]) === null || _g === void 0 ? void 0 : _g.revenueToDay) || 0,
-                                    revenueThisWeek: ((_h = getStatsRevenue[0]) === null || _h === void 0 ? void 0 : _h.revenueThisWeek) || 0,
-                                    revenueThisMonth: ((_j = getStatsRevenue[0]) === null || _j === void 0 ? void 0 : _j.revenueThisMonth) || 0,
-                                    revenueThisYear: ((_k = getStatsRevenue[0]) === null || _k === void 0 ? void 0 : _k.revenueThisYear) || 0,
+                                    totalClientsThisMonth: ((_b = getStatsUser[0]) === null || _b === void 0 ? void 0 : _b.countClientThisMonth) || 0,
+                                    totalStaffs: ((_c = getStatsUser[0]) === null || _c === void 0 ? void 0 : _c.countStaff) || 0,
+                                    totalStaffsThisMonth: ((_d = getStatsUser[0]) === null || _d === void 0 ? void 0 : _d.countStaffThisMonth) || 0,
+                                    totalBooks: ((_e = getStatsBook[0]) === null || _e === void 0 ? void 0 : _e.countBook) || 0,
+                                    totalSoldBooks: ((_f = getStatsBook[0]) === null || _f === void 0 ? void 0 : _f.countSoldBook) || 0,
+                                    totalOrders: ((_g = getStatsRevenue[0]) === null || _g === void 0 ? void 0 : _g.countOrders) || 0,
+                                    revenue: ((_h = getStatsRevenue[0]) === null || _h === void 0 ? void 0 : _h.revenue) || 0,
+                                    revenueToDay: ((_j = getStatsRevenue[0]) === null || _j === void 0 ? void 0 : _j.revenueToDay) || 0,
+                                    revenueThisWeek: ((_k = getStatsRevenue[0]) === null || _k === void 0 ? void 0 : _k.revenueThisWeek) || 0,
+                                    revenueThisMonth: ((_l = getStatsRevenue[0]) === null || _l === void 0 ? void 0 : _l.revenueThisMonth) || 0,
+                                    revenueThisYear: ((_m = getStatsRevenue[0]) === null || _m === void 0 ? void 0 : _m.revenueThisYear) || 0,
                                 },
                             })];
                 }

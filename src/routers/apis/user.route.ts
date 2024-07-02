@@ -481,6 +481,36 @@ class UserRoute extends BaseRoute {
               $cond: [{ $eq: ["$role", ROLES.CLIENT] }, 1, 0],
             },
           },
+          countClientThisMonth: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$createdAt", startOfMonth] },
+                    { $lte: ["$createdAt", endOfMonth] },
+                    { $eq: ["$role", ROLES.CLIENT] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          countStaffThisMonth: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$createdAt", startOfMonth] },
+                    { $lte: ["$createdAt", endOfMonth] },
+                    { $eq: ["$role", ROLES.CLIENT] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
         },
       },
     ]);
@@ -583,7 +613,9 @@ class UserRoute extends BaseRoute {
       message: "success",
       data: {
         totalClients: getStatsUser[0]?.countClient || 0,
+        totalClientsThisMonth: getStatsUser[0]?.countClientThisMonth || 0,
         totalStaffs: getStatsUser[0]?.countStaff || 0,
+        totalStaffsThisMonth: getStatsUser[0]?.countStaffThisMonth || 0,
         totalBooks: getStatsBook[0]?.countBook || 0,
         totalSoldBooks: getStatsBook[0]?.countSoldBook || 0,
         totalOrders: getStatsRevenue[0]?.countOrders || 0,
