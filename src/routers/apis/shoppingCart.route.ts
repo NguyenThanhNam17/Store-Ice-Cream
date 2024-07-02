@@ -110,7 +110,7 @@ class ShoppingCartRoute extends BaseRoute {
     };
     const shoppingCarts = await shoppingCartService.fetch(
       {
-        filter: req.body.filter,
+        filter: filter,
         order: order,
         search: search,
         limit: limit,

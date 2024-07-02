@@ -130,7 +130,7 @@ class OrderRoute extends BaseRoute {
     }
     const orders = await orderService.fetch(
       {
-        filter: req.body.filter,
+        filter: filter,
         order: order,
         search: search,
         limit: limit,
@@ -179,13 +179,13 @@ class OrderRoute extends BaseRoute {
 
     const orders = await orderService.fetch(
       {
-        filter: req.body.filter,
-        search: search,
+        filter: filter,
         order: order,
+        search: search,
         limit: limit,
         page: page,
       },
-      ["user", "shoppingCarts"]
+      [`user`, "shoppingCarts"]
     );
     return res.status(200).json({
       status: 200,

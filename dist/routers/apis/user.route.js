@@ -241,7 +241,7 @@ var UserRoute = /** @class */ (function (_super) {
                             lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
                         }
                         return [4 /*yield*/, user_service_1.userService.fetch({
-                                filter: req.body.filter,
+                                filter: filter,
                                 order: order,
                                 search: search,
                                 limit: limit,

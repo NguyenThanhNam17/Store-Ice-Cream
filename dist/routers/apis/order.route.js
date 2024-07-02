@@ -154,7 +154,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             filter.userId = tokenData._id;
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
-                                filter: req.body.filter,
+                                filter: filter,
                                 order: order,
                                 search: search,
                                 limit: limit,
@@ -211,9 +211,9 @@ var OrderRoute = /** @class */ (function (_super) {
                             lodash_1.default.set(req.body, "filter.createdAt", { $gte: fromDate, $lte: toDate });
                         }
                         return [4 /*yield*/, order_service_1.orderService.fetch({
-                                filter: req.body.filter,
-                                search: search,
+                                filter: filter,
                                 order: order,
+                                search: search,
                                 limit: limit,
                                 page: page,
                             }, ["user", "shoppingCarts"])];
