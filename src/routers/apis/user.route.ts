@@ -245,10 +245,15 @@ class UserRoute extends BaseRoute {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    const { password, name, phone, gender, address, email, role } = req.body;
-
+    const { password, name, phoneNumber, gender, address, email, role } =
+      req.body;
+    var newPhone = UtilsHelper.parsePhone(phoneNumber, "+84");
+    let phoneCheck = phone(newPhone);
+    if (!phoneCheck.isValid) {
+      throw ErrorHelper.requestDataInvalid("phone");
+    }
     let userCheck = await UserModel.findOne({
-      $or: [{ email: phone ?? "" }, { phone: phone ?? "" }],
+      $or: [{ email: phone ?? "" }, { phone: phoneCheck.phoneNumber ?? "" }],
     });
     if (userCheck) {
       throw ErrorHelper.forbidden("Username or phone number is existed!");
@@ -259,7 +264,7 @@ class UserRoute extends BaseRoute {
       password: passwordHash.generate(password),
       name: name.trim(),
       gender: gender,
-      phone: phone,
+      phone: phoneCheck.phoneNumber,
       address: address,
       key: key,
       role: role,

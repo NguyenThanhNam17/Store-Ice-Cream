@@ -314,20 +314,26 @@ var UserRoute = /** @class */ (function (_super) {
         });
     };
     UserRoute.prototype.createUser = function (req, res) {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var _a, password, name, phone, gender, address, email, role, userCheck, key, user;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _b, password, name, phoneNumber, gender, address, email, role, newPhone, phoneCheck, userCheck, key, user;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
                             throw error_1.ErrorHelper.permissionDeny();
                         }
-                        _a = req.body, password = _a.password, name = _a.name, phone = _a.phone, gender = _a.gender, address = _a.address, email = _a.email, role = _a.role;
+                        _b = req.body, password = _b.password, name = _b.name, phoneNumber = _b.phoneNumber, gender = _b.gender, address = _b.address, email = _b.email, role = _b.role;
+                        newPhone = utils_helper_1.UtilsHelper.parsePhone(phoneNumber, "+84");
+                        phoneCheck = (0, phone_1.default)(newPhone);
+                        if (!phoneCheck.isValid) {
+                            throw error_1.ErrorHelper.requestDataInvalid("phone");
+                        }
                         return [4 /*yield*/, user_model_1.UserModel.findOne({
-                                $or: [{ email: phone !== null && phone !== void 0 ? phone : "" }, { phone: phone !== null && phone !== void 0 ? phone : "" }],
+                                $or: [{ email: phone_1.default !== null && phone_1.default !== void 0 ? phone_1.default : "" }, { phone: (_a = phoneCheck.phoneNumber) !== null && _a !== void 0 ? _a : "" }],
                             })];
                     case 1:
-                        userCheck = _b.sent();
+                        userCheck = _c.sent();
                         if (userCheck) {
                             throw error_1.ErrorHelper.forbidden("Username or phone number is existed!");
                         }
@@ -337,14 +343,14 @@ var UserRoute = /** @class */ (function (_super) {
                             password: password_hash_1.default.generate(password),
                             name: name.trim(),
                             gender: gender,
-                            phone: phone,
+                            phone: phoneCheck.phoneNumber,
                             address: address,
                             key: key,
                             role: role,
                         });
                         return [4 /*yield*/, user.save()];
                     case 2:
-                        _b.sent();
+                        _c.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
