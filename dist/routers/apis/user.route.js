@@ -63,6 +63,7 @@ var user_helper_1 = require("../../models/user/user.helper");
 var error_1 = require("../../base/error");
 var phone_1 = __importDefault(require("phone"));
 var user_service_1 = require("../../models/user/user.service");
+var book_model_1 = require("../../models/book/book.model");
 var utils_helper_1 = require("../../helper/utils.helper");
 var wallet_model_1 = require("../../models/wallet/wallet.model");
 var invoice_model_1 = require("../../models/invoice/invoice.model");
@@ -643,7 +644,7 @@ var UserRoute = /** @class */ (function (_super) {
                             ])];
                     case 1:
                         getStatsUser = _l.sent();
-                        return [4 /*yield*/, user_model_1.UserModel.aggregate([
+                        return [4 /*yield*/, book_model_1.BookModel.aggregate([
                                 {
                                     $group: {
                                         _id: null,
@@ -744,8 +745,8 @@ var UserRoute = /** @class */ (function (_super) {
                                 code: "200",
                                 message: "success",
                                 data: {
-                                    totalClients: ((_a = getStatsUser[0]) === null || _a === void 0 ? void 0 : _a.countClients) || 0,
-                                    totalStaffs: ((_b = getStatsUser[0]) === null || _b === void 0 ? void 0 : _b.countClients) || 0,
+                                    totalClients: ((_a = getStatsUser[0]) === null || _a === void 0 ? void 0 : _a.countClient) || 0,
+                                    totalStaffs: ((_b = getStatsUser[0]) === null || _b === void 0 ? void 0 : _b.countStaff) || 0,
                                     totalBooks: ((_c = getStatsBook[0]) === null || _c === void 0 ? void 0 : _c.countBook) || 0,
                                     totalSoldBooks: ((_d = getStatsBook[0]) === null || _d === void 0 ? void 0 : _d.countSoldBook) || 0,
                                     totalOrders: ((_e = getStatsRevenue[0]) === null || _e === void 0 ? void 0 : _e.countOrders) || 0,

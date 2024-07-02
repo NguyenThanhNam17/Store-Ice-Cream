@@ -484,7 +484,7 @@ class UserRoute extends BaseRoute {
         },
       },
     ]);
-    let getStatsBook = await UserModel.aggregate([
+    let getStatsBook = await BookModel.aggregate([
       {
         $group: {
           _id: null,
@@ -582,8 +582,8 @@ class UserRoute extends BaseRoute {
       code: "200",
       message: "success",
       data: {
-        totalClients: getStatsUser[0]?.countClients || 0,
-        totalStaffs: getStatsUser[0]?.countClients || 0,
+        totalClients: getStatsUser[0]?.countClient || 0,
+        totalStaffs: getStatsUser[0]?.countStaff || 0,
         totalBooks: getStatsBook[0]?.countBook || 0,
         totalSoldBooks: getStatsBook[0]?.countSoldBook || 0,
         totalOrders: getStatsRevenue[0]?.countOrders || 0,
