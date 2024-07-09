@@ -142,8 +142,8 @@ var OrderRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order;
-                        filter = (req === null || req === void 0 ? void 0 : req.body) || {};
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order, filter = _a.filter;
+                        // let filter = req?.body || {};
                         if (!limit) {
                             limit = 10;
                         }

@@ -117,8 +117,8 @@ class OrderRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, order } = req.body;
-    let filter = req?.body || {};
+    var { limit, page, search, order, filter } = req.body;
+    // let filter = req?.body || {};
     if (!limit) {
       limit = 10;
     }
