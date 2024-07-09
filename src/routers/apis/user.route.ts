@@ -123,6 +123,17 @@ class UserRoute extends BaseRoute {
       key: key,
     });
     await user.save();
+    let wallet = new WalletModel({
+      userId: user._id,
+      balance: 0,
+    });
+    user.walletId = wallet._id;
+    await wallet.save();
+    await userService.updateOne(user._id, {
+      $set: {
+        walletId: wallet._id,
+      },
+    });
     return res.status(200).json({
       status: 200,
       code: "200",
@@ -456,9 +467,9 @@ class UserRoute extends BaseRoute {
     });
   }
   async getStatsForDashboard(req: Request, res: Response) {
-    if (![ROLES.ADMIN, ROLES.STAFF].includes(req.tokenInfo.role_)) {
-      throw ErrorHelper.permissionDeny();
-    }
+    // if (![ROLES.ADMIN, ROLES.STAFF].includes(req.tokenInfo.role_)) {
+    //   throw ErrorHelper.permissionDeny();
+    // }
     let startOfDay = moment().startOf("day").toDate();
     let endOfDate = moment().endOf("day").toDate();
     let startOfWeek = moment().startOf("week").toDate();
@@ -606,6 +617,75 @@ class UserRoute extends BaseRoute {
         },
       },
     ]);
+    let getStatRevenueThisYear: any = await OrderModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfYear,
+            $lt: endOfYear,
+          },
+          status: OrderStatusEnum.SUCCESS,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month: { $month: "$createdAt" },
+          },
+          month: {
+            $first: { $month: "$createdAt" },
+          },
+          totalRevenue: {
+            $sum: "$finalCost",
+          },
+        },
+      },
+      {
+        $sort: { month: 1 },
+      },
+    ]);
+    let statRevenueByMonth: any = {};
+    getStatRevenueThisYear.map((item: any) => {
+      if (item.month == 1) {
+        statRevenueByMonth.january = item.totalRevenue;
+      } else if (item.month == 2) {
+        statRevenueByMonth.february = item.totalRevenue;
+      } else if (item.month == 3) {
+        statRevenueByMonth.march = item.totalRevenue;
+      } else if (item.month == 4) {
+        statRevenueByMonth.april = item.totalRevenue;
+      } else if (item.month == 5) {
+        statRevenueByMonth.may = item.totalRevenue;
+      } else if (item.month == 6) {
+        statRevenueByMonth.june = item.totalRevenue;
+      } else if (item.month == 7) {
+        statRevenueByMonth.july = item.totalRevenue;
+      } else if (item.month == 8) {
+        statRevenueByMonth.august = item.totalRevenue;
+      } else if (item.month == 9) {
+        statRevenueByMonth.september = item.totalRevenue;
+      } else if (item.month == 10) {
+        statRevenueByMonth.october = item.totalRevenue;
+      } else if (item.month == 11) {
+        statRevenueByMonth.november = item.totalRevenue;
+      } else if (item.month == 12) {
+        statRevenueByMonth.december = item.totalRevenue;
+      }
+    });
+    getStatRevenueThisYear = {
+      january: statRevenueByMonth.january || 0,
+      february: statRevenueByMonth.february || 0,
+      march: statRevenueByMonth.march || 0,
+      april: statRevenueByMonth.april || 0,
+      may: statRevenueByMonth.may || 0,
+      june: statRevenueByMonth.june || 0,
+      july: statRevenueByMonth.july || 0,
+      august: statRevenueByMonth.august || 0,
+      september: statRevenueByMonth.september || 0,
+      october: statRevenueByMonth.october || 0,
+      november: statRevenueByMonth.november || 0,
+      december: statRevenueByMonth.december || 0,
+    };
 
     return res.status(200).json({
       status: 200,
@@ -624,6 +704,7 @@ class UserRoute extends BaseRoute {
         revenueThisWeek: getStatsRevenue[0]?.revenueThisWeek || 0,
         revenueThisMonth: getStatsRevenue[0]?.revenueThisMonth || 0,
         revenueThisYear: getStatsRevenue[0]?.revenueThisYear || 0,
+        getStatRevenueThisYear,
       },
     });
   }

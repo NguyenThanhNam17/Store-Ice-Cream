@@ -125,7 +125,7 @@ var UserRoute = /** @class */ (function (_super) {
     //register
     UserRoute.prototype.register = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, name, phoneNumber, password, newPhone, phoneCheck, userCheck, key, user;
+            var _a, name, phoneNumber, password, newPhone, phoneCheck, userCheck, key, user, wallet;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -154,6 +154,21 @@ var UserRoute = /** @class */ (function (_super) {
                         });
                         return [4 /*yield*/, user.save()];
                     case 2:
+                        _b.sent();
+                        wallet = new wallet_model_1.WalletModel({
+                            userId: user._id,
+                            balance: 0,
+                        });
+                        user.walletId = wallet._id;
+                        return [4 /*yield*/, wallet.save()];
+                    case 3:
+                        _b.sent();
+                        return [4 /*yield*/, user_service_1.userService.updateOne(user._id, {
+                                $set: {
+                                    walletId: wallet._id,
+                                },
+                            })];
+                    case 4:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
@@ -610,13 +625,10 @@ var UserRoute = /** @class */ (function (_super) {
     UserRoute.prototype.getStatsForDashboard = function (req, res) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         return __awaiter(this, void 0, void 0, function () {
-            var startOfDay, endOfDate, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, getStatsUser, getStatsBook, getStatsRevenue;
+            var startOfDay, endOfDate, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, getStatsUser, getStatsBook, getStatsRevenue, getStatRevenueThisYear, statRevenueByMonth;
             return __generator(this, function (_o) {
                 switch (_o.label) {
                     case 0:
-                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(req.tokenInfo.role_)) {
-                            throw error_1.ErrorHelper.permissionDeny();
-                        }
                         startOfDay = (0, moment_timezone_1.default)().startOf("day").toDate();
                         endOfDate = (0, moment_timezone_1.default)().endOf("day").toDate();
                         startOfWeek = (0, moment_timezone_1.default)().startOf("week").toDate();
@@ -770,6 +782,88 @@ var UserRoute = /** @class */ (function (_super) {
                             ])];
                     case 3:
                         getStatsRevenue = _o.sent();
+                        return [4 /*yield*/, order_model_1.OrderModel.aggregate([
+                                {
+                                    $match: {
+                                        createdAt: {
+                                            $gte: startOfYear,
+                                            $lt: endOfYear,
+                                        },
+                                        status: model_const_1.OrderStatusEnum.SUCCESS,
+                                    },
+                                },
+                                {
+                                    $group: {
+                                        _id: {
+                                            month: { $month: "$createdAt" },
+                                        },
+                                        month: {
+                                            $first: { $month: "$createdAt" },
+                                        },
+                                        totalRevenue: {
+                                            $sum: "$finalCost",
+                                        },
+                                    },
+                                },
+                                {
+                                    $sort: { month: 1 },
+                                },
+                            ])];
+                    case 4:
+                        getStatRevenueThisYear = _o.sent();
+                        statRevenueByMonth = {};
+                        getStatRevenueThisYear.map(function (item) {
+                            if (item.month == 1) {
+                                statRevenueByMonth.january = item.totalRevenue;
+                            }
+                            else if (item.month == 2) {
+                                statRevenueByMonth.february = item.totalRevenue;
+                            }
+                            else if (item.month == 3) {
+                                statRevenueByMonth.march = item.totalRevenue;
+                            }
+                            else if (item.month == 4) {
+                                statRevenueByMonth.april = item.totalRevenue;
+                            }
+                            else if (item.month == 5) {
+                                statRevenueByMonth.may = item.totalRevenue;
+                            }
+                            else if (item.month == 6) {
+                                statRevenueByMonth.june = item.totalRevenue;
+                            }
+                            else if (item.month == 7) {
+                                statRevenueByMonth.july = item.totalRevenue;
+                            }
+                            else if (item.month == 8) {
+                                statRevenueByMonth.august = item.totalRevenue;
+                            }
+                            else if (item.month == 9) {
+                                statRevenueByMonth.september = item.totalRevenue;
+                            }
+                            else if (item.month == 10) {
+                                statRevenueByMonth.october = item.totalRevenue;
+                            }
+                            else if (item.month == 11) {
+                                statRevenueByMonth.november = item.totalRevenue;
+                            }
+                            else if (item.month == 12) {
+                                statRevenueByMonth.december = item.totalRevenue;
+                            }
+                        });
+                        getStatRevenueThisYear = {
+                            january: statRevenueByMonth.january || 0,
+                            february: statRevenueByMonth.february || 0,
+                            march: statRevenueByMonth.march || 0,
+                            april: statRevenueByMonth.april || 0,
+                            may: statRevenueByMonth.may || 0,
+                            june: statRevenueByMonth.june || 0,
+                            july: statRevenueByMonth.july || 0,
+                            august: statRevenueByMonth.august || 0,
+                            september: statRevenueByMonth.september || 0,
+                            october: statRevenueByMonth.october || 0,
+                            november: statRevenueByMonth.november || 0,
+                            december: statRevenueByMonth.december || 0,
+                        };
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
@@ -787,6 +881,7 @@ var UserRoute = /** @class */ (function (_super) {
                                     revenueThisWeek: ((_k = getStatsRevenue[0]) === null || _k === void 0 ? void 0 : _k.revenueThisWeek) || 0,
                                     revenueThisMonth: ((_l = getStatsRevenue[0]) === null || _l === void 0 ? void 0 : _l.revenueThisMonth) || 0,
                                     revenueThisYear: ((_m = getStatsRevenue[0]) === null || _m === void 0 ? void 0 : _m.revenueThisYear) || 0,
+                                    getStatRevenueThisYear: getStatRevenueThisYear,
                                 },
                             })];
                 }
