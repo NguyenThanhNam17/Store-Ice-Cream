@@ -358,9 +358,6 @@ class UserRoute extends BaseRoute {
     });
   }
   async changePassword(req: Request, res: Response) {
-    if (ROLES.ADMIN != req.tokenInfo.role_) {
-      throw ErrorHelper.permissionDeny();
-    }
     const { id, oldPass, newPass } = req.body;
 
     let user = await UserModel.findById(id);

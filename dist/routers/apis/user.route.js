@@ -486,9 +486,6 @@ var UserRoute = /** @class */ (function (_super) {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        if (role_const_1.ROLES.ADMIN != req.tokenInfo.role_) {
-                            throw error_1.ErrorHelper.permissionDeny();
-                        }
                         _a = req.body, id = _a.id, oldPass = _a.oldPass, newPass = _a.newPass;
                         return [4 /*yield*/, user_model_1.UserModel.findById(id)];
                     case 1:
