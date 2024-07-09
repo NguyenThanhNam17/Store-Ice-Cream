@@ -252,7 +252,7 @@ class ShoppingCartRoute extends BaseRoute {
         paymentMethod == "CASH"
           ? OrderStatusEnum.PENDING
           : OrderStatusEnum.UNPAID,
-      isPaid: paymentMethod == PaymentMethodEnum.ATM ? false : true,
+      isPaid: paymentMethod == PaymentMethodEnum.WALLET ? true : false,
       shippingFee: 20000,
       initialCost: initialCost,
       finalCost: initialCost + 20000,

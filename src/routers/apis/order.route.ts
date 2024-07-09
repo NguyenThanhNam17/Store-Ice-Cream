@@ -295,7 +295,7 @@ class OrderRoute extends BaseRoute {
       finalCost: initialCost + 20000,
       userId: tokenData._id,
       phone: newPhone,
-      isPaid: paymentMethod == PaymentMethodEnum.ATM ? false : true,
+      isPaid: paymentMethod == PaymentMethodEnum.WALLET ? true : false,
       shippingFee: 20000,
       status:
         paymentMethod == PaymentMethodEnum.CASH
@@ -429,6 +429,13 @@ class OrderRoute extends BaseRoute {
       phone: newPhone || order.phone,
       noteUpdate: noteUpdate || order.noteUpdate,
     });
+    if (
+      status == OrderStatusEnum.DELIVERING &&
+      order.paymentMethod == PaymentMethodEnum.CASH
+    ) {
+      order.isPaid = true;
+      await order.save();
+    }
     if (status == OrderStatusEnum.CANCEL) {
       let shoppingCarts = await ShoppingCartModel.find({
         _id: order.shoppingCartIds,

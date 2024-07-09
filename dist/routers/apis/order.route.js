@@ -364,7 +364,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             finalCost: initialCost + 20000,
                             userId: tokenData._id,
                             phone: newPhone,
-                            isPaid: paymentMethod == model_const_1.PaymentMethodEnum.ATM ? false : true,
+                            isPaid: paymentMethod == model_const_1.PaymentMethodEnum.WALLET ? true : false,
                             shippingFee: 20000,
                             status: paymentMethod == model_const_1.PaymentMethodEnum.CASH
                                 ? model_const_1.OrderStatusEnum.PENDING
@@ -510,11 +510,19 @@ var OrderRoute = /** @class */ (function (_super) {
                             })];
                     case 3:
                         _b.sent();
-                        if (!(status == model_const_1.OrderStatusEnum.CANCEL)) return [3 /*break*/, 7];
+                        if (!(status == model_const_1.OrderStatusEnum.DELIVERING &&
+                            order.paymentMethod == model_const_1.PaymentMethodEnum.CASH)) return [3 /*break*/, 5];
+                        order.isPaid = true;
+                        return [4 /*yield*/, order.save()];
+                    case 4:
+                        _b.sent();
+                        _b.label = 5;
+                    case 5:
+                        if (!(status == model_const_1.OrderStatusEnum.CANCEL)) return [3 /*break*/, 9];
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
                                 _id: order.shoppingCartIds,
                             })];
-                    case 4:
+                    case 6:
                         shoppingCarts = _b.sent();
                         shoppingCarts.map(function (shoppingCart) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
@@ -531,17 +539,17 @@ var OrderRoute = /** @class */ (function (_super) {
                             });
                         }); });
                         return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
-                    case 5:
+                    case 7:
                         wallet = _b.sent();
                         return [4 /*yield*/, wallet_service_1.walletService.updateOne(wallet._id, {
                                 $inc: {
                                     balance: -order.finalCost,
                                 },
                             })];
-                    case 6:
+                    case 8:
                         _b.sent();
-                        _b.label = 7;
-                    case 7: return [2 /*return*/, res.status(200).json({
+                        _b.label = 9;
+                    case 9: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",
