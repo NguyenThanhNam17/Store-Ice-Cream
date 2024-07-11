@@ -366,9 +366,9 @@ var OrderRoute = /** @class */ (function (_super) {
                             phone: newPhone,
                             isPaid: paymentMethod == model_const_1.PaymentMethodEnum.WALLET ? true : false,
                             shippingFee: 20000,
-                            status: paymentMethod == model_const_1.PaymentMethodEnum.CASH
-                                ? model_const_1.OrderStatusEnum.PENDING
-                                : model_const_1.OrderStatusEnum.UNPAID,
+                            status: paymentMethod == model_const_1.PaymentMethodEnum.ATM
+                                ? model_const_1.OrderStatusEnum.UNPAID
+                                : model_const_1.OrderStatusEnum.PENDING,
                             paymentMethod: paymentMethod || model_const_1.PaymentMethodEnum.CASH,
                         });
                         return [4 /*yield*/, order.save()];

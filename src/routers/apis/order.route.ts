@@ -298,9 +298,9 @@ class OrderRoute extends BaseRoute {
       isPaid: paymentMethod == PaymentMethodEnum.WALLET ? true : false,
       shippingFee: 20000,
       status:
-        paymentMethod == PaymentMethodEnum.CASH
-          ? OrderStatusEnum.PENDING
-          : OrderStatusEnum.UNPAID,
+        paymentMethod == PaymentMethodEnum.ATM
+          ? OrderStatusEnum.UNPAID
+          : OrderStatusEnum.PENDING,
       paymentMethod: paymentMethod || PaymentMethodEnum.CASH,
     });
     await order.save();

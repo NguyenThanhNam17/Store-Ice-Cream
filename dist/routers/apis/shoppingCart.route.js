@@ -327,9 +327,9 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             phone: newPhone,
                             address: address,
                             note: note,
-                            status: paymentMethod == "CASH"
-                                ? model_const_1.OrderStatusEnum.PENDING
-                                : model_const_1.OrderStatusEnum.UNPAID,
+                            status: paymentMethod == "ATM"
+                                ? model_const_1.OrderStatusEnum.UNPAID
+                                : model_const_1.OrderStatusEnum.PENDING,
                             isPaid: paymentMethod == model_const_1.PaymentMethodEnum.WALLET ? true : false,
                             shippingFee: 20000,
                             initialCost: initialCost,
