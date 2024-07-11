@@ -504,7 +504,7 @@ class OrderRoute extends BaseRoute {
   //cancel order
   async cancelOrder(req: Request, res: Response) {
     const { id } = req.body;
-    let order = await OrderModel.findById(id);
+    let order: any = await OrderModel.findById(id);
     if (!order) {
       throw ErrorHelper.recoredNotFound("Book!");
     }
@@ -524,12 +524,18 @@ class OrderRoute extends BaseRoute {
       });
     });
     await order.save();
-    let wallet = await WalletModel.findById(user.walletId);
-    await walletService.updateOne(wallet._id, {
-      $inc: {
-        balance: order.finalCost,
-      },
-    });
+    if (
+      [PaymentMethodEnum.ATM, PaymentMethodEnum.WALLET].includes(
+        order.paymentMethod
+      )
+    ) {
+      let wallet = await WalletModel.findById(user.walletId);
+      await walletService.updateOne(wallet._id, {
+        $inc: {
+          balance: order.finalCost,
+        },
+      });
+    }
     return res.status(200).json({
       status: 200,
       code: "200",

@@ -662,6 +662,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, order.save()];
                     case 4:
                         _a.sent();
+                        if (![model_const_1.PaymentMethodEnum.ATM, model_const_1.PaymentMethodEnum.WALLET].includes(order.paymentMethod)) return [3 /*break*/, 7];
                         return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
                     case 5:
                         wallet = _a.sent();
@@ -672,14 +673,15 @@ var OrderRoute = /** @class */ (function (_super) {
                             })];
                     case 6:
                         _a.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: {
-                                    order: order,
-                                },
-                            })];
+                        _a.label = 7;
+                    case 7: return [2 /*return*/, res.status(200).json({
+                            status: 200,
+                            code: "200",
+                            message: "success",
+                            data: {
+                                order: order,
+                            },
+                        })];
                 }
             });
         });
