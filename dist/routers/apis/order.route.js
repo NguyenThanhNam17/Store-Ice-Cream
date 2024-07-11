@@ -743,7 +743,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         order.paymentMethod = model_const_1.PaymentMethodEnum.CASH;
                         order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
                         order.status = model_const_1.OrderStatusEnum.PENDING;
-                        order.isPaid = true;
+                        order.isPaid = false;
                         return [4 /*yield*/, order.save()];
                     case 3:
                         _b.sent();
