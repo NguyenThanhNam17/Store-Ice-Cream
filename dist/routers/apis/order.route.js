@@ -739,30 +739,35 @@ var OrderRoute = /** @class */ (function (_super) {
                         if (order.isPaid == true) {
                             throw error_1.ErrorHelper.forbidden("The order is paid");
                         }
-                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.CASH)) return [3 /*break*/, 3];
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.CASH)) return [3 /*break*/, 4];
                         order.paymentMethod = model_const_1.PaymentMethodEnum.CASH;
                         order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
+                        order.status = model_const_1.OrderStatusEnum.PENDING;
                         order.isPaid = true;
-                        return [3 /*break*/, 13];
+                        return [4 /*yield*/, order.save()];
                     case 3:
-                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 8];
-                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(mine.walletId)];
+                        _b.sent();
+                        return [3 /*break*/, 14];
                     case 4:
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 9];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(mine.walletId)];
+                    case 5:
                         wallet = _b.sent();
-                        if (!(wallet.balance < order.finalCost)) return [3 /*break*/, 5];
+                        if (!(wallet.balance < order.finalCost)) return [3 /*break*/, 6];
                         throw error_1.ErrorHelper.forbidden("Wallet balance is not enough!");
-                    case 5: return [4 /*yield*/, wallet_service_1.walletService.updateOne(mine.walletId, {
+                    case 6: return [4 /*yield*/, wallet_service_1.walletService.updateOne(mine.walletId, {
                             $inc: {
                                 balance: -order.finalCost,
                             },
                         })];
-                    case 6:
+                    case 7:
                         _b.sent();
                         order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
+                        order.status = model_const_1.OrderStatusEnum.PENDING;
                         order.isPaid = true;
-                        _b.label = 7;
-                    case 7: return [3 /*break*/, 13];
-                    case 8:
+                        _b.label = 8;
+                    case 8: return [3 /*break*/, 14];
+                    case 9:
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: req.tokenInfo._id,
                             amount: order.finalCost,
@@ -770,7 +775,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             orderId: order._id,
                         });
                         return [4 /*yield*/, invoice.save()];
-                    case 9:
+                    case 10:
                         _b.sent();
                         MERCHANT_KEY = process.env.MERCHANT_KEY;
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
@@ -788,7 +793,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             method: "ATM_CARD",
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
-                    case 10:
+                    case 11:
                         httpQuery = _b.sent();
                         message = "POST" +
                             "\n" +
@@ -799,7 +804,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             "\n" +
                             httpQuery;
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
-                    case 11:
+                    case 12:
                         signature = _b.sent();
                         baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
                         httpBuild = {
@@ -807,7 +812,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             signature: signature,
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
-                    case 12:
+                    case 13:
                         buildHttpQuery = _b.sent();
                         directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
@@ -816,7 +821,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 13: return [2 /*return*/, res.status(200).json({
+                    case 14: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",

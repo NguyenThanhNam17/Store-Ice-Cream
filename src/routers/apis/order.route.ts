@@ -582,7 +582,9 @@ class OrderRoute extends BaseRoute {
     if (paymentMethod == PaymentMethodEnum.CASH) {
       order.paymentMethod = PaymentMethodEnum.CASH;
       order.paymentStatus = PaymentStatusEnum.SUCCESS;
+      order.status = OrderStatusEnum.PENDING;
       order.isPaid = true;
+      await order.save();
     } else if (paymentMethod == PaymentMethodEnum.WALLET) {
       let wallet = await WalletModel.findById(mine.walletId);
       if (wallet.balance < order.finalCost) {
@@ -594,6 +596,7 @@ class OrderRoute extends BaseRoute {
           },
         });
         order.paymentStatus = PaymentStatusEnum.SUCCESS;
+        order.status = OrderStatusEnum.PENDING;
         order.isPaid = true;
       }
     } else {
