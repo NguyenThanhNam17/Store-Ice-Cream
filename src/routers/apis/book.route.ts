@@ -103,56 +103,54 @@ class BookRoute extends BaseRoute {
         if (mine.categoryIds.length > 0) {
           _.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
         }
-        if (search) {
-          const text = search;
-          const tokenizer = vntk.posTag();
-          const words: any = tokenizer.tag(text);
 
-          const nouns = words.filter(
-            (word: any) =>
-              word[1] === "N" || word[1] === "M" || word[1] === "Np"
-          );
+        const text = search;
+        const tokenizer = vntk.posTag();
+        const words: any = tokenizer.tag(text);
 
-          const tfidf = new vntk.TfIdf();
-          tfidf.addDocument(text);
-          const importantWords = nouns.map((word: any) => {
-            return {
-              word: word[0],
-              tfidf: tfidf.tfidfs(word[0], function (i, measure) {
-                console.log("document #" + i + " is " + measure);
-              }),
-            };
-          });
+        const nouns = words.filter(
+          (word: any) => word[1] === "N" || word[1] === "M" || word[1] === "Np"
+        );
 
-          const topKeywords = importantWords
-            .sort((a: any, b: any) => b.tfidf - a.tfidf)
-            .slice(0, 3);
-          const result = topKeywords.map((item: any) => item.word);
-          await Promise.all([
-            UserModel.updateOne(
-              { _id: mine._id },
-              {
-                $addToSet: {
-                  searchs: {
-                    $each: result,
-                  },
+        const tfidf = new vntk.TfIdf();
+        tfidf.addDocument(text);
+        const importantWords = nouns.map((word: any) => {
+          return {
+            word: word[0],
+            tfidf: tfidf.tfidfs(word[0], function (i, measure) {
+              console.log("document #" + i + " is " + measure);
+            }),
+          };
+        });
+
+        const topKeywords = importantWords
+          .sort((a: any, b: any) => b.tfidf - a.tfidf)
+          .slice(0, 3);
+        const result = topKeywords.map((item: any) => item.word);
+        await Promise.all([
+          UserModel.updateOne(
+            { _id: mine._id },
+            {
+              $addToSet: {
+                searchs: {
+                  $each: result,
                 },
-              }
-            ),
-            //limit array size
-            UserModel.updateOne(
-              { _id: mine._id },
-              {
-                $push: {
-                  searchs: {
-                    $each: [],
-                    $slice: -10,
-                  },
+              },
+            }
+          ),
+          //limit array size
+          UserModel.updateOne(
+            { _id: mine._id },
+            {
+              $push: {
+                searchs: {
+                  $each: [],
+                  $slice: -10,
                 },
-              }
-            ),
-          ]);
-        }
+              },
+            }
+          ),
+        ]);
       }
     }
     if (fromDate && toDate) {

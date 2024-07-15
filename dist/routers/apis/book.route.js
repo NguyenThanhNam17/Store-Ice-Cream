@@ -161,13 +161,10 @@ var BookRoute = /** @class */ (function (_super) {
                         if (mine.categoryIds.length > 0) {
                             lodash_1.default.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
                         }
-                        if (!search) return [3 /*break*/, 3];
                         text = search;
                         tokenizer = vntk_1.default.posTag();
                         words = tokenizer.tag(text);
-                        nouns = words.filter(function (word) {
-                            return word[1] === "N" || word[1] === "M" || word[1] === "Np";
-                        });
+                        nouns = words.filter(function (word) { return word[1] === "N" || word[1] === "M" || word[1] === "Np"; });
                         tfidf_1 = new vntk_1.default.TfIdf();
                         tfidf_1.addDocument(text);
                         importantWords = nouns.map(function (word) {
