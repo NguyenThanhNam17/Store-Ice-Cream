@@ -355,27 +355,28 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 }
                             });
                         }); });
-                        return [4 /*yield*/, Promise.all([
-                                user_model_1.UserModel.updateOne({ _id: order.userId }, {
-                                    $addToSet: {
-                                        categoryIds: {
-                                            $each: bookCategoryIds,
-                                        },
+                        return [4 /*yield*/, user_model_1.UserModel.updateOne({ _id: user._id }, {
+                                $addToSet: {
+                                    categoryIds: {
+                                        $each: bookCategoryIds,
                                     },
-                                }),
-                                //limit array size
-                                user_model_1.UserModel.updateOne({ _id: order.userId }, {
-                                    $push: {
-                                        categoryIds: {
-                                            $each: [],
-                                            $slice: -10,
-                                        },
-                                    },
-                                }),
-                            ])];
+                                },
+                            })];
                     case 8:
                         _b.sent();
-                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 13];
+                        //limit array size
+                        return [4 /*yield*/, user_model_1.UserModel.updateOne({ _id: order.userId }, {
+                                $push: {
+                                    categoryIds: {
+                                        $each: [],
+                                        $slice: -10,
+                                    },
+                                },
+                            })];
+                    case 9:
+                        //limit array size
+                        _b.sent();
+                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 14];
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: req.tokenInfo._id,
                             amount: Number(order.finalCost),
@@ -383,7 +384,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             orderId: order._id,
                         });
                         return [4 /*yield*/, invoice.save()];
-                    case 9:
+                    case 10:
                         _b.sent();
                         MERCHANT_KEY = process.env.MERCHANT_KEY;
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
@@ -401,7 +402,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             method: "ATM_CARD",
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
-                    case 10:
+                    case 11:
                         httpQuery = _b.sent();
                         message = "POST" +
                             "\n" +
@@ -412,7 +413,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             "\n" +
                             httpQuery;
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
-                    case 11:
+                    case 12:
                         signature = _b.sent();
                         baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
                         httpBuild = {
@@ -420,7 +421,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                             signature: signature,
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
-                    case 12:
+                    case 13:
                         buildHttpQuery = _b.sent();
                         directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
@@ -429,7 +430,7 @@ var ShoppingCartRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 13: return [2 /*return*/, res.status(200).json({
+                    case 14: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",

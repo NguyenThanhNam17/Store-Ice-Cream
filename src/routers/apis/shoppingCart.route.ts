@@ -268,30 +268,29 @@ class ShoppingCartRoute extends BaseRoute {
       let book = await BookModel.findById(shoppingCart.bookId);
       bookCategoryIds.push(book.categoryId);
     });
-    await Promise.all([
-      UserModel.updateOne(
-        { _id: order.userId },
-        {
-          $addToSet: {
-            categoryIds: {
-              $each: bookCategoryIds,
-            },
+    await UserModel.updateOne(
+      { _id: user._id },
+      {
+        $addToSet: {
+          categoryIds: {
+            $each: bookCategoryIds,
           },
-        }
-      ),
-      //limit array size
-      UserModel.updateOne(
-        { _id: order.userId },
-        {
-          $push: {
-            categoryIds: {
-              $each: [],
-              $slice: -10,
-            },
+        },
+      }
+    );
+    //limit array size
+    await UserModel.updateOne(
+      { _id: order.userId },
+      {
+        $push: {
+          categoryIds: {
+            $each: [],
+            $slice: -10,
           },
-        }
-      ),
-    ]);
+        },
+      }
+    );
+
     if (paymentMethod == "ATM") {
       const invoice = new InvoiceModel({
         userId: req.tokenInfo._id,
