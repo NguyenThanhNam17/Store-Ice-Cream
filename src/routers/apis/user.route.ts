@@ -78,6 +78,11 @@ class UserRoute extends BaseRoute {
       [this.authentication],
       this.route(this.getStatsForDashboard)
     );
+    this.router.post(
+      "/getAllTransHistoryByWallet",
+      [this.authentication],
+      this.route(this.getAllTransHistoryByWallet)
+    );
   }
 
   async authentication(req: Request, res: Response, next: NextFunction) {

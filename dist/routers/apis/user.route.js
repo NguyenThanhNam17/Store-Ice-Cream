@@ -91,6 +91,7 @@ var UserRoute = /** @class */ (function (_super) {
         this.router.post("/changePassword", [this.authentication], this.route(this.changePassword));
         this.router.post("/depositToWallet", [this.authentication], this.route(this.depositToWallet));
         this.router.post("/getStatsForDashboard", [this.authentication], this.route(this.getStatsForDashboard));
+        this.router.post("/getAllTransHistoryByWallet", [this.authentication], this.route(this.getAllTransHistoryByWallet));
     };
     UserRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
