@@ -277,7 +277,7 @@ class OrderRoute extends BaseRoute {
         userId: req.tokenInfo._id,
         amount: initialCost + 20000,
         type: "PAYMENT",
-        walltetId: wallet._id,
+        walletId: wallet.id,
       });
       await invoice.save();
     }
@@ -463,7 +463,7 @@ class OrderRoute extends BaseRoute {
         userId: req.tokenInfo._id,
         amount: order.finalCost,
         type: "REFUND",
-        walltetId: wallet._id,
+        walletId: wallet.id,
       });
       await invoice.save();
     }
@@ -542,17 +542,19 @@ class OrderRoute extends BaseRoute {
         order.paymentMethod
       )
     ) {
+      console.log("abc");
       let wallet = await WalletModel.findById(user.walletId);
       await walletService.updateOne(wallet._id, {
         $inc: {
           balance: order.finalCost,
         },
       });
+      console.log(wallet);
       const invoice = new InvoiceModel({
         userId: req.tokenInfo._id,
         amount: order.finalCost,
         type: "REFUND",
-        walltetId: wallet._id,
+        walletId: wallet.id,
       });
       await invoice.save();
     }
@@ -654,7 +656,7 @@ class OrderRoute extends BaseRoute {
           amount: order.finalCost,
           type: "PAYMENT",
           orderId: order._id,
-          walltetId: wallet._id,
+          walletId: wallet.id,
         });
         await invoice.save();
       }

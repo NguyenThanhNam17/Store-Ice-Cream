@@ -570,7 +570,7 @@ var UserRoute = /** @class */ (function (_super) {
                             userId: req.tokenInfo._id,
                             amount: balance,
                             type: "DEPOSIT",
-                            walltetId: wallet._id,
+                            walletId: wallet.id,
                         });
                         return [4 /*yield*/, invoice.save()];
                     case 3:
@@ -890,7 +890,7 @@ var UserRoute = /** @class */ (function (_super) {
     };
     UserRoute.prototype.getAllTransHistoryByWallet = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var user, _a, limit, page, search, order, filter, fromDate, toDate, trans;
+            var user, _a, limit, page, search, order, filter, trans;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0: return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
@@ -911,22 +911,16 @@ var UserRoute = /** @class */ (function (_super) {
                         catch (err) {
                             throw error_1.ErrorHelper.requestDataInvalid("page");
                         }
-                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order, filter = _a.filter;
                         if (!limit) {
-                            limit = 10;
+                            req.body.limit = 10;
                         }
                         if (!page) {
-                            page = 1;
+                            req.body.page = 1;
                         }
-                        lodash_1.default.set(req, "body.filter.userId", user._id);
+                        lodash_1.default.set(req, "body.filter.userId", user.id);
                         lodash_1.default.set(req, "body.filter.walletId", { $exists: true });
-                        return [4 /*yield*/, invoice_service_1.invoiceService.fetch({
-                                filter: filter,
-                                order: order,
-                                search: search,
-                                limit: limit,
-                                page: page,
-                            }, ["user"])];
+                        return [4 /*yield*/, invoice_service_1.invoiceService.fetch(req.body)];
                     case 2:
                         trans = _b.sent();
                         return [2 /*return*/, res.status(200).json({

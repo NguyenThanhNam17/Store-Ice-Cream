@@ -342,7 +342,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             userId: req.tokenInfo._id,
                             amount: initialCost + 20000,
                             type: "PAYMENT",
-                            walltetId: wallet._id,
+                            walletId: wallet.id,
                         });
                         return [4 /*yield*/, invoice.save()];
                     case 5:
@@ -562,7 +562,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             userId: req.tokenInfo._id,
                             amount: order.finalCost,
                             type: "REFUND",
-                            walltetId: wallet._id,
+                            walletId: wallet.id,
                         });
                         return [4 /*yield*/, invoice.save()];
                     case 9:
@@ -682,6 +682,7 @@ var OrderRoute = /** @class */ (function (_super) {
                     case 4:
                         _a.sent();
                         if (![model_const_1.PaymentMethodEnum.ATM, model_const_1.PaymentMethodEnum.WALLET].includes(order.paymentMethod)) return [3 /*break*/, 8];
+                        console.log("abc");
                         return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
                     case 5:
                         wallet = _a.sent();
@@ -692,11 +693,12 @@ var OrderRoute = /** @class */ (function (_super) {
                             })];
                     case 6:
                         _a.sent();
+                        console.log(wallet);
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: req.tokenInfo._id,
                             amount: order.finalCost,
                             type: "REFUND",
-                            walltetId: wallet._id,
+                            walletId: wallet.id,
                         });
                         return [4 /*yield*/, invoice.save()];
                     case 7:
@@ -838,7 +840,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             amount: order.finalCost,
                             type: "PAYMENT",
                             orderId: order._id,
-                            walltetId: wallet._id,
+                            walletId: wallet.id,
                         });
                         return [4 /*yield*/, invoice.save()];
                     case 11:

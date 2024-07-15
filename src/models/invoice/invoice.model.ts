@@ -8,7 +8,7 @@ export type IInvoice = BaseDocument & {
   type?: string;
   orderId?: string;
   status?: string;
-  walltetId?: string;
+  walletId?: string;
 };
 
 const invoiceSchema = new mongoose.Schema(

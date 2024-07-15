@@ -421,7 +421,7 @@ class UserRoute extends BaseRoute {
       userId: req.tokenInfo._id,
       amount: balance,
       type: "DEPOSIT",
-      walltetId: wallet._id,
+      walletId: wallet.id,
     });
     await invoice.save();
     const MERCHANT_KEY = process.env.MERCHANT_KEY;
@@ -727,25 +727,16 @@ class UserRoute extends BaseRoute {
     } catch (err) {
       throw ErrorHelper.requestDataInvalid("page");
     }
-    var { limit, page, search, order, filter, fromDate, toDate } = req.body;
+    var { limit, page, search, order, filter }: any = req.body;
     if (!limit) {
-      limit = 10;
+      req.body.limit = 10;
     }
     if (!page) {
-      page = 1;
+      req.body.page = 1;
     }
-    _.set(req, "body.filter.userId", user._id);
+    _.set(req, "body.filter.userId", user.id);
     _.set(req, "body.filter.walletId", { $exists: true });
-    let trans = await invoiceService.fetch(
-      {
-        filter: filter,
-        order: order,
-        search: search,
-        limit: limit,
-        page: page,
-      },
-      [`user`]
-    );
+    let trans = await invoiceService.fetch(req.body);
     return res.status(200).json({
       status: 200,
       code: "200",
