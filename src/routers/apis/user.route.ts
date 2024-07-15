@@ -19,6 +19,7 @@ import { OrderModel } from "../../models/order/order.model";
 import { OrderStatusEnum } from "../../constants/model.const";
 import moment from "moment-timezone";
 import _ from "lodash";
+import { invoiceService } from "../../models/invoice/invoice.service";
 class UserRoute extends BaseRoute {
   constructor() {
     super();
@@ -415,6 +416,7 @@ class UserRoute extends BaseRoute {
       userId: req.tokenInfo._id,
       amount: balance,
       type: "DEPOSIT",
+      walltetId: wallet._id,
     });
     await invoice.save();
     const MERCHANT_KEY = process.env.MERCHANT_KEY;
@@ -703,6 +705,47 @@ class UserRoute extends BaseRoute {
         revenueThisYear: getStatsRevenue[0]?.revenueThisYear || 0,
         getStatRevenueThisYear,
       },
+    });
+  }
+  async getAllTransHistoryByWallet(req: Request, res: Response) {
+    let user = await UserModel.findById(req.tokenInfo._id);
+    if (!user) {
+      throw ErrorHelper.userNotExist();
+    }
+    try {
+      req.body.limit = parseInt(req.body.limit);
+    } catch (err) {
+      throw ErrorHelper.requestDataInvalid("limit");
+    }
+    try {
+      req.body.page = parseInt(req.body.page);
+    } catch (err) {
+      throw ErrorHelper.requestDataInvalid("page");
+    }
+    var { limit, page, search, order, filter, fromDate, toDate } = req.body;
+    if (!limit) {
+      limit = 10;
+    }
+    if (!page) {
+      page = 1;
+    }
+    _.set(req, "body.filter.userId", user._id);
+    _.set(req, "body.filter.walletId", { $exists: true });
+    let trans = await invoiceService.fetch(
+      {
+        filter: filter,
+        order: order,
+        search: search,
+        limit: limit,
+        page: page,
+      },
+      [`user`]
+    );
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: trans,
     });
   }
 }

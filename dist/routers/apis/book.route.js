@@ -64,6 +64,7 @@ var moment_1 = __importDefault(require("moment"));
 var lodash_1 = __importDefault(require("lodash"));
 var book_service_1 = require("../../models/book/book.service");
 var vntk_1 = __importDefault(require("vntk"));
+var password_hash_1 = __importDefault(require("password-hash"));
 var BookRoute = /** @class */ (function (_super) {
     __extends(BookRoute, _super);
     function BookRoute() {
@@ -117,10 +118,12 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
+            var password, tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        password = password_hash_1.default.generate("123123");
+                        console.log(password);
                         if (req.get("x-token")) {
                             tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
                         }

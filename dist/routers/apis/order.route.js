@@ -300,7 +300,7 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.createOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, bookId, quantity, address, note, phoneNumber, paymentMethod, mine, book, newPhone, phoneCheck, initialCost, wallet, shoppingCart, code, order, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
+            var tokenData, _a, bookId, quantity, address, note, phoneNumber, paymentMethod, mine, book, newPhone, phoneCheck, initialCost, wallet, invoice, shoppingCart, code, order, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -324,7 +324,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             throw error_1.ErrorHelper.requestDataInvalid("phone");
                         }
                         initialCost = book.price * quantity;
-                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 5];
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 6];
                         return [4 /*yield*/, wallet_model_1.WalletModel.findById(mine.walletId)];
                     case 3:
                         wallet = _b.sent();
@@ -338,8 +338,17 @@ var OrderRoute = /** @class */ (function (_super) {
                             })];
                     case 4:
                         _b.sent();
-                        _b.label = 5;
+                        invoice = new invoice_model_1.InvoiceModel({
+                            userId: req.tokenInfo._id,
+                            amount: initialCost + 20000,
+                            type: "PAYMENT",
+                            walltetId: wallet._id,
+                        });
+                        return [4 /*yield*/, invoice.save()];
                     case 5:
+                        _b.sent();
+                        _b.label = 6;
+                    case 6:
                         shoppingCart = new shoppingCart_model_1.ShoppingCartModel({
                             bookId: book._id,
                             bookName: book.name,
@@ -348,10 +357,10 @@ var OrderRoute = /** @class */ (function (_super) {
                             status: model_const_1.ShoppingCartStatusEnum.SUCCESS,
                         });
                         return [4 /*yield*/, shoppingCart.save()];
-                    case 6:
+                    case 7:
                         _b.sent();
                         return [4 /*yield*/, order_helper_1.OrderHelper.generateOrderCode()];
-                    case 7:
+                    case 8:
                         code = _b.sent();
                         order = new order_model_1.OrderModel({
                             code: code,
@@ -372,7 +381,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             paymentMethod: paymentMethod || model_const_1.PaymentMethodEnum.CASH,
                         });
                         return [4 /*yield*/, order.save()];
-                    case 8:
+                    case 9:
                         _b.sent();
                         return [4 /*yield*/, Promise.all([
                                 user_model_1.UserModel.updateOne({ _id: order.userId }, {
@@ -392,9 +401,9 @@ var OrderRoute = /** @class */ (function (_super) {
                                     },
                                 }),
                             ])];
-                    case 9:
+                    case 10:
                         _b.sent();
-                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 14];
+                        if (!(paymentMethod == "ATM")) return [3 /*break*/, 15];
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: tokenData._id,
                             amount: Number(order.finalCost),
@@ -402,7 +411,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             orderId: order._id,
                         });
                         return [4 /*yield*/, invoice.save()];
-                    case 10:
+                    case 11:
                         _b.sent();
                         MERCHANT_KEY = process.env.MERCHANT_KEY;
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
@@ -420,7 +429,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             method: "ATM_CARD",
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
-                    case 11:
+                    case 12:
                         httpQuery = _b.sent();
                         message = "POST" +
                             "\n" +
@@ -431,7 +440,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             "\n" +
                             httpQuery;
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
-                    case 12:
+                    case 13:
                         signature = _b.sent();
                         baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
                         httpBuild = {
@@ -439,7 +448,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             signature: signature,
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
-                    case 13:
+                    case 14:
                         buildHttpQuery = _b.sent();
                         directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
@@ -448,7 +457,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 14: return [2 /*return*/, res.status(200).json({
+                    case 15: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",
@@ -463,7 +472,7 @@ var OrderRoute = /** @class */ (function (_super) {
     //update order for admin
     OrderRoute.prototype.updateOrderForAdmin = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, id, address, note, status, phoneNumber, noteUpdate, order, user, newPhone, phoneCheck, shoppingCarts, wallet;
+            var _a, id, address, note, status, phoneNumber, noteUpdate, order, user, newPhone, phoneCheck, shoppingCarts, wallet, invoice;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -518,7 +527,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         _b.sent();
                         _b.label = 5;
                     case 5:
-                        if (!(status == model_const_1.OrderStatusEnum.CANCEL)) return [3 /*break*/, 9];
+                        if (!(status == model_const_1.OrderStatusEnum.CANCEL)) return [3 /*break*/, 10];
                         return [4 /*yield*/, shoppingCart_model_1.ShoppingCartModel.find({
                                 _id: order.shoppingCartIds,
                             })];
@@ -548,8 +557,17 @@ var OrderRoute = /** @class */ (function (_super) {
                             })];
                     case 8:
                         _b.sent();
-                        _b.label = 9;
-                    case 9: return [2 /*return*/, res.status(200).json({
+                        invoice = new invoice_model_1.InvoiceModel({
+                            userId: req.tokenInfo._id,
+                            amount: order.finalCost,
+                            type: "REFUND",
+                            walltetId: wallet._id,
+                        });
+                        return [4 /*yield*/, invoice.save()];
+                    case 9:
+                        _b.sent();
+                        _b.label = 10;
+                    case 10: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",
@@ -621,7 +639,7 @@ var OrderRoute = /** @class */ (function (_super) {
     //cancel order
     OrderRoute.prototype.cancelOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, order, user, shoppingCarts, wallet;
+            var id, order, user, shoppingCarts, wallet, invoice;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -662,7 +680,7 @@ var OrderRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, order.save()];
                     case 4:
                         _a.sent();
-                        if (![model_const_1.PaymentMethodEnum.ATM, model_const_1.PaymentMethodEnum.WALLET].includes(order.paymentMethod)) return [3 /*break*/, 7];
+                        if (![model_const_1.PaymentMethodEnum.ATM, model_const_1.PaymentMethodEnum.WALLET].includes(order.paymentMethod)) return [3 /*break*/, 8];
                         return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
                     case 5:
                         wallet = _a.sent();
@@ -673,8 +691,17 @@ var OrderRoute = /** @class */ (function (_super) {
                             })];
                     case 6:
                         _a.sent();
-                        _a.label = 7;
-                    case 7: return [2 /*return*/, res.status(200).json({
+                        invoice = new invoice_model_1.InvoiceModel({
+                            userId: req.tokenInfo._id,
+                            amount: order.finalCost,
+                            type: "REFUND",
+                            walltetId: wallet._id,
+                        });
+                        return [4 /*yield*/, invoice.save()];
+                    case 7:
+                        _a.sent();
+                        _a.label = 8;
+                    case 8: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",
@@ -719,7 +746,7 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.rePaymentOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, orderId, paymentMethod, mine, order, wallet, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
+            var _a, orderId, paymentMethod, mine, order, wallet, invoice, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -747,9 +774,9 @@ var OrderRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, order.save()];
                     case 3:
                         _b.sent();
-                        return [3 /*break*/, 14];
+                        return [3 /*break*/, 15];
                     case 4:
-                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 9];
+                        if (!(paymentMethod == model_const_1.PaymentMethodEnum.WALLET)) return [3 /*break*/, 10];
                         return [4 /*yield*/, wallet_model_1.WalletModel.findById(mine.walletId)];
                     case 5:
                         wallet = _b.sent();
@@ -765,9 +792,19 @@ var OrderRoute = /** @class */ (function (_super) {
                         order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
                         order.status = model_const_1.OrderStatusEnum.PENDING;
                         order.isPaid = true;
-                        _b.label = 8;
-                    case 8: return [3 /*break*/, 14];
-                    case 9:
+                        invoice = new invoice_model_1.InvoiceModel({
+                            userId: req.tokenInfo._id,
+                            amount: order.finalCost,
+                            type: "PAYMENT",
+                            orderId: order._id,
+                            walltetId: wallet._id,
+                        });
+                        return [4 /*yield*/, invoice.save()];
+                    case 8:
+                        _b.sent();
+                        _b.label = 9;
+                    case 9: return [3 /*break*/, 15];
+                    case 10:
                         invoice = new invoice_model_1.InvoiceModel({
                             userId: req.tokenInfo._id,
                             amount: order.finalCost,
@@ -775,7 +812,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             orderId: order._id,
                         });
                         return [4 /*yield*/, invoice.save()];
-                    case 10:
+                    case 11:
                         _b.sent();
                         MERCHANT_KEY = process.env.MERCHANT_KEY;
                         MERCHANT_SECRET_KEY = process.env.MERCHANT_SECRET_KEY;
@@ -793,7 +830,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             method: "ATM_CARD",
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(parameters)];
-                    case 11:
+                    case 12:
                         httpQuery = _b.sent();
                         message = "POST" +
                             "\n" +
@@ -804,7 +841,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             "\n" +
                             httpQuery;
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildSignature(message, MERCHANT_SECRET_KEY)];
-                    case 12:
+                    case 13:
                         signature = _b.sent();
                         baseEncode = Buffer.from(JSON.stringify(parameters)).toString("base64");
                         httpBuild = {
@@ -812,7 +849,7 @@ var OrderRoute = /** @class */ (function (_super) {
                             signature: signature,
                         };
                         return [4 /*yield*/, utils_helper_1.UtilsHelper.buildHttpQuery(httpBuild)];
-                    case 13:
+                    case 14:
                         buildHttpQuery = _b.sent();
                         directUrl = END_POINT + "/portal?" + buildHttpQuery;
                         return [2 /*return*/, res.status(200).json({
@@ -821,7 +858,7 @@ var OrderRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 14: return [2 /*return*/, res.status(200).json({
+                    case 15: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",

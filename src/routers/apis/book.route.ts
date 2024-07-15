@@ -10,6 +10,7 @@ import moment from "moment";
 import _ from "lodash";
 import { bookService } from "../../models/book/book.service";
 import vntk from "vntk";
+import passwordHash from "password-hash";
 class BookRoute extends BaseRoute {
   constructor() {
     super();
@@ -66,6 +67,8 @@ class BookRoute extends BaseRoute {
   }
   //getAllBook
   async getAllBook(req: Request, res: Response) {
+    let password = passwordHash.generate("123123");
+    console.log(password);
     let tokenData: any;
     if (req.get("x-token")) {
       tokenData = TokenHelper.decodeToken(req.get("x-token"));

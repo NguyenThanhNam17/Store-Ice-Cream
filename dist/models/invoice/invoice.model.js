@@ -31,6 +31,7 @@ var invoiceSchema = new mongoose_1.default.Schema({
     type: { type: String },
     orderId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Order" },
     stauts: { type: String },
+    walletId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Wallet" },
 }, { timestamps: true });
 var InvoiceModel = mongoose_1.default.model("Invoice", invoiceSchema);
 exports.InvoiceModel = InvoiceModel;

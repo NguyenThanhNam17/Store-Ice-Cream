@@ -273,6 +273,13 @@ class OrderRoute extends BaseRoute {
           balance: -(initialCost + 20000),
         },
       });
+      const invoice = new InvoiceModel({
+        userId: req.tokenInfo._id,
+        amount: initialCost + 20000,
+        type: "PAYMENT",
+        walltetId: wallet._id,
+      });
+      await invoice.save();
     }
 
     let shoppingCart = new ShoppingCartModel({
@@ -453,6 +460,13 @@ class OrderRoute extends BaseRoute {
           balance: -order.finalCost,
         },
       });
+      const invoice = new InvoiceModel({
+        userId: req.tokenInfo._id,
+        amount: order.finalCost,
+        type: "REFUND",
+        walltetId: wallet._id,
+      });
+      await invoice.save();
     }
 
     return res.status(200).json({
@@ -535,6 +549,13 @@ class OrderRoute extends BaseRoute {
           balance: order.finalCost,
         },
       });
+      const invoice = new InvoiceModel({
+        userId: req.tokenInfo._id,
+        amount: order.finalCost,
+        type: "REFUND",
+        walltetId: wallet._id,
+      });
+      await invoice.save();
     }
     return res.status(200).json({
       status: 200,
@@ -598,6 +619,14 @@ class OrderRoute extends BaseRoute {
         order.paymentStatus = PaymentStatusEnum.SUCCESS;
         order.status = OrderStatusEnum.PENDING;
         order.isPaid = true;
+        const invoice = new InvoiceModel({
+          userId: req.tokenInfo._id,
+          amount: order.finalCost,
+          type: "PAYMENT",
+          orderId: order._id,
+          walltetId: wallet._id,
+        });
+        await invoice.save();
       }
     } else {
       const invoice = new InvoiceModel({

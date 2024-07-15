@@ -71,6 +71,7 @@ var order_model_1 = require("../../models/order/order.model");
 var model_const_1 = require("../../constants/model.const");
 var moment_timezone_1 = __importDefault(require("moment-timezone"));
 var lodash_1 = __importDefault(require("lodash"));
+var invoice_service_1 = require("../../models/invoice/invoice.service");
 var UserRoute = /** @class */ (function (_super) {
     __extends(UserRoute, _super);
     function UserRoute() {
@@ -568,6 +569,7 @@ var UserRoute = /** @class */ (function (_super) {
                             userId: req.tokenInfo._id,
                             amount: balance,
                             type: "DEPOSIT",
+                            walltetId: wallet._id,
                         });
                         return [4 /*yield*/, invoice.save()];
                     case 3:
@@ -880,6 +882,57 @@ var UserRoute = /** @class */ (function (_super) {
                                     revenueThisYear: ((_m = getStatsRevenue[0]) === null || _m === void 0 ? void 0 : _m.revenueThisYear) || 0,
                                     getStatRevenueThisYear: getStatRevenueThisYear,
                                 },
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.getAllTransHistoryByWallet = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, _a, limit, page, search, order, filter, fromDate, toDate, trans;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
+                    case 1:
+                        user = _b.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        try {
+                            req.body.limit = parseInt(req.body.limit);
+                        }
+                        catch (err) {
+                            throw error_1.ErrorHelper.requestDataInvalid("limit");
+                        }
+                        try {
+                            req.body.page = parseInt(req.body.page);
+                        }
+                        catch (err) {
+                            throw error_1.ErrorHelper.requestDataInvalid("page");
+                        }
+                        _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
+                        if (!limit) {
+                            limit = 10;
+                        }
+                        if (!page) {
+                            page = 1;
+                        }
+                        lodash_1.default.set(req, "body.filter.userId", user._id);
+                        lodash_1.default.set(req, "body.filter.walletId", { $exists: true });
+                        return [4 /*yield*/, invoice_service_1.invoiceService.fetch({
+                                filter: filter,
+                                order: order,
+                                search: search,
+                                limit: limit,
+                                page: page,
+                            }, ["user"])];
+                    case 2:
+                        trans = _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: trans,
                             })];
                 }
             });

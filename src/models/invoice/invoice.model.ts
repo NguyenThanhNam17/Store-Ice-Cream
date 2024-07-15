@@ -8,6 +8,7 @@ export type IInvoice = BaseDocument & {
   type?: string;
   orderId?: string;
   status?: string;
+  walltetId?: string;
 };
 
 const invoiceSchema = new mongoose.Schema(
@@ -17,6 +18,7 @@ const invoiceSchema = new mongoose.Schema(
     type: { type: String },
     orderId: { type: Schema.Types.ObjectId, ref: "Order" },
     stauts: { type: String },
+    walletId: { type: Schema.Types.ObjectId, ref: "Wallet" },
   },
   { timestamps: true }
 );
