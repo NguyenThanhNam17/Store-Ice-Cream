@@ -67,8 +67,6 @@ class BookRoute extends BaseRoute {
   }
   //getAllBook
   async getAllBook(req: Request, res: Response) {
-    let password = passwordHash.generate("123123");
-    console.log(password);
     let tokenData: any;
     if (req.get("x-token")) {
       tokenData = TokenHelper.decodeToken(req.get("x-token"));
@@ -85,10 +83,10 @@ class BookRoute extends BaseRoute {
     }
     var { limit, page, search, filter, order, fromDate, toDate } = req.body;
     if (!limit) {
-      limit = 10;
+      req.body.limit = 10;
     }
     if (!page) {
-      page = 1;
+      req.body.page = 1;
     }
     if (tokenData) {
       if (tokenData.role_ != ROLES.ADMIN) {
@@ -103,54 +101,56 @@ class BookRoute extends BaseRoute {
         if (mine.categoryIds.length > 0) {
           _.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
         }
+        if (search) {
+          const text = search;
+          const tokenizer = vntk.posTag();
+          const words: any = tokenizer.tag(text);
 
-        const text = search;
-        const tokenizer = vntk.posTag();
-        const words: any = tokenizer.tag(text);
+          const nouns = words.filter(
+            (word: any) =>
+              word[1] === "N" || word[1] === "M" || word[1] === "Np"
+          );
 
-        const nouns = words.filter(
-          (word: any) => word[1] === "N" || word[1] === "M" || word[1] === "Np"
-        );
+          const tfidf = new vntk.TfIdf();
+          tfidf.addDocument(text);
+          const importantWords = nouns.map((word: any) => {
+            return {
+              word: word[0],
+              tfidf: tfidf.tfidfs(word[0], function (i, measure) {
+                console.log("document #" + i + " is " + measure);
+              }),
+            };
+          });
 
-        const tfidf = new vntk.TfIdf();
-        tfidf.addDocument(text);
-        const importantWords = nouns.map((word: any) => {
-          return {
-            word: word[0],
-            tfidf: tfidf.tfidfs(word[0], function (i, measure) {
-              console.log("document #" + i + " is " + measure);
-            }),
-          };
-        });
-
-        const topKeywords = importantWords
-          .sort((a: any, b: any) => b.tfidf - a.tfidf)
-          .slice(0, 3);
-        const result = topKeywords.map((item: any) => item.word);
-        await Promise.all([
-          UserModel.updateOne(
-            { _id: mine._id },
-            {
-              $addToSet: {
-                searchs: {
-                  $each: result,
+          const topKeywords = importantWords
+            .sort((a: any, b: any) => b.tfidf - a.tfidf)
+            .slice(0, 3);
+          const result = topKeywords.map((item: any) => item.word);
+          await Promise.all([
+            UserModel.updateOne(
+              { _id: mine._id },
+              {
+                $addToSet: {
+                  searchs: {
+                    $each: result,
+                  },
                 },
-              },
-            }
-          ),
-          //limit array size
-          UserModel.updateOne(
-            { _id: mine._id },
-            {
-              $push: {
-                searchs: {
-                  $each: [],
-                  $slice: -10,
+              }
+            ),
+            //limit array size
+            UserModel.updateOne(
+              { _id: mine._id },
+              {
+                $push: {
+                  searchs: {
+                    $each: [],
+                    $slice: -10,
+                  },
                 },
-              },
-            }
-          ),
-        ]);
+              }
+            ),
+          ]);
+        }
       }
     }
     if (fromDate && toDate) {
@@ -158,17 +158,8 @@ class BookRoute extends BaseRoute {
       toDate = moment(toDate).endOf("day").subtract(7, "hours").toDate();
       _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
     }
-
-    const books = await bookService.fetch(
-      {
-        filter: filter,
-        order: order,
-        search: search,
-        limit: limit,
-        page: page,
-      },
-      ["category"]
-    );
+    console.log(req.body);
+    const books = await bookService.fetch(req.body, ["category"]);
     return res.status(200).json({
       status: 200,
       code: "200",

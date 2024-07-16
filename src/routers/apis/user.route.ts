@@ -195,23 +195,17 @@ class UserRoute extends BaseRoute {
     }
     var { limit, page, search, order, filter, fromDate, toDate } = req.body;
     if (!limit) {
-      limit = 10;
+      req.body.limit = 10;
     }
     if (!page) {
-      page = 1;
+      req.body.page = 1;
     }
     if (fromDate && toDate) {
       fromDate = moment(fromDate).startOf("day").subtract(7, "hours").toDate();
       toDate = moment(toDate).endOf("day").subtract(7, "hours").toDate();
       _.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
     }
-    const users = await userService.fetch({
-      filter: filter,
-      order: order,
-      search: search,
-      limit: limit,
-      page: page,
-    });
+    const users = await userService.fetch(req.body);
     return res.status(200).json({
       status: 200,
       code: "200",

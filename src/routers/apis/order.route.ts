@@ -120,24 +120,18 @@ class OrderRoute extends BaseRoute {
     var { limit, page, search, order, filter } = req.body;
     // let filter = req?.body || {};
     if (!limit) {
-      limit = 10;
+      req.body.limit = 10;
     }
     if (!page) {
-      page = 1;
+      req.body.page = 1;
     }
     if (![ROLES.ADMIN, ROLES.STAFF].includes(tokenData.role_)) {
       filter.userId = tokenData._id;
     }
-    const orders = await orderService.fetch(
-      {
-        filter: filter,
-        order: order,
-        search: search,
-        limit: limit,
-        page: page,
-      },
-      [`user`, "shoppingCarts"]
-    );
+    const orders = await orderService.fetch(req.body, [
+      `user`,
+      "shoppingCarts",
+    ]);
     return res.status(200).json({
       status: 200,
       code: "200",
@@ -163,10 +157,10 @@ class OrderRoute extends BaseRoute {
     }
     var { limit, page, search, order, filter, fromDate, toDate } = req.body;
     if (!limit) {
-      limit = 10;
+      req.body.limit = 10;
     }
     if (!page) {
-      page = 1;
+      req.body.page = 1;
     }
     // if (filter.status) {
     //   filter.status = { $nin: [OrderStatusEnum.IN_CART] };
@@ -177,16 +171,10 @@ class OrderRoute extends BaseRoute {
       _.set(req.body, "filter.createdAt", { $gte: fromDate, $lte: toDate });
     }
 
-    const orders = await orderService.fetch(
-      {
-        filter: filter,
-        order: order,
-        search: search,
-        limit: limit,
-        page: page,
-      },
-      [`user`, "shoppingCarts"]
-    );
+    const orders = await orderService.fetch(req.body, [
+      `user`,
+      "shoppingCarts",
+    ]);
     return res.status(200).json({
       status: 200,
       code: "200",

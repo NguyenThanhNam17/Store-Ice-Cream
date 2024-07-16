@@ -64,7 +64,6 @@ var moment_1 = __importDefault(require("moment"));
 var lodash_1 = __importDefault(require("lodash"));
 var book_service_1 = require("../../models/book/book.service");
 var vntk_1 = __importDefault(require("vntk"));
-var password_hash_1 = __importDefault(require("password-hash"));
 var BookRoute = /** @class */ (function (_super) {
     __extends(BookRoute, _super);
     function BookRoute() {
@@ -118,12 +117,10 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var password, tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
+            var tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        password = password_hash_1.default.generate("123123");
-                        console.log(password);
                         if (req.get("x-token")) {
                             tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
                         }
@@ -141,10 +138,10 @@ var BookRoute = /** @class */ (function (_super) {
                         }
                         _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, filter = _a.filter, order = _a.order, fromDate = _a.fromDate, toDate = _a.toDate;
                         if (!limit) {
-                            limit = 10;
+                            req.body.limit = 10;
                         }
                         if (!page) {
-                            page = 1;
+                            req.body.page = 1;
                         }
                         if (!tokenData) return [3 /*break*/, 3];
                         if (!(tokenData.role_ != role_const_1.ROLES.ADMIN)) return [3 /*break*/, 3];
@@ -161,10 +158,13 @@ var BookRoute = /** @class */ (function (_super) {
                         if (mine.categoryIds.length > 0) {
                             lodash_1.default.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
                         }
+                        if (!search) return [3 /*break*/, 3];
                         text = search;
                         tokenizer = vntk_1.default.posTag();
                         words = tokenizer.tag(text);
-                        nouns = words.filter(function (word) { return word[1] === "N" || word[1] === "M" || word[1] === "Np"; });
+                        nouns = words.filter(function (word) {
+                            return word[1] === "N" || word[1] === "M" || word[1] === "Np";
+                        });
                         tfidf_1 = new vntk_1.default.TfIdf();
                         tfidf_1.addDocument(text);
                         importantWords = nouns.map(function (word) {
@@ -206,13 +206,8 @@ var BookRoute = /** @class */ (function (_super) {
                             toDate = (0, moment_1.default)(toDate).endOf("day").subtract(7, "hours").toDate();
                             lodash_1.default.set(req, "body.filter.createdAt", { $gte: fromDate, $lte: toDate });
                         }
-                        return [4 /*yield*/, book_service_1.bookService.fetch({
-                                filter: filter,
-                                order: order,
-                                search: search,
-                                limit: limit,
-                                page: page,
-                            }, ["category"])];
+                        console.log(req.body);
+                        return [4 /*yield*/, book_service_1.bookService.fetch(req.body, ["category"])];
                     case 4:
                         books = _b.sent();
                         return [2 /*return*/, res.status(200).json({

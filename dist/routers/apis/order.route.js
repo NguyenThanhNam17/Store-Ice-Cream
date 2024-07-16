@@ -145,21 +145,18 @@ var OrderRoute = /** @class */ (function (_super) {
                         _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order, filter = _a.filter;
                         // let filter = req?.body || {};
                         if (!limit) {
-                            limit = 10;
+                            req.body.limit = 10;
                         }
                         if (!page) {
-                            page = 1;
+                            req.body.page = 1;
                         }
                         if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.STAFF].includes(tokenData.role_)) {
                             filter.userId = tokenData._id;
                         }
-                        return [4 /*yield*/, order_service_1.orderService.fetch({
-                                filter: filter,
-                                order: order,
-                                search: search,
-                                limit: limit,
-                                page: page,
-                            }, ["user", "shoppingCarts"])];
+                        return [4 /*yield*/, order_service_1.orderService.fetch(req.body, [
+                                "user",
+                                "shoppingCarts",
+                            ])];
                     case 1:
                         orders = _b.sent();
                         return [2 /*return*/, res.status(200).json({
@@ -197,10 +194,10 @@ var OrderRoute = /** @class */ (function (_super) {
                         }
                         _a = req.body, limit = _a.limit, page = _a.page, search = _a.search, order = _a.order, filter = _a.filter, fromDate = _a.fromDate, toDate = _a.toDate;
                         if (!limit) {
-                            limit = 10;
+                            req.body.limit = 10;
                         }
                         if (!page) {
-                            page = 1;
+                            req.body.page = 1;
                         }
                         // if (filter.status) {
                         //   filter.status = { $nin: [OrderStatusEnum.IN_CART] };
@@ -210,13 +207,10 @@ var OrderRoute = /** @class */ (function (_super) {
                             toDate = (0, moment_timezone_1.default)(toDate).endOf("day").subtract(7, "hours").toDate();
                             lodash_1.default.set(req.body, "filter.createdAt", { $gte: fromDate, $lte: toDate });
                         }
-                        return [4 /*yield*/, order_service_1.orderService.fetch({
-                                filter: filter,
-                                order: order,
-                                search: search,
-                                limit: limit,
-                                page: page,
-                            }, ["user", "shoppingCarts"])];
+                        return [4 /*yield*/, order_service_1.orderService.fetch(req.body, [
+                                "user",
+                                "shoppingCarts",
+                            ])];
                     case 1:
                         orders = _b.sent();
                         return [2 /*return*/, res.status(200).json({
