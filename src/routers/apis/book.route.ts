@@ -94,15 +94,26 @@ class BookRoute extends BaseRoute {
         if (!mine) {
           throw ErrorHelper.userNotExist();
         }
-        if (!req.body.filter || !req.body.search) {
-          if (mine.searchs.length > 0) {
-            const keywords = mine.searchs.join("|");
-            _.set(req.body, "filter.name", { $regex: keywords, $options: "i" });
-          }
-          if (mine.categoryIds.length > 0) {
-            _.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
-          }
-        }
+
+        // if (!filter) {
+        //   console.log(filter);
+        //   if (mine.searchs.length > 0) {
+        //     const keywords = mine.searchs.join("|");
+        //     _.set(req.body, "filter.name", { $regex: keywords, $options: "i" });
+        //   }
+        //   if (mine.categoryIds.length > 0) {
+        //     _.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
+        //   }
+        // } else if (!order || !filter) {
+        //   console.log(filter);
+        //   if (mine.searchs.length > 0) {
+        //     const keywords = mine.searchs.join("|");
+        //     _.set(req.body, "filter.name", { $regex: keywords, $options: "i" });
+        //   }
+        //   if (mine.categoryIds.length > 0) {
+        //     _.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
+        //   }
+        // }
         if (search) {
           const text = search;
           const tokenizer = vntk.posTag();

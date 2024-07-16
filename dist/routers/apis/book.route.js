@@ -117,7 +117,7 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, keywords, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
+            var tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -150,15 +150,6 @@ var BookRoute = /** @class */ (function (_super) {
                         mine = _b.sent();
                         if (!mine) {
                             throw error_1.ErrorHelper.userNotExist();
-                        }
-                        if (!req.body.filter || !req.body.search) {
-                            if (mine.searchs.length > 0) {
-                                keywords = mine.searchs.join("|");
-                                lodash_1.default.set(req.body, "filter.name", { $regex: keywords, $options: "i" });
-                            }
-                            if (mine.categoryIds.length > 0) {
-                                lodash_1.default.set(req.body, "filter.categoryId", { $in: mine.categoryIds });
-                            }
                         }
                         if (!search) return [3 /*break*/, 3];
                         text = search;
