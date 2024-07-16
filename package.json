@@ -19,6 +19,7 @@
     "nodemon": "^3.1.0",
     "password-hash": "^1.2.2",
     "phone": "^3.1.42",
+    "slug": "^9.1.0",
     "typescript": "^5.3.3",
     "vntk": "^1.4.4"
   },

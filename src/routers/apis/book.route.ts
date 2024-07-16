@@ -11,6 +11,7 @@ import _ from "lodash";
 import { bookService } from "../../models/book/book.service";
 import vntk from "vntk";
 import passwordHash from "password-hash";
+var slug = require("slug");
 class BookRoute extends BaseRoute {
   constructor() {
     super();
@@ -23,6 +24,7 @@ class BookRoute extends BaseRoute {
     //   this.route(this.getAllBookForAdmin)
     // );
     this.router.post("/getOneBook", this.route(this.getOneBook));
+    this.router.post("/getOneBookBySlug", this.route(this.getOneBookBySlug));
     this.router.post(
       "/createBook",
       [this.authentication],
@@ -44,6 +46,7 @@ class BookRoute extends BaseRoute {
       this.route(this.setHightlightBook)
     );
   }
+
   //Auth
   async authentication(req: Request, res: Response, next: NextFunction) {
     try {
@@ -67,6 +70,14 @@ class BookRoute extends BaseRoute {
   }
   //getAllBook
   async getAllBook(req: Request, res: Response) {
+    let bookss = await BookModel.find({});
+    bookss.map(async (item: any) => {
+      await bookService.updateOne(item._id, {
+        $set: {
+          slug: slug(item.name),
+        },
+      });
+    });
     let tokenData: any;
     if (req.get("x-token")) {
       tokenData = TokenHelper.decodeToken(req.get("x-token"));
@@ -238,6 +249,24 @@ class BookRoute extends BaseRoute {
       },
     });
   }
+  async getOneBookBySlug(req: Request, res: Response) {
+    let { slug } = req.body;
+    const book: any = await BookModel.findOne({ slug: slug }).populate(
+      "category"
+    );
+    if (!book) {
+      //throw lỗi không tìm thấy
+      throw ErrorHelper.recoredNotFound("Book!");
+    }
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "success",
+      data: {
+        book,
+      },
+    });
+  }
   async createBook(req: Request, res: Response) {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
@@ -249,6 +278,7 @@ class BookRoute extends BaseRoute {
     }
     const book = new BookModel({
       name: name,
+      slug: slug(name),
       author: author,
       categoryId: categoryId,
       description: description,
@@ -266,6 +296,7 @@ class BookRoute extends BaseRoute {
       },
     });
   }
+
   async updateBook(req: Request, res: Response) {
     if (ROLES.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();

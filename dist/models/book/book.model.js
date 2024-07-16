@@ -36,6 +36,7 @@ var bookSchema = new mongoose_1.default.Schema({
     isHighlight: { type: Boolean, default: false },
     soldQuantity: { type: Number, default: 0 },
     bookCategoryIds: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "BookCategory" }],
+    slug: { type: String },
 }, { timestamps: true });
 // Index for search
 bookSchema.index({ name: "text", author: "text" }, { weights: { name: 4, author: 2 } });

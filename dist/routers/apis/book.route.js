@@ -64,6 +64,7 @@ var moment_1 = __importDefault(require("moment"));
 var lodash_1 = __importDefault(require("lodash"));
 var book_service_1 = require("../../models/book/book.service");
 var vntk_1 = __importDefault(require("vntk"));
+var slug = require("slug");
 var BookRoute = /** @class */ (function (_super) {
     __extends(BookRoute, _super);
     function BookRoute() {
@@ -77,6 +78,7 @@ var BookRoute = /** @class */ (function (_super) {
         //   this.route(this.getAllBookForAdmin)
         // );
         this.router.post("/getOneBook", this.route(this.getOneBook));
+        this.router.post("/getOneBookBySlug", this.route(this.getOneBookBySlug));
         this.router.post("/createBook", [this.authentication], this.route(this.createBook));
         this.router.post("/updateBook", [this.authentication], this.route(this.updateBook));
         this.router.post("/deleteOneBook", [this.authentication], this.route(this.deleteOneBook));
@@ -117,10 +119,27 @@ var BookRoute = /** @class */ (function (_super) {
     //getAllBook
     BookRoute.prototype.getAllBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
+            var bookss, tokenData, _a, limit, page, search, filter, order, fromDate, toDate, mine, text, tokenizer, words, nouns, tfidf_1, importantWords, topKeywords, result, books;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, book_model_1.BookModel.find({})];
+                    case 1:
+                        bookss = _b.sent();
+                        bookss.map(function (item) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, book_service_1.bookService.updateOne(item._id, {
+                                            $set: {
+                                                slug: slug(item.name),
+                                            },
+                                        })];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
                         if (req.get("x-token")) {
                             tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
                         }
@@ -143,15 +162,15 @@ var BookRoute = /** @class */ (function (_super) {
                         if (!page) {
                             req.body.page = 1;
                         }
-                        if (!tokenData) return [3 /*break*/, 3];
-                        if (!(tokenData.role_ != role_const_1.ROLES.ADMIN)) return [3 /*break*/, 3];
+                        if (!tokenData) return [3 /*break*/, 4];
+                        if (!(tokenData.role_ != role_const_1.ROLES.ADMIN)) return [3 /*break*/, 4];
                         return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
-                    case 1:
+                    case 2:
                         mine = _b.sent();
                         if (!mine) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        if (!search) return [3 /*break*/, 3];
+                        if (!search) return [3 /*break*/, 4];
                         text = search;
                         tokenizer = vntk_1.default.posTag();
                         words = tokenizer.tag(text);
@@ -190,10 +209,10 @@ var BookRoute = /** @class */ (function (_super) {
                                     },
                                 }),
                             ])];
-                    case 2:
-                        _b.sent();
-                        _b.label = 3;
                     case 3:
+                        _b.sent();
+                        _b.label = 4;
+                    case 4:
                         if (fromDate && toDate) {
                             fromDate = (0, moment_1.default)(fromDate).startOf("day").subtract(7, "hours").toDate();
                             toDate = (0, moment_1.default)(toDate).endOf("day").subtract(7, "hours").toDate();
@@ -201,7 +220,7 @@ var BookRoute = /** @class */ (function (_super) {
                         }
                         console.log(req.body);
                         return [4 /*yield*/, book_service_1.bookService.fetch(req.body, ["category"])];
-                    case 4:
+                    case 5:
                         books = _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
@@ -281,6 +300,32 @@ var BookRoute = /** @class */ (function (_super) {
             });
         });
     };
+    BookRoute.prototype.getOneBookBySlug = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var slug, book;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        slug = req.body.slug;
+                        return [4 /*yield*/, book_model_1.BookModel.findOne({ slug: slug }).populate("category")];
+                    case 1:
+                        book = _a.sent();
+                        if (!book) {
+                            //throw lỗi không tìm thấy
+                            throw error_1.ErrorHelper.recoredNotFound("Book!");
+                        }
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    book: book,
+                                },
+                            })];
+                }
+            });
+        });
+    };
     BookRoute.prototype.createBook = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, name, author, categoryId, description, price, quantity, images, book;
@@ -296,6 +341,7 @@ var BookRoute = /** @class */ (function (_super) {
                         }
                         book = new book_model_1.BookModel({
                             name: name,
+                            slug: slug(name),
                             author: author,
                             categoryId: categoryId,
                             description: description,
