@@ -151,7 +151,7 @@ var BookRoute = /** @class */ (function (_super) {
                         if (!mine) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        if (req.body.filter || req.body.search) {
+                        if (!req.body.filter || !req.body.search) {
                             if (mine.searchs.length > 0) {
                                 keywords = mine.searchs.join("|");
                                 lodash_1.default.set(req.body, "filter.name", { $regex: keywords, $options: "i" });

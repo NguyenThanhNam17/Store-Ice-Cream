@@ -94,7 +94,7 @@ class BookRoute extends BaseRoute {
         if (!mine) {
           throw ErrorHelper.userNotExist();
         }
-        if (req.body.filter || req.body.search) {
+        if (!req.body.filter || !req.body.search) {
           if (mine.searchs.length > 0) {
             const keywords = mine.searchs.join("|");
             _.set(req.body, "filter.name", { $regex: keywords, $options: "i" });
