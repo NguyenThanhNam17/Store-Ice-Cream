@@ -73,6 +73,7 @@ var order_helper_1 = require("../../models/order/order.helper");
 var wallet_model_1 = require("../../models/wallet/wallet.model");
 var wallet_service_1 = require("../../models/wallet/wallet.service");
 var moment_timezone_1 = __importDefault(require("moment-timezone"));
+var nodemailer = require("nodemailer");
 var OrderRoute = /** @class */ (function (_super) {
     __extends(OrderRoute, _super);
     function OrderRoute() {
@@ -294,7 +295,7 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.createOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var tokenData, _a, bookId, quantity, address, note, phoneNumber, paymentMethod, mine, book, newPhone, phoneCheck, initialCost, wallet, invoice, shoppingCart, code, order, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
+            var tokenData, _a, bookId, quantity, address, note, phoneNumber, paymentMethod, mine, book, newPhone, phoneCheck, initialCost, wallet, invoice, shoppingCart, code, order, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl, transporter, mailOptions, info;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -452,14 +453,34 @@ var OrderRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 16: return [2 /*return*/, res.status(200).json({
-                            status: 200,
-                            code: "200",
-                            message: "success",
-                            data: {
-                                order: order,
+                    case 16:
+                        transporter = nodemailer.createTransport({
+                            // service: "gmail",
+                            host: "smtp.gmail.com",
+                            port: 587,
+                            secure: false,
+                            auth: {
+                                user: "minhthuanvo482@gmail.com", // Địa chỉ email của bạn
+                                pass: "wwbxbpibjcjddqil", // Mật khẩu email của bạn
                             },
-                        })];
+                        });
+                        mailOptions = {
+                            from: "minhthuanvo482@gmail.com", // Địa chỉ email người gửi
+                            to: "thuanvodv@gmail.com", // Địa chỉ email người nhận
+                            subject: "Thông báo đặt hàng mới", // Tiêu đề email
+                            html: "\n        <h2>Th\u00F4ng b\u00E1o \u0111\u1EB7t h\u00E0ng m\u1EDBi</h2>\n        <p>C\u00F3 m\u1ED9t \u0111\u01A1n h\u00E0ng m\u1EDBi \u0111\u00E3 \u0111\u01B0\u1EE3c \u0111\u1EB7t. Vui l\u00F2ng ki\u1EC3m tra v\u00E0 x\u1EED l\u00FD ngay.</p>\n        <p>M\u00E3 \u0111\u01A1n h\u00E0ng: ".concat(order.code, "</p>\n      "),
+                        };
+                        return [4 /*yield*/, transporter.sendMail(mailOptions)];
+                    case 17:
+                        info = _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    order: order,
+                                },
+                            })];
                 }
             });
         });
@@ -743,7 +764,7 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.rePaymentOrder = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, orderId, paymentMethod, mine, order, bookCategoryIds, shoppingCarts, wallet, invoice, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl;
+            var _a, orderId, paymentMethod, mine, order, bookCategoryIds, shoppingCarts, wallet, invoice, invoice, MERCHANT_KEY, MERCHANT_SECRET_KEY, END_POINT, time, returnUrl, parameters, httpQuery, message, signature, baseEncode, httpBuild, buildHttpQuery, directUrl, transporter, mailOptions, info;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -895,12 +916,32 @@ var OrderRoute = /** @class */ (function (_super) {
                                 message: "success",
                                 data: { order: order, url: directUrl },
                             })];
-                    case 18: return [2 /*return*/, res.status(200).json({
-                            status: 200,
-                            code: "200",
-                            message: "success",
-                            data: {},
-                        })];
+                    case 18:
+                        transporter = nodemailer.createTransport({
+                            // service: "gmail",
+                            host: "smtp.gmail.com",
+                            port: 587,
+                            secure: false,
+                            auth: {
+                                user: "minhthuanvo482@gmail.com", // Địa chỉ email của bạn
+                                pass: "wwbxbpibjcjddqil", // Mật khẩu email của bạn
+                            },
+                        });
+                        mailOptions = {
+                            from: "minhthuanvo482@gmail.com", // Địa chỉ email người gửi
+                            to: "thuanvodv@gmail.com", // Địa chỉ email người nhận
+                            subject: "Thông báo đặt hàng mới", // Tiêu đề email
+                            html: "\n    <h2>Th\u00F4ng b\u00E1o \u0111\u1EB7t h\u00E0ng m\u1EDBi</h2>\n    <p>C\u00F3 m\u1ED9t \u0111\u01A1n h\u00E0ng m\u1EDBi \u0111\u00E3 \u0111\u01B0\u1EE3c \u0111\u1EB7t. Vui l\u00F2ng ki\u1EC3m tra v\u00E0 x\u1EED l\u00FD ngay.</p>\n    <p>M\u00E3 \u0111\u01A1n h\u00E0ng: ".concat(order.code, "</p>\n  "),
+                        };
+                        return [4 /*yield*/, transporter.sendMail(mailOptions)];
+                    case 19:
+                        info = _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {},
+                            })];
                 }
             });
         });

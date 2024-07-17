@@ -84,6 +84,7 @@ var wallet_model_1 = require("../../models/wallet/wallet.model");
 var wallet_service_1 = require("../../models/wallet/wallet.service");
 var user_model_1 = require("../../models/user/user.model");
 var axios = require("axios").default;
+var nodemailer = require("nodemailer");
 var WebhookRoute = /** @class */ (function (_super) {
     __extends(WebhookRoute, _super);
     function WebhookRoute() {
@@ -95,7 +96,7 @@ var WebhookRoute = /** @class */ (function (_super) {
     };
     WebhookRoute.prototype.ninePay = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var data, checksum_key, sha256Data, buff, text, parseText, invoice, order, user, wallet;
+            var data, checksum_key, sha256Data, buff, text, parseText, invoice, order, user, transporter, mailOptions, info, wallet;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -130,34 +131,55 @@ var WebhookRoute = /** @class */ (function (_super) {
                         if (!user) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        if (!(invoice.type == "PAYMENT")) return [3 /*break*/, 6];
-                        if ([5, 16].includes(parseText.status)) {
-                            order.isPaid = true;
-                            order.status = model_const_1.OrderStatusEnum.PENDING;
-                            order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
-                        }
-                        else if ([6, 8, 9].includes(parseText.status)) {
+                        if (!(invoice.type == "PAYMENT")) return [3 /*break*/, 9];
+                        if (![5, 16].includes(parseText.status)) return [3 /*break*/, 6];
+                        order.isPaid = true;
+                        order.status = model_const_1.OrderStatusEnum.PENDING;
+                        order.paymentStatus = model_const_1.PaymentStatusEnum.SUCCESS;
+                        transporter = nodemailer.createTransport({
+                            // service: "gmail",
+                            host: "smtp.gmail.com",
+                            port: 587,
+                            secure: false,
+                            auth: {
+                                user: "minhthuanvo482@gmail.com", // Địa chỉ email của bạn
+                                pass: "wwbxbpibjcjddqil", // Mật khẩu email của bạn
+                            },
+                        });
+                        mailOptions = {
+                            from: "minhthuanvo482@gmail.com", // Địa chỉ email người gửi
+                            to: "thuanvodv@gmail.com", // Địa chỉ email người nhận
+                            subject: "Thông báo đặt hàng mới", // Tiêu đề email
+                            html: "\n        <h2>Th\u00F4ng b\u00E1o \u0111\u1EB7t h\u00E0ng m\u1EDBi</h2>\n        <p>C\u00F3 m\u1ED9t \u0111\u01A1n h\u00E0ng m\u1EDBi \u0111\u00E3 \u0111\u01B0\u1EE3c \u0111\u1EB7t. Vui l\u00F2ng ki\u1EC3m tra v\u00E0 x\u1EED l\u00FD ngay.</p>\n        <p>M\u00E3 \u0111\u01A1n h\u00E0ng: ".concat(order.code, "</p>\n      "),
+                        };
+                        return [4 /*yield*/, transporter.sendMail(mailOptions)];
+                    case 5:
+                        info = _a.sent();
+                        return [3 /*break*/, 7];
+                    case 6:
+                        if ([6, 8, 9].includes(parseText.status)) {
                             order.paymentStatus = model_const_1.PaymentStatusEnum.FAIL;
                         }
-                        return [4 /*yield*/, order.save()];
-                    case 5:
+                        _a.label = 7;
+                    case 7: return [4 /*yield*/, order.save()];
+                    case 8:
                         _a.sent();
-                        return [3 /*break*/, 9];
-                    case 6:
-                        if (!(invoice.type == "DEPOSIT")) return [3 /*break*/, 9];
-                        if (![5, 16].includes(parseText.status)) return [3 /*break*/, 9];
+                        return [3 /*break*/, 12];
+                    case 9:
+                        if (!(invoice.type == "DEPOSIT")) return [3 /*break*/, 12];
+                        if (![5, 16].includes(parseText.status)) return [3 /*break*/, 12];
                         return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
-                    case 7:
+                    case 10:
                         wallet = _a.sent();
                         return [4 /*yield*/, wallet_service_1.walletService.updateOne(wallet._id, {
                                 $inc: {
                                     balance: invoice.amount,
                                 },
                             })];
-                    case 8:
+                    case 11:
                         _a.sent();
-                        _a.label = 9;
-                    case 9: return [2 /*return*/, res.status(200).json({
+                        _a.label = 12;
+                    case 12: return [2 /*return*/, res.status(200).json({
                             status: 200,
                             code: "200",
                             message: "success",

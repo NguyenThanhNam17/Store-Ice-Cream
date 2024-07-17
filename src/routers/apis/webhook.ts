@@ -11,7 +11,7 @@ import { WalletModel } from "../../models/wallet/wallet.model";
 import { walletService } from "../../models/wallet/wallet.service";
 import { UserModel } from "../../models/user/user.model";
 const axios = require("axios").default;
-
+const nodemailer = require("nodemailer");
 class WebhookRoute extends BaseRoute {
   constructor() {
     super();
@@ -51,6 +51,32 @@ class WebhookRoute extends BaseRoute {
         order.isPaid = true;
         order.status = OrderStatusEnum.PENDING;
         order.paymentStatus = PaymentStatusEnum.SUCCESS;
+        // Tạo một transporter sử dụng SMTP
+        let transporter = nodemailer.createTransport({
+          // service: "gmail",
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false,
+          auth: {
+            user: "minhthuanvo482@gmail.com", // Địa chỉ email của bạn
+            pass: "wwbxbpibjcjddqil", // Mật khẩu email của bạn
+          },
+        });
+
+        // Định nghĩa các thông tin email
+        let mailOptions = {
+          from: "minhthuanvo482@gmail.com", // Địa chỉ email người gửi
+          to: "thuanvodv@gmail.com", // Địa chỉ email người nhận
+          subject: "Thông báo đặt hàng mới", // Tiêu đề email
+          html: `
+        <h2>Thông báo đặt hàng mới</h2>
+        <p>Có một đơn hàng mới đã được đặt. Vui lòng kiểm tra và xử lý ngay.</p>
+        <p>Mã đơn hàng: ${order.code}</p>
+      `,
+        };
+
+        // Gửi email
+        let info = await transporter.sendMail(mailOptions);
       } else if ([6, 8, 9].includes(parseText.status)) {
         order.paymentStatus = PaymentStatusEnum.FAIL;
       }
