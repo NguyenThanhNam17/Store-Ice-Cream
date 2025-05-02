@@ -4,18 +4,11 @@ import { BaseDocument } from "../../base/baseModel";
 // Định nghĩa type cho user
 export type IUser = BaseDocument & {
   name?: string;
-  username?: string;
-  password?: string;
   phone?: string;
   email?: string;
+  password?: string;
   role?: string;
-  address?: string;
-  gender?: string;
   key?: string;
-  searchs?: string[];
-  isBlock?: boolean;
-  walletId?: string;
-  categoryIds?: string[];
 };
 
 const userSchema = new mongoose.Schema(
@@ -23,34 +16,12 @@ const userSchema = new mongoose.Schema(
     name: { type: String },
     phone: { type: String },
     email: { type: String },
-    gender: { type: String },
-    address: { type: String },
-    role: { type: String },
-    username: { type: String },
     password: { type: String },
+    role: { type: String },
     key: { type: String },
-    searchs: [{ type: String }],
-    categoryIds: [{ type: Schema.Types.ObjectId, ref: "BookCategory" }],
-    isBlock: { type: Boolean, default: false },
-    walletId: { type: Schema.Types.ObjectId, ref: "Wallet" },
   },
   { timestamps: true }
 );
 // Index for search
-userSchema.index(
-  { username: "text", name: "text", phone: "text" },
-  { weights: { phone: 6, name: 4, username: 2 } }
-);
-
-userSchema.index({ phone: 1 }, { unique: true });
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.set("toObject", { virtuals: true });
-
-userSchema.set("toJSON", { virtuals: true });
-userSchema.virtual("wallet", {
-  ref: "Wallet",
-  localField: "walletId",
-  foreignField: "_id",
-});
 const UserModel = mongoose.model<IUser>("User", userSchema);
 export { UserModel };

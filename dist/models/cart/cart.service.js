@@ -15,16 +15,16 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderService = void 0;
+exports.cartService = void 0;
 var crudService_1 = require("../../base/crudService");
-var order_model_1 = require("../order/order.model");
-var OrderService = /** @class */ (function (_super) {
-    __extends(OrderService, _super);
-    function OrderService() {
-        return _super.call(this, order_model_1.OrderModel) || this;
+var cart_model_1 = require("./cart.model");
+var CartService = /** @class */ (function (_super) {
+    __extends(CartService, _super);
+    function CartService() {
+        return _super.call(this, cart_model_1.CartModel) || this;
     }
-    return OrderService;
+    return CartService;
 }(crudService_1.CrudService));
-var orderService = new OrderService();
-exports.orderService = orderService;
-//# sourceMappingURL=order.service.js.map
+var cartService = new CartService();
+exports.cartService = cartService;
+//# sourceMappingURL=cart.service.js.map

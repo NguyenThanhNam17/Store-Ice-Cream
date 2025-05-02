@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
-let secretKey: any = process.env.SECRET_KEY;
+let secretKey: any = process.env.SECRET;
 export interface IPayloadToken {
   role_?: string;
-
   _id?: string;
   username?: string;
   key?: string;

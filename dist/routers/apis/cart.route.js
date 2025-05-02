@@ -50,89 +50,97 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var error_1 = require("../../base/error");
 var baseRoute_1 = require("../../base/baseRoute");
-var user_model_1 = require("../../models/user/user.model");
-var password_hash_1 = __importDefault(require("password-hash"));
-var role_const_1 = require("../../constants/role.const");
-var user_helper_1 = require("../../models/user/user.helper");
+var cart_model_1 = require("../../models/cart/cart.model");
 var token_helper_1 = require("../../helper/token.helper");
-var UserRoute = /** @class */ (function (_super) {
-    __extends(UserRoute, _super);
-    function UserRoute() {
+var role_const_1 = require("../../constants/role.const");
+var user_model_1 = require("../../models/user/user.model");
+var product_model_1 = require("../../models/product/product.model");
+var CartRoute = /** @class */ (function (_super) {
+    __extends(CartRoute, _super);
+    function CartRoute() {
         return _super.call(this) || this;
     }
-    UserRoute.prototype.customRouting = function () {
-        this.router.post("/login", this.route(this.login));
-        this.router.post("/register", this.route(this.register));
+    CartRoute.prototype.customRouting = function () {
+        this.router.get("/getAllCart", [this.authentication], this.route(this.getAllCart));
+        this.router.post("/addCartProductToCart", [this.authentication], this.route(this.addCartProductToCart));
     };
-    UserRoute.prototype.login = function (req, res) {
+    CartRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, username, password, user, check, key;
+            var tokenData, user, _a;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = req.body, username = _a.username, password = _a.password;
-                        if (!username || !password) {
-                            throw error_1.ErrorHelper.requestDataInvalid("request data");
+                        _b.trys.push([0, 4, , 5]);
+                        if (!req.get("x-token")) {
+                            throw error_1.ErrorHelper.unauthorized();
                         }
-                        return [4 /*yield*/, user_model_1.UserModel.findOne({
-                                $or: [{ phone: username }, { email: username }],
-                            })];
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.CLIENT].includes(tokenData.role_)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
                     case 1:
                         user = _b.sent();
                         if (!user) {
                             throw error_1.ErrorHelper.userNotExist();
                         }
-                        check = password_hash_1.default.verify(password, user.password);
-                        if (!check) {
-                            throw error_1.ErrorHelper.userPasswordNotCorrect();
-                        }
-                        key = token_helper_1.TokenHelper.generateKey();
+                        req.tokenInfo = tokenData;
+                        next();
+                        return [3 /*break*/, 3];
+                    case 2: throw error_1.ErrorHelper.permissionDeny();
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
+                        _a = _b.sent();
+                        throw error_1.ErrorHelper.unauthorized();
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    CartRoute.prototype.getAllCart = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var carts;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, cart_model_1.CartModel.find({ userId: req.tokenInfo._id })];
+                    case 1:
+                        carts = _a.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
                                 data: {
-                                    user: user,
-                                    token: new user_helper_1.UserHelper(user).getToken(key),
+                                    carts: carts,
                                 },
                             })];
                 }
             });
         });
     };
-    UserRoute.prototype.register = function (req, res) {
+    CartRoute.prototype.addCartProductToCart = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, username, password, user, key;
+            var _a, productId, quantity, checkProduct, cart;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = req.body, username = _a.username, password = _a.password;
-                        return [4 /*yield*/, user_model_1.UserModel.findOne({
-                                $or: [{ phone: username }, { username: username }],
-                            })];
+                        _a = req.body, productId = _a.productId, quantity = _a.quantity;
+                        console.log(req.body);
+                        if (!productId || !quantity) {
+                            throw error_1.ErrorHelper.requestDataInvalid("product");
+                        }
+                        return [4 /*yield*/, product_model_1.ProductModel.findById(productId)];
                     case 1:
-                        user = _b.sent();
-                        if (user) {
-                            throw error_1.ErrorHelper.userExisted();
+                        checkProduct = _b.sent();
+                        if (!checkProduct) {
+                            throw error_1.ErrorHelper.requestDataInvalid("product");
                         }
-                        if (!username || !password) {
-                            throw error_1.ErrorHelper.requestDataInvalid("request data");
-                        }
-                        key = token_helper_1.TokenHelper.generateKey();
-                        user = new user_model_1.UserModel({
-                            username: username,
-                            phone: username,
-                            password: password_hash_1.default.generate(password),
-                            role: role_const_1.ROLES.CLIENT,
-                            key: key,
+                        cart = new cart_model_1.CartModel({
+                            productId: productId,
+                            userId: req.tokenInfo._id,
+                            quantity: quantity,
                         });
-                        return [4 /*yield*/, user.save()];
+                        return [4 /*yield*/, cart.save()];
                     case 2:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
@@ -140,15 +148,14 @@ var UserRoute = /** @class */ (function (_super) {
                                 code: "200",
                                 message: "success",
                                 data: {
-                                    user: user,
-                                    token: new user_helper_1.UserHelper(user).getToken(key),
+                                    cart: cart,
                                 },
                             })];
                 }
             });
         });
     };
-    return UserRoute;
+    return CartRoute;
 }(baseRoute_1.BaseRoute));
-exports.default = new UserRoute().router;
-//# sourceMappingURL=user.route.js.map
+exports.default = new CartRoute().router;
+//# sourceMappingURL=cart.route.js.map

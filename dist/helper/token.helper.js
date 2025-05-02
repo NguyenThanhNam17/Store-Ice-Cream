@@ -7,7 +7,7 @@ exports.TokenHelper = void 0;
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-var secretKey = process.env.SECRET_KEY;
+var secretKey = process.env.SECRET;
 var TokenHelper = /** @class */ (function () {
     function TokenHelper() {
     }

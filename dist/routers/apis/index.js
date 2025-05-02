@@ -4,18 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
-var user_route_1 = __importDefault(require("./user.route"));
-var book_route_1 = __importDefault(require("./book.route"));
-var bookCategory_route_1 = __importDefault(require("./bookCategory.route"));
-var order_route_1 = __importDefault(require("./order.route"));
-var shoppingCart_route_1 = __importDefault(require("./shoppingCart.route"));
-var webhook_1 = __importDefault(require("./webhook"));
+var user_route_1 = __importDefault(require("../apis/user.route"));
+var product_route_1 = __importDefault(require("../apis/product.route"));
+var cart_route_1 = __importDefault(require("../apis/cart.route"));
 var router = express_1.default.Router();
 router.use("/user", user_route_1.default);
-router.use("/book", book_route_1.default);
-router.use("/bookCategory", bookCategory_route_1.default);
-router.use("/order", order_route_1.default);
-router.use("/shoppingCart", shoppingCart_route_1.default);
-router.use("/webhook", webhook_1.default);
+router.use("/product", product_route_1.default);
+router.use("/cart", cart_route_1.default);
 exports.default = router;
 //# sourceMappingURL=index.js.map

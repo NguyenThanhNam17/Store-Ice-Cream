@@ -1,5 +1,5 @@
 import { CrudService } from "../../base/crudService";
-import { OrderModel } from "./order.model";
+import { OrderModel } from "../order/order.model";
 
 class OrderService extends CrudService<typeof OrderModel> {
   constructor() {
@@ -8,5 +8,4 @@ class OrderService extends CrudService<typeof OrderModel> {
 }
 
 const orderService = new OrderService();
-
 export { orderService };
