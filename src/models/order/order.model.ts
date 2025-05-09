@@ -1,17 +1,27 @@
 import mongoose, { Schema } from "mongoose";
 import { BaseDocument } from "../../base/baseModel";
+import { OrderStatusEnum } from "../../constants/model.const";
 
 export type IOrder = BaseDocument & {
-  userId: string;
-  cartId: string;
-  price: number;
+  userId?: string;
+  cartIds?: string[];
+  price?: number;
+  paymentMethod?: string;
+  status?: string;
+  totalPrice?: number;
 };
 
 const orderSchema = new mongoose.Schema(
   {
-    userId: String,
-    cartId: String,
-    price: Number,
+    userId: { type: String },
+    cartIds: [{ type: String }],
+    price: { type: Number },
+    paymentMethod: { type: String },
+    status: {
+      type: String,
+      enum: Object.values(OrderStatusEnum),
+    },
+    totalPrice: { type: Number, default: 0 },
   },
   {
     timestamps: true,

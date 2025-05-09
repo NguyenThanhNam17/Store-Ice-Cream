@@ -7,9 +7,11 @@ var express_1 = __importDefault(require("express"));
 var user_route_1 = __importDefault(require("../apis/user.route"));
 var product_route_1 = __importDefault(require("../apis/product.route"));
 var cart_route_1 = __importDefault(require("../apis/cart.route"));
+var order_route_1 = __importDefault(require("../apis/order.route"));
 var router = express_1.default.Router();
 router.use("/user", user_route_1.default);
 router.use("/product", product_route_1.default);
 router.use("/cart", cart_route_1.default);
+router.use("/order", order_route_1.default);
 exports.default = router;
 //# sourceMappingURL=index.js.map

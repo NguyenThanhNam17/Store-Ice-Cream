@@ -65,7 +65,6 @@ class CartRoute extends BaseRoute {
 
   async addCartProductToCart(req: Request, res: Response) {
     let { productId, quantity } = req.body;
-    console.log(req.body);
     if (!productId || !quantity) {
       throw ErrorHelper.requestDataInvalid("product");
     }

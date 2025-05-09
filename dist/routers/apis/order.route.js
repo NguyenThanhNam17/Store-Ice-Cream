@@ -53,21 +53,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var error_1 = require("../../base/error");
 var baseRoute_1 = require("../../base/baseRoute");
-var cart_model_1 = require("../../models/cart/cart.model");
-var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
+var token_helper_1 = require("../../helper/token.helper");
 var user_model_1 = require("../../models/user/user.model");
+var model_const_1 = require("../../constants/model.const");
+var order_model_1 = require("../../models/order/order.model");
+var cart_model_1 = require("../../models/cart/cart.model");
 var product_model_1 = require("../../models/product/product.model");
-var CartRoute = /** @class */ (function (_super) {
-    __extends(CartRoute, _super);
-    function CartRoute() {
+var TransactionRoute = /** @class */ (function (_super) {
+    __extends(TransactionRoute, _super);
+    function TransactionRoute() {
         return _super.call(this) || this;
     }
-    CartRoute.prototype.customRouting = function () {
-        this.router.get("/getAllCart", [this.authentication], this.route(this.getAllCart));
-        this.router.post("/addCartProductToCart", [this.authentication], this.route(this.addCartProductToCart));
+    TransactionRoute.prototype.customRouting = function () {
+        this.router.post("/createOrder", [this.route(this.authentication)], this.route(this.createOrder));
     };
-    CartRoute.prototype.authentication = function (req, res, next) {
+    TransactionRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var tokenData, user, _a;
             return __generator(this, function (_b) {
@@ -98,63 +99,59 @@ var CartRoute = /** @class */ (function (_super) {
             });
         });
     };
-    CartRoute.prototype.getAllCart = function (req, res) {
+    TransactionRoute.prototype.createOrder = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var carts;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, cart_model_1.CartModel.find({ userId: req.tokenInfo._id })];
-                    case 1:
-                        carts = _a.sent();
-                        return [2 /*return*/, res.status(200).json({
-                                status: 200,
-                                code: "200",
-                                message: "success",
-                                data: {
-                                    carts: carts,
-                                },
-                            })];
-                }
-            });
-        });
-    };
-    CartRoute.prototype.addCartProductToCart = function (req, res) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, productId, quantity, checkProduct, cart;
+            var _a, cartIds, paymentMethod, carts, totalPrice, order;
+            var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = req.body, productId = _a.productId, quantity = _a.quantity;
-                        if (!productId || !quantity) {
-                            throw error_1.ErrorHelper.requestDataInvalid("product");
+                        _a = req.body, cartIds = _a.cartIds, paymentMethod = _a.paymentMethod;
+                        if (cartIds.length == 0 || !paymentMethod) {
+                            throw error_1.ErrorHelper.requestDataInvalid("invalid data");
                         }
-                        return [4 /*yield*/, product_model_1.ProductModel.findById(productId)];
+                        return [4 /*yield*/, cart_model_1.CartModel.find({ _id: { $in: cartIds } })];
                     case 1:
-                        checkProduct = _b.sent();
-                        if (!checkProduct) {
-                            throw error_1.ErrorHelper.requestDataInvalid("product");
-                        }
-                        cart = new cart_model_1.CartModel({
-                            productId: productId,
-                            userId: req.tokenInfo._id,
-                            quantity: quantity,
-                        });
-                        return [4 /*yield*/, cart.save()];
+                        carts = _b.sent();
+                        totalPrice = 0;
+                        return [4 /*yield*/, Promise.all(carts.map(function (cart) { return __awaiter(_this, void 0, void 0, function () {
+                                var product;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, product_model_1.ProductModel.findById(cart.productId)];
+                                        case 1:
+                                            product = _a.sent();
+                                            totalPrice += cart.quantity * product.price;
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
                     case 2:
+                        _b.sent();
+                        console.log(totalPrice);
+                        order = new order_model_1.OrderModel({
+                            userId: req.tokenInfo._id,
+                            cartIds: cartIds,
+                            paymentMethod: paymentMethod,
+                            status: model_const_1.OrderStatusEnum.PENDING,
+                            totalPrice: totalPrice,
+                        });
+                        return [4 /*yield*/, order.save()];
+                    case 3:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",
                                 message: "success",
                                 data: {
-                                    cart: cart,
+                                    order: order,
                                 },
                             })];
                 }
             });
         });
     };
-    return CartRoute;
+    return TransactionRoute;
 }(baseRoute_1.BaseRoute));
-exports.default = new CartRoute().router;
-//# sourceMappingURL=cart.route.js.map
+exports.default = new TransactionRoute().router;
+//# sourceMappingURL=order.route.js.map
