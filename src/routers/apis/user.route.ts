@@ -20,7 +20,30 @@ class UserRoute extends BaseRoute {
   customRouting() {
     this.router.post("/login", this.route(this.login));
     this.router.post("/register", this.route(this.register));
+    this.router.post("/getMe", [this.authentication], this.route(this.getMe));
   }
+
+  async authentication(req: Request, res: Response, next: NextFunction) {
+        try {
+          if (!req.get("x-token")) {
+            throw ErrorHelper.unauthorized();
+          }
+          const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+          if ([ROLES.ADMIN, ROLES.CLIENT].includes(tokenData.role_)) {
+            const user: any = await UserModel.findById(tokenData._id);
+            if (!user) {
+              throw ErrorHelper.userNotExist();
+            }
+            req.tokenInfo = tokenData;
+            next();
+          } else {
+            throw ErrorHelper.permissionDeny();
+          }
+        } catch {
+          throw ErrorHelper.unauthorized();
+        }
+      }
+  
 
   async login(req: Request, res: Response) {
     let { username, password } = req.body;
@@ -81,6 +104,23 @@ class UserRoute extends BaseRoute {
         token: new UserHelper(user).getToken(key),
       },
     });
+  }
+
+
+  async getMe(req:Request,res:Response){
+    const user:any = await UserModel.findById(req.tokenInfo._id);
+    if(!user){
+      throw ErrorHelper.userNotExist();
+    }
+
+    return res.status(200).json({
+      status:200,
+      code:"200",
+      message:"succes",
+      data:{
+        user,
+      }
+    })
   }
 }
 
