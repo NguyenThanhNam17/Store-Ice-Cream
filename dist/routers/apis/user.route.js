@@ -114,7 +114,7 @@ var UserRoute = /** @class */ (function (_super) {
                     case 0:
                         _a = req.body, username = _a.username, password = _a.password;
                         return [4 /*yield*/, user_model_1.UserModel.findOne({
-                                $or: [{ phone: username }, { username: username }],
+                                phone: username
                             })];
                     case 1:
                         user = _b.sent();

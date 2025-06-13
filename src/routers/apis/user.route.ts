@@ -54,7 +54,7 @@ class UserRoute extends BaseRoute {
   async register(req: Request, res: Response) {
     let { username, password } = req.body;
     let user = await UserModel.findOne({
-      $or: [{ phone: username }, { username: username }],
+      phone:username
     });
     if (user) {
       throw ErrorHelper.userExisted();
