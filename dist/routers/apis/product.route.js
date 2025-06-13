@@ -54,6 +54,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var error_1 = require("../../base/error");
 var baseRoute_1 = require("../../base/baseRoute");
 var product_model_1 = require("../../models/product/product.model");
+var token_helper_1 = require("../../helper/token.helper");
+var role_const_1 = require("../../constants/role.const");
+var user_model_1 = require("../../models/user/user.model");
 var ProductRoute = /** @class */ (function (_super) {
     __extends(ProductRoute, _super);
     function ProductRoute() {
@@ -62,6 +65,38 @@ var ProductRoute = /** @class */ (function (_super) {
     ProductRoute.prototype.customRouting = function () {
         this.router.get("/getAllProduct", this.route(this.getAllProduct));
         this.router.get("/getOneProduct/:idProduct", this.route(this.getOneProduct));
+        this.router.post("/addProductForAdmin", [this.route(this.authentication)], this.route(this.addProductForAdmin));
+    };
+    ProductRoute.prototype.authentication = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tokenData, user, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 4, , 5]);
+                        if (!req.get("x-token")) {
+                            throw error_1.ErrorHelper.unauthorized();
+                        }
+                        tokenData = token_helper_1.TokenHelper.decodeToken(req.get("x-token"));
+                        if (![role_const_1.ROLES.ADMIN, role_const_1.ROLES.CLIENT].includes(tokenData.role_)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, user_model_1.UserModel.findById(tokenData._id)];
+                    case 1:
+                        user = _b.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        req.tokenInfo = tokenData;
+                        next();
+                        return [3 /*break*/, 3];
+                    case 2: throw error_1.ErrorHelper.permissionDeny();
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
+                        _a = _b.sent();
+                        throw error_1.ErrorHelper.unauthorized();
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
     };
     ProductRoute.prototype.getAllProduct = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
@@ -103,6 +138,43 @@ var ProductRoute = /** @class */ (function (_super) {
                                 data: {
                                     product: product,
                                 },
+                            })];
+                }
+            });
+        });
+    };
+    ProductRoute.prototype.addProductForAdmin = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, name, price, image, describe, product, pro;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, name = _a.name, price = _a.price, image = _a.image, describe = _a.describe;
+                        if (!name || !price || !image || !describe) {
+                            throw error_1.ErrorHelper.requestDataInvalid("invalid");
+                        }
+                        return [4 /*yield*/, product_model_1.ProductModel.findOne({ name: name })];
+                    case 1:
+                        product = _b.sent();
+                        if (product) {
+                            throw error_1.ErrorHelper.forbidden("Sản phẩm đã tồn tại!");
+                        }
+                        pro = new product_model_1.ProductModel({
+                            name: name,
+                            price: price,
+                            image: image,
+                            describe: describe
+                        });
+                        return [4 /*yield*/, pro.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    pro: pro
+                                }
                             })];
                 }
             });
