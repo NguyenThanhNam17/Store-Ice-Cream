@@ -52,21 +52,21 @@ class UserRoute extends BaseRoute {
   }
 
   async register(req: Request, res: Response) {
-    let { username, password } = req.body;
+    let { name, phoneNumber, password } = req.body;
     let user = await UserModel.findOne({
-      phone:username
+      phone:phoneNumber
     });
     if (user) {
       throw ErrorHelper.userExisted();
     }
 
-    if (!username || !password) {
+    if (!phoneNumber || !password) {
       throw ErrorHelper.requestDataInvalid("request data");
     }
     const key = TokenHelper.generateKey();
     user = new UserModel({
-      username: username,
-      phone: username,
+      name:name,
+      phone: phoneNumber,
       password: passwordHash.generate(password),
       role: ROLES.CLIENT,
       key: key,

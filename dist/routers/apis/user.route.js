@@ -108,26 +108,26 @@ var UserRoute = /** @class */ (function (_super) {
     };
     UserRoute.prototype.register = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, username, password, user, key;
+            var _a, name, phoneNumber, password, user, key;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = req.body, username = _a.username, password = _a.password;
+                        _a = req.body, name = _a.name, phoneNumber = _a.phoneNumber, password = _a.password;
                         return [4 /*yield*/, user_model_1.UserModel.findOne({
-                                phone: username
+                                phone: phoneNumber
                             })];
                     case 1:
                         user = _b.sent();
                         if (user) {
                             throw error_1.ErrorHelper.userExisted();
                         }
-                        if (!username || !password) {
+                        if (!phoneNumber || !password) {
                             throw error_1.ErrorHelper.requestDataInvalid("request data");
                         }
                         key = token_helper_1.TokenHelper.generateKey();
                         user = new user_model_1.UserModel({
-                            username: username,
-                            phone: username,
+                            name: name,
+                            phone: phoneNumber,
                             password: password_hash_1.default.generate(password),
                             role: role_const_1.ROLES.CLIENT,
                             key: key,
