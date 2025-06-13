@@ -19,3 +19,8 @@ export enum OrderStatusEnum {
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
 }
+
+export enum CartStatusEnum{
+   PENDING = "PENDING",
+  SUCCESS = "SUCCESS"
+}

@@ -60,15 +60,29 @@ var model_const_1 = require("../../constants/model.const");
 var order_model_1 = require("../../models/order/order.model");
 var cart_model_1 = require("../../models/cart/cart.model");
 var product_model_1 = require("../../models/product/product.model");
-var TransactionRoute = /** @class */ (function (_super) {
-    __extends(TransactionRoute, _super);
-    function TransactionRoute() {
+var OrderRoute = /** @class */ (function (_super) {
+    __extends(OrderRoute, _super);
+    function OrderRoute() {
         return _super.call(this) || this;
     }
-    TransactionRoute.prototype.customRouting = function () {
+    OrderRoute.prototype.customRouting = function () {
         this.router.post("/createOrder", [this.route(this.authentication)], this.route(this.createOrder));
+        this.router.post("/updateStatusOrder", [this.route(this.authentication)], this.route(this.updateStatusOrder));
+        this.router.get("/getListOrder", [this.route(this.authentication)], this.route(this.getListOrder));
+        this.router.get("/getOneOrder/:id", [
+            this.route(this.authentication),
+            this.route(this.getOneOrder),
+        ]);
+        this.router.post("/cancelOrder", [
+            this.route(this.authentication),
+            this.route(this.cancelOrder),
+        ]);
+        this.router.post("/deleteOneOrder", [
+            this.route(this.authentication),
+            this.route(this.deleteOneOrder),
+        ]);
     };
-    TransactionRoute.prototype.authentication = function (req, res, next) {
+    OrderRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var tokenData, user, _a;
             return __generator(this, function (_b) {
@@ -99,7 +113,7 @@ var TransactionRoute = /** @class */ (function (_super) {
             });
         });
     };
-    TransactionRoute.prototype.createOrder = function (req, res, next) {
+    OrderRoute.prototype.createOrder = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, cartIds, paymentMethod, carts, totalPrice, order;
             var _this = this;
@@ -113,6 +127,9 @@ var TransactionRoute = /** @class */ (function (_super) {
                         return [4 /*yield*/, cart_model_1.CartModel.find({ _id: { $in: cartIds } })];
                     case 1:
                         carts = _b.sent();
+                        if (!carts) {
+                            throw error_1.ErrorHelper.forbidden("không tồn tại cart");
+                        }
                         totalPrice = 0;
                         return [4 /*yield*/, Promise.all(carts.map(function (cart) { return __awaiter(_this, void 0, void 0, function () {
                                 var product;
@@ -128,7 +145,6 @@ var TransactionRoute = /** @class */ (function (_super) {
                             }); }))];
                     case 2:
                         _b.sent();
-                        console.log(totalPrice);
                         order = new order_model_1.OrderModel({
                             userId: req.tokenInfo._id,
                             cartIds: cartIds,
@@ -138,6 +154,11 @@ var TransactionRoute = /** @class */ (function (_super) {
                         });
                         return [4 /*yield*/, order.save()];
                     case 3:
+                        _b.sent();
+                        // Cập nhật trạng thái của các giỏ hàng đã dùng thành SUCCESS
+                        return [4 /*yield*/, cart_model_1.CartModel.updateMany({ _id: { $in: cartIds } }, { $set: { status: model_const_1.CartStatusEnum.SUCCESS } })];
+                    case 4:
+                        // Cập nhật trạng thái của các giỏ hàng đã dùng thành SUCCESS
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
@@ -151,7 +172,154 @@ var TransactionRoute = /** @class */ (function (_super) {
             });
         });
     };
-    return TransactionRoute;
+    OrderRoute.prototype.getListOrder = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var list;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, order_model_1.OrderModel.find({ userId: req.tokenInfo._id })];
+                    case 1:
+                        list = _a.sent();
+                        if (!list) {
+                            throw error_1.ErrorHelper.requestDataInvalid("Khong co order");
+                        }
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "success",
+                                data: {
+                                    list: list,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    OrderRoute.prototype.getOneOrder = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.params.id;
+                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
+                    case 1:
+                        result = _a.sent();
+                        if (!result) {
+                            throw error_1.ErrorHelper.requestDataInvalid("Khong co order");
+                        }
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    result: result,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    OrderRoute.prototype.updateStatusOrder = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, orderId, status, order;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, orderId = _a.orderId, status = _a.status;
+                        if (!orderId || !status) {
+                            throw error_1.ErrorHelper.requestDataInvalid("Thiếu orderId hoặc status");
+                        }
+                        if (req.tokenInfo.role_ != role_const_1.ROLES.ADMIN) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        return [4 /*yield*/, order_model_1.OrderModel.findById(orderId)];
+                    case 1:
+                        order = _b.sent();
+                        if (!order) {
+                            throw error_1.ErrorHelper.forbidden("Đơn hàng không tồn tại");
+                        }
+                        if (![
+                            model_const_1.OrderStatusEnum.FAILED,
+                            model_const_1.OrderStatusEnum.PENDING,
+                            model_const_1.OrderStatusEnum.SUCCESS,
+                        ].includes(status)) {
+                            throw error_1.ErrorHelper.requestDataInvalid("Trạng thái không hợp lệ");
+                        }
+                        order.status = status;
+                        return [4 /*yield*/, order.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    order: order,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    OrderRoute.prototype.cancelOrder = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, order;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.body.id;
+                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
+                    case 1:
+                        order = _a.sent();
+                        if (!order) {
+                            throw error_1.ErrorHelper.recoredNotFound("Order");
+                        }
+                        order.status = model_const_1.OrderStatusEnum.FAILED;
+                        return [4 /*yield*/, order.save()];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    order: order,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    OrderRoute.prototype.deleteOneOrder = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, order;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.body.id;
+                        return [4 /*yield*/, order_model_1.OrderModel.findById(id)];
+                    case 1:
+                        order = _a.sent();
+                        if (!order) {
+                            throw error_1.ErrorHelper.recoredNotFound("order");
+                        }
+                        return [4 /*yield*/, order_model_1.OrderModel.deleteOne({ _id: id })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    order: order,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    return OrderRoute;
 }(baseRoute_1.BaseRoute));
-exports.default = new TransactionRoute().router;
+exports.default = new OrderRoute().router;
 //# sourceMappingURL=order.route.js.map

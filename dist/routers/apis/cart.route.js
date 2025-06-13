@@ -58,6 +58,7 @@ var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var user_model_1 = require("../../models/user/user.model");
 var product_model_1 = require("../../models/product/product.model");
+var model_const_1 = require("../../constants/model.const");
 var CartRoute = /** @class */ (function (_super) {
     __extends(CartRoute, _super);
     function CartRoute() {
@@ -66,6 +67,8 @@ var CartRoute = /** @class */ (function (_super) {
     CartRoute.prototype.customRouting = function () {
         this.router.get("/getAllCart", [this.authentication], this.route(this.getAllCart));
         this.router.post("/addCartProductToCart", [this.authentication], this.route(this.addCartProductToCart));
+        this.router.post("/deleteCartProductToCart", [this.authentication], this.route(this.deleteCartProductToCart));
+        this.router.post("/updateCartProductToCart", [this.authentication], this.route(this.updateCartProductToCart));
     };
     CartRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
@@ -103,7 +106,10 @@ var CartRoute = /** @class */ (function (_super) {
             var carts;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, cart_model_1.CartModel.find({ userId: req.tokenInfo._id })];
+                    case 0: return [4 /*yield*/, cart_model_1.CartModel.find({
+                            userId: req.tokenInfo._id,
+                            status: model_const_1.CartStatusEnum.PENDING,
+                        })];
                     case 1:
                         carts = _a.sent();
                         return [2 /*return*/, res.status(200).json({
@@ -149,6 +155,67 @@ var CartRoute = /** @class */ (function (_super) {
                                 data: {
                                     cart: cart,
                                 },
+                            })];
+                }
+            });
+        });
+    };
+    CartRoute.prototype.deleteCartProductToCart = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, cart;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.body.id;
+                        return [4 /*yield*/, cart_model_1.CartModel.findById(id)];
+                    case 1:
+                        cart = _a.sent();
+                        if (!cart) {
+                            throw error_1.ErrorHelper.recoredNotFound("cart");
+                        }
+                        return [4 /*yield*/, cart_model_1.CartModel.deleteOne({ _id: id })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    cart: cart
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    CartRoute.prototype.updateCartProductToCart = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, id, quantity, productId, cart;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, id = _a.id, quantity = _a.quantity, productId = _a.productId;
+                        if (!id || !quantity || !productId) {
+                            throw error_1.ErrorHelper.requestDataInvalid("invalid");
+                        }
+                        return [4 /*yield*/, cart_model_1.CartModel.findById(id)];
+                    case 1:
+                        cart = _b.sent();
+                        if (!cart) {
+                            throw error_1.ErrorHelper.recoredNotFound("cart");
+                        }
+                        cart.productId = productId || cart.productId;
+                        cart.quantity = quantity || cart.quantity;
+                        return [4 /*yield*/, cart.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    cart: cart
+                                }
                             })];
                 }
             });
