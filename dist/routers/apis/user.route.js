@@ -61,6 +61,7 @@ var password_hash_1 = __importDefault(require("password-hash"));
 var role_const_1 = require("../../constants/role.const");
 var user_helper_1 = require("../../models/user/user.helper");
 var token_helper_1 = require("../../helper/token.helper");
+var model_const_1 = require("../../constants/model.const");
 var UserRoute = /** @class */ (function (_super) {
     __extends(UserRoute, _super);
     function UserRoute() {
@@ -69,7 +70,12 @@ var UserRoute = /** @class */ (function (_super) {
     UserRoute.prototype.customRouting = function () {
         this.router.post("/login", this.route(this.login));
         this.router.post("/register", this.route(this.register));
-        this.router.post("/getMe", [this.authentication], this.route(this.getMe));
+        this.router.get("/getMe", [this.authentication], this.route(this.getMe));
+        this.router.get("/getOneUser", [this.authentication], this.route(this.getOneUser));
+        this.router.get("/getAllUser", [this.authentication], this.route(this.getAllUser));
+        this.router.post("/createUser", [this.authentication], this.route(this.createUser));
+        this.router.post("/updateMe", [this.authentication], this.route(this.updateMe));
+        this.router.get("/deleteOneUser", [this.authentication], this.route(this.deleteOneUser));
     };
     UserRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
@@ -197,6 +203,156 @@ var UserRoute = /** @class */ (function (_super) {
                                 message: "succes",
                                 data: {
                                     user: user,
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.getOneUser = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        id = req.body.id;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(id)];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    user: user
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.getAllUser = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, user_model_1.UserModel.find()];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    user: user,
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.createUser = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, name, phoneNumber, password, role, phoneNew, key, user;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (model_const_1.UserRoleEnum.ADMIN != req.tokenInfo.role_) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        _a = req.body, name = _a.name, phoneNumber = _a.phoneNumber, password = _a.password, role = _a.role;
+                        if (!name || !phoneNumber || !password) {
+                            throw error_1.ErrorHelper.requestDataInvalid("invalid");
+                        }
+                        return [4 /*yield*/, user_model_1.UserModel.findOne({ phone: phoneNumber })];
+                    case 1:
+                        phoneNew = _b.sent();
+                        if (phoneNew) {
+                            throw error_1.ErrorHelper.userExisted();
+                        }
+                        key = token_helper_1.TokenHelper.generateKey();
+                        user = new user_model_1.UserModel({
+                            name: name,
+                            phone: phoneNumber,
+                            password: password,
+                            key: key,
+                            role: role,
+                        });
+                        return [4 /*yield*/, user.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    user: user
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.updateMe = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, _a, newName, newPhoneNumber;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
+                    case 1:
+                        user = _b.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        _a = req.body, newName = _a.newName, newPhoneNumber = _a.newPhoneNumber;
+                        user.name = newName;
+                        user.phone = newPhoneNumber;
+                        return [4 /*yield*/, user.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    user: user
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.deleteOneUser = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (req.tokenInfo.role_ != role_const_1.ROLES.ADMIN) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        id = req.body.id;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(id)];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        return [4 /*yield*/, user_model_1.UserModel.deleteOne({ _id: id })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                messagee: "succes",
+                                data: {
+                                    user: user
                                 }
                             })];
                 }

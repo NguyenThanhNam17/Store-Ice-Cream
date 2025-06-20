@@ -11,6 +11,8 @@ import passwordHash from "password-hash";
 import { ROLES } from "../../constants/role.const";
 import { UserHelper } from "../../models/user/user.helper";
 import { TokenHelper } from "../../helper/token.helper";
+import { UserRoleEnum } from "../../constants/model.const";
+import phone from "phone/dist";
 
 class UserRoute extends BaseRoute {
   constructor() {
@@ -20,7 +22,13 @@ class UserRoute extends BaseRoute {
   customRouting() {
     this.router.post("/login", this.route(this.login));
     this.router.post("/register", this.route(this.register));
-    this.router.post("/getMe", [this.authentication], this.route(this.getMe));
+    this.router.get("/getMe", [this.authentication], this.route(this.getMe));
+    this.router.get("/getOneUser", [this.authentication], this.route(this.getOneUser));
+       this.router.get("/getAllUser", [this.authentication], this.route(this.getAllUser));
+        this.router.post("/createUser", [this.authentication], this.route(this.createUser));
+         this.router.post("/updateMe", [this.authentication], this.route(this.updateMe));
+         this.router.get("/deleteOneUser", [this.authentication], this.route(this.deleteOneUser));
+       
   }
 
   async authentication(req: Request, res: Response, next: NextFunction) {
@@ -122,6 +130,116 @@ class UserRoute extends BaseRoute {
       }
     })
   }
+
+  async getOneUser(req:Request,res:Response,next:NextFunction){
+    let {id} = req.body;
+    let user = await UserModel.findById(id);
+    if(!user){
+      throw ErrorHelper.userNotExist();
+    }
+    return res.status(200).json({
+      status:200,
+      code:"200",
+      message:"succes",
+      data:{
+        user
+      }
+    })
+  }
+
+  async getAllUser(req:Request,res:Response,next:NextFunction){
+    let user = await UserModel.find();
+    if(!user){
+      throw ErrorHelper.userNotExist();
+    }
+    return res.status(200).json({
+      status:200,
+      code:"200",
+      message:"succes",
+      data:{
+        user,
+      }
+    })
+  }
+
+  async createUser(req:Request,res:Response,next:NextFunction){
+    if(UserRoleEnum.ADMIN!=req.tokenInfo.role_){
+      throw ErrorHelper.permissionDeny();
+    }
+    let {name,phoneNumber,password,role} = req.body;
+    if(!name||!phoneNumber||!password){
+      throw ErrorHelper.requestDataInvalid("invalid");
+    }
+    
+    let phoneNew = await UserModel.findOne({phone:phoneNumber});
+    if(phoneNew){
+      throw ErrorHelper.userExisted();
+    }
+
+     const key = TokenHelper.generateKey();
+    let user = new UserModel({
+      name:name,
+      phone:phoneNumber,
+      password:password,
+      key:key,
+      role:role,
+    })
+
+    await user.save();
+    return res.status(200).json({
+      status:200,
+      code:"200",
+      message:"succes",
+      data:{
+        user
+      }
+    })
+  }
+
+  async updateMe(req:Request,res:Response,next:NextFunction){
+    let user = await UserModel.findById(req.tokenInfo._id);
+    if(!user){
+      throw ErrorHelper.userNotExist();
+    }
+
+    let {newName,newPhoneNumber} = req.body;
+    user.name = newName;
+    user.phone=newPhoneNumber;
+    await user.save();
+    return res.status(200).json({
+      status:200,
+      code:"200",
+      message:"succes",
+      data:{
+        user
+      }
+    })
+  }
+
+  async deleteOneUser(req:Request, res:Response, next:NextFunction){
+    if(req.tokenInfo.role_!=ROLES.ADMIN){
+      throw ErrorHelper.permissionDeny();
+    }
+
+    let {id} = req.body;
+
+    let user = await UserModel.findById(id);
+
+    if(!user){
+      throw ErrorHelper.userNotExist();
+    }
+
+    await UserModel.deleteOne({_id:id});
+    return res.status(200).json({
+      status:200,
+      code:"200",
+      messagee:"succes",
+      data:{
+        user
+      }
+    })
+  }
+
 }
 
 export default new UserRoute().router;
