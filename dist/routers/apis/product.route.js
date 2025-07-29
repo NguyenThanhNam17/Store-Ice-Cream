@@ -148,14 +148,11 @@ var ProductRoute = /** @class */ (function (_super) {
     };
     ProductRoute.prototype.addProductForAdmin = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, name, price, image, describe, product, pro;
+            var _a, name, price, image, product, pro;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = req.body, name = _a.name, price = _a.price, image = _a.image, describe = _a.describe;
-                        if (!name || !price || !image || !describe) {
-                            throw error_1.ErrorHelper.requestDataInvalid("invalid");
-                        }
+                        _a = req.body, name = _a.name, price = _a.price, image = _a.image;
                         return [4 /*yield*/, product_model_1.ProductModel.findOne({ name: name })];
                     case 1:
                         product = _b.sent();
@@ -167,7 +164,6 @@ var ProductRoute = /** @class */ (function (_super) {
                             slug: slug(name),
                             price: price,
                             image: image,
-                            describe: describe
                         });
                         return [4 /*yield*/, pro.save()];
                     case 2:

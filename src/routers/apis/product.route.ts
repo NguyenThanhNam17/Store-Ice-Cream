@@ -84,10 +84,8 @@ class ProductRoute extends BaseRoute {
   }
 
   async addProductForAdmin(req:Request,res:Response,next:NextFunction){
-    let {name, price,image,describe}= req.body;
-    if(!name||!price||!image||!describe){
-      throw ErrorHelper.requestDataInvalid("invalid");
-    }
+    let {name, price,image}= req.body;
+   
 
     let product = await ProductModel.findOne({name:name});
     if(product){
@@ -99,7 +97,6 @@ class ProductRoute extends BaseRoute {
       slug: slug(name),
       price:price,
       image:image,
-      describe:describe
     })
 
     await pro.save();
