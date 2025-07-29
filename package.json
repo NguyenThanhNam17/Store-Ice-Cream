@@ -35,7 +35,8 @@
     "@types/lodash": "^4.17.0",
     "@types/mongoose": "^5.11.97",
     "@types/morgan": "^1.9.9",
-    "@types/password-hash": "^1.2.24"
+    "@types/password-hash": "^1.2.24",
+    "@types/slug": "^5.0.9"
   },
   "name": "express-typescript-starter",
   "version": "1.0.0",

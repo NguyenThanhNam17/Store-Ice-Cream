@@ -50,6 +50,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var error_1 = require("../../base/error");
 var baseRoute_1 = require("../../base/baseRoute");
@@ -57,6 +60,7 @@ var product_model_1 = require("../../models/product/product.model");
 var token_helper_1 = require("../../helper/token.helper");
 var role_const_1 = require("../../constants/role.const");
 var user_model_1 = require("../../models/user/user.model");
+var slug_1 = __importDefault(require("slug"));
 var ProductRoute = /** @class */ (function (_super) {
     __extends(ProductRoute, _super);
     function ProductRoute() {
@@ -164,7 +168,7 @@ var ProductRoute = /** @class */ (function (_super) {
                         }
                         pro = new product_model_1.ProductModel({
                             name: name,
-                            slug: slug(name),
+                            slug: (0, slug_1.default)(name),
                             price: price,
                             image: image,
                         });
@@ -272,7 +276,4 @@ var ProductRoute = /** @class */ (function (_super) {
     return ProductRoute;
 }(baseRoute_1.BaseRoute));
 exports.default = new ProductRoute().router;
-function slug(name) {
-    throw new Error("Function not implemented.");
-}
 //# sourceMappingURL=product.route.js.map

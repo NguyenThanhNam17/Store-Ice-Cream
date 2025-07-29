@@ -9,7 +9,7 @@ import { ProductModel } from "../../models/product/product.model";
 import { TokenHelper } from "../../helper/token.helper";
 import { ROLES } from "../../constants/role.const";
 import { UserModel } from "../../models/user/user.model";
-
+import slug from "slug";
 class ProductRoute extends BaseRoute {
   constructor() {
     super();
@@ -171,7 +171,5 @@ async getOneProductBySlug(req:Request,res:Response){
 }
 
 export default new ProductRoute().router;
-function slug(name: any): any {
-  throw new Error("Function not implemented.");
-}
+
 
