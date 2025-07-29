@@ -86,6 +86,9 @@ class ProductRoute extends BaseRoute {
   async addProductForAdmin(req:Request,res:Response,next:NextFunction){
     let {name, price,image}= req.body;
    
+    if(!name||!price||!image){
+      throw ErrorHelper.requestDataInvalid("invalid");
+    }
 
     let product = await ProductModel.findOne({name:name});
     if(product){

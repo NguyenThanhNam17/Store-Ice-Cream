@@ -153,6 +153,9 @@ var ProductRoute = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         _a = req.body, name = _a.name, price = _a.price, image = _a.image;
+                        if (!name || !price || !image) {
+                            throw error_1.ErrorHelper.requestDataInvalid("invalid");
+                        }
                         return [4 /*yield*/, product_model_1.ProductModel.findOne({ name: name })];
                     case 1:
                         product = _b.sent();
