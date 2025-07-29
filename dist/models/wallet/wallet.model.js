@@ -23,15 +23,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CartModel = void 0;
+exports.WalletModel = void 0;
 var mongoose_1 = __importStar(require("mongoose"));
-var model_const_1 = require("../../constants/model.const");
-var cartSchema = new mongoose_1.default.Schema({
-    productId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Product" },
+var walletSchema = new mongoose_1.default.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
-    quantity: { type: Number },
-    status: { type: String, default: model_const_1.CartStatusEnum.PENDING },
+    balance: { type: Number },
+    passCode: { type: Number },
 }, { timestamps: true });
-var CartModel = mongoose_1.default.model("Cart", cartSchema);
-exports.CartModel = CartModel;
-//# sourceMappingURL=cart.model.js.map
+var WalletModel = mongoose_1.default.model("Wallet", walletSchema);
+exports.WalletModel = WalletModel;
+//# sourceMappingURL=wallet.model.js.map

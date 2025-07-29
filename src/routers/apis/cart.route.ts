@@ -69,6 +69,7 @@ class CartRoute extends BaseRoute {
       userId: req.tokenInfo._id,
       status: CartStatusEnum.PENDING,
     });
+    console.log(req.tokenInfo._id)
     return res.status(200).json({
       status: 200,
       code: "200",

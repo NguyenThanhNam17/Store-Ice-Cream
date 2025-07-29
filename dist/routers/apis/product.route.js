@@ -66,6 +66,9 @@ var ProductRoute = /** @class */ (function (_super) {
         this.router.get("/getAllProduct", this.route(this.getAllProduct));
         this.router.get("/getOneProduct/:idProduct", this.route(this.getOneProduct));
         this.router.post("/addProductForAdmin", [this.route(this.authentication)], this.route(this.addProductForAdmin));
+        this.router.post("/deleteProduct", [this.route(this.authentication)], this.route(this.deleteProduct));
+        this.router.post("/updateProduct", [this.route(this.authentication)], this.route(this.updateProduct));
+        this.router.post("/getOneProductBySlug", [this.route(this.authentication)], this.route(this.getOneProductBySlug));
     };
     ProductRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
@@ -161,6 +164,7 @@ var ProductRoute = /** @class */ (function (_super) {
                         }
                         pro = new product_model_1.ProductModel({
                             name: name,
+                            slug: slug(name),
                             price: price,
                             image: image,
                             describe: describe
@@ -180,7 +184,96 @@ var ProductRoute = /** @class */ (function (_super) {
             });
         });
     };
+    ProductRoute.prototype.deleteProduct = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, prod;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        console.log(req.tokenInfo);
+                        id = req.body.id;
+                        return [4 /*yield*/, product_model_1.ProductModel.findById(id)];
+                    case 1:
+                        prod = _a.sent();
+                        if (!prod) {
+                            throw error_1.ErrorHelper.forbidden("not product!!");
+                        }
+                        return [4 /*yield*/, product_model_1.ProductModel.deleteOne({ _id: id })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    prod: prod
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    ProductRoute.prototype.updateProduct = function (req, res, next) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, id, name, price, image, describe, product;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.body, id = _a.id, name = _a.name, price = _a.price, image = _a.image, describe = _a.describe;
+                        return [4 /*yield*/, product_model_1.ProductModel.findById(id)];
+                    case 1:
+                        product = _b.sent();
+                        if (!product) {
+                            throw error_1.ErrorHelper.forbidden("not product!!");
+                        }
+                        product.name = name || product.name;
+                        product.price = price || product.price;
+                        product.image = image || product.image;
+                        product.describe = describe || product.describe;
+                        return [4 /*yield*/, product.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    product: product
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    ProductRoute.prototype.getOneProductBySlug = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var slug, prod;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        slug = req.body.slug;
+                        return [4 /*yield*/, product_model_1.ProductModel.findOne({ slug: slug })];
+                    case 1:
+                        prod = (_a.sent());
+                        if (!prod) {
+                            throw error_1.ErrorHelper.forbidden("not product!!");
+                        }
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
+                                data: {
+                                    prod: prod,
+                                }
+                            })];
+                }
+            });
+        });
+    };
     return ProductRoute;
 }(baseRoute_1.BaseRoute));
 exports.default = new ProductRoute().router;
+function slug(name) {
+    throw new Error("Function not implemented.");
+}
 //# sourceMappingURL=product.route.js.map

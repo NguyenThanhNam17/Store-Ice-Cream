@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 import { BaseDocument } from "../../base/baseModel";
 import { TransStatusEnum } from "../../constants/model.const";
 

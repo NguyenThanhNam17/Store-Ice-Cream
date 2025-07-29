@@ -12,7 +12,7 @@ import { ROLES } from "../../constants/role.const";
 import { UserHelper } from "../../models/user/user.helper";
 import { TokenHelper } from "../../helper/token.helper";
 import { UserRoleEnum } from "../../constants/model.const";
-import phone from "phone/dist";
+import { WalletModel } from "../../models/wallet/wallet.model";
 
 class UserRoute extends BaseRoute {
   constructor() {
@@ -23,35 +23,58 @@ class UserRoute extends BaseRoute {
     this.router.post("/login", this.route(this.login));
     this.router.post("/register", this.route(this.register));
     this.router.get("/getMe", [this.authentication], this.route(this.getMe));
-    this.router.get("/getOneUser", [this.authentication], this.route(this.getOneUser));
-       this.router.get("/getAllUser", [this.authentication], this.route(this.getAllUser));
-        this.router.post("/createUser", [this.authentication], this.route(this.createUser));
-         this.router.post("/updateMe", [this.authentication], this.route(this.updateMe));
-         this.router.get("/deleteOneUser", [this.authentication], this.route(this.deleteOneUser));
-       
+    this.router.get(
+      "/getOneUser",
+      [this.authentication],
+      this.route(this.getOneUser)
+    );
+    this.router.get(
+      "/getAllUser",
+      [this.authentication],
+      this.route(this.getAllUser)
+    );
+    this.router.post(
+      "/createUser",
+      [this.authentication],
+      this.route(this.createUser)
+    );
+    this.router.post(
+      "/updateMe",
+      [this.authentication],
+      this.route(this.updateMe)
+    );
+    this.router.get(
+      "/deleteOneUser",
+      [this.authentication],
+      this.route(this.deleteOneUser)
+    );
+     this.router.post(
+      "/updateOneUserForAdmin",
+      [this.authentication],
+      this.route(this.updateOneUserForAdmin)
+    );
   }
 
   async authentication(req: Request, res: Response, next: NextFunction) {
-        try {
-          if (!req.get("x-token")) {
-            throw ErrorHelper.unauthorized();
-          }
-          const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
-          if ([ROLES.ADMIN, ROLES.CLIENT].includes(tokenData.role_)) {
-            const user: any = await UserModel.findById(tokenData._id);
-            if (!user) {
-              throw ErrorHelper.userNotExist();
-            }
-            req.tokenInfo = tokenData;
-            next();
-          } else {
-            throw ErrorHelper.permissionDeny();
-          }
-        } catch {
-          throw ErrorHelper.unauthorized();
-        }
+    try {
+      if (!req.get("x-token")) {
+        throw ErrorHelper.unauthorized();
       }
-  
+      const tokenData: any = TokenHelper.decodeToken(req.get("x-token"));
+      if ([ROLES.ADMIN, ROLES.CLIENT].includes(tokenData.role_)) {
+        const user: any = await UserModel.findById(tokenData._id);
+        if (!user) {
+          throw ErrorHelper.userNotExist();
+        }
+        req.tokenInfo = tokenData;
+        next();
+      } else {
+        throw ErrorHelper.permissionDeny();
+      }
+    } catch {
+      throw ErrorHelper.unauthorized();
+    }
+  }
 
   async login(req: Request, res: Response) {
     let { username, password } = req.body;
@@ -85,7 +108,7 @@ class UserRoute extends BaseRoute {
   async register(req: Request, res: Response) {
     let { name, phoneNumber, password } = req.body;
     let user = await UserModel.findOne({
-      phone:phoneNumber
+      phone: phoneNumber,
     });
     if (user) {
       throw ErrorHelper.userExisted();
@@ -96,13 +119,23 @@ class UserRoute extends BaseRoute {
     }
     const key = TokenHelper.generateKey();
     user = new UserModel({
-      name:name,
+      name: name,
       phone: phoneNumber,
       password: passwordHash.generate(password),
       role: ROLES.CLIENT,
       key: key,
     });
+    let wallet = new WalletModel({
+      userId:user.id,
+      balance:0,
+    })
+
+    await wallet.save();
+
+    user.walletId = wallet._id;
+
     await user.save();
+
     return res.status(200).json({
       status: 200,
       code: "200",
@@ -114,126 +147,150 @@ class UserRoute extends BaseRoute {
     });
   }
 
-
-  async getMe(req:Request,res:Response){
-    const user:any = await UserModel.findById(req.tokenInfo._id);
-    if(!user){
+  async getMe(req: Request, res: Response) {
+    const user: any = await UserModel.findById(req.tokenInfo._id);
+    if (!user) {
       throw ErrorHelper.userNotExist();
     }
 
     return res.status(200).json({
-      status:200,
-      code:"200",
-      message:"succes",
-      data:{
+      status: 200,
+      code: "200",
+      message: "succes",
+      data: {
         user,
-      }
-    })
+      },
+    });
   }
 
-  async getOneUser(req:Request,res:Response,next:NextFunction){
-    let {id} = req.body;
+  async getOneUser(req: Request, res: Response, next: NextFunction) {
+    let { id } = req.body;
     let user = await UserModel.findById(id);
-    if(!user){
+    if (!user) {
       throw ErrorHelper.userNotExist();
     }
     return res.status(200).json({
-      status:200,
-      code:"200",
-      message:"succes",
-      data:{
-        user
-      }
-    })
-  }
-
-  async getAllUser(req:Request,res:Response,next:NextFunction){
-    let user = await UserModel.find();
-    if(!user){
-      throw ErrorHelper.userNotExist();
-    }
-    return res.status(200).json({
-      status:200,
-      code:"200",
-      message:"succes",
-      data:{
+      status: 200,
+      code: "200",
+      message: "succes",
+      data: {
         user,
-      }
-    })
+      },
+    });
   }
 
-  async createUser(req:Request,res:Response,next:NextFunction){
-    if(UserRoleEnum.ADMIN!=req.tokenInfo.role_){
+  async getAllUser(req: Request, res: Response, next: NextFunction) {
+    let user = await UserModel.find();
+    if (!user) {
+      throw ErrorHelper.userNotExist();
+    }
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      message: "succes",
+      data: {
+        user,
+      },
+    });
+  }
+
+  async createUser(req: Request, res: Response, next: NextFunction) {
+    if (UserRoleEnum.ADMIN != req.tokenInfo.role_) {
       throw ErrorHelper.permissionDeny();
     }
-    let {name,phoneNumber,password,role} = req.body;
-    if(!name||!phoneNumber||!password){
+    let { name, phoneNumber, password, role } = req.body;
+    if (!name || !phoneNumber || !password) {
       throw ErrorHelper.requestDataInvalid("invalid");
     }
-    
-    let phoneNew = await UserModel.findOne({phone:phoneNumber});
-    if(phoneNew){
+
+    let phoneNew = await UserModel.findOne({ phone: phoneNumber });
+    if (phoneNew) {
       throw ErrorHelper.userExisted();
     }
 
-     const key = TokenHelper.generateKey();
+    const key = TokenHelper.generateKey();
     let user = new UserModel({
-      name:name,
-      phone:phoneNumber,
-      password:password,
-      key:key,
-      role:role,
-    })
+      name: name,
+      phone: phoneNumber,
+      password: password,
+      key: key,
+      role: role,
+    });
 
     await user.save();
     return res.status(200).json({
-      status:200,
-      code:"200",
-      message:"succes",
-      data:{
-        user
-      }
-    })
+      status: 200,
+      code: "200",
+      message: "succes",
+      data: {
+        user,
+      },
+    });
   }
 
-  async updateMe(req:Request,res:Response,next:NextFunction){
+  async updateMe(req: Request, res: Response, next: NextFunction) {
     let user = await UserModel.findById(req.tokenInfo._id);
-    if(!user){
+    if (!user) {
       throw ErrorHelper.userNotExist();
     }
 
-    let {newName,newPhoneNumber} = req.body;
+    let { newName, newPhoneNumber } = req.body;
     user.name = newName;
-    user.phone=newPhoneNumber;
+    user.phone = newPhoneNumber;
     await user.save();
     return res.status(200).json({
-      status:200,
-      code:"200",
-      message:"succes",
-      data:{
-        user
-      }
-    })
+      status: 200,
+      code: "200",
+      message: "succes",
+      data: {
+        user,
+      },
+    });
   }
 
-  async deleteOneUser(req:Request, res:Response, next:NextFunction){
-    if(req.tokenInfo.role_!=ROLES.ADMIN){
+  async deleteOneUser(req: Request, res: Response, next: NextFunction) {
+    if (req.tokenInfo.role_ != ROLES.ADMIN) {
       throw ErrorHelper.permissionDeny();
     }
 
-    let {id} = req.body;
+    let { id } = req.body;
 
     let user = await UserModel.findById(id);
 
-    if(!user){
+    if (!user) {
       throw ErrorHelper.userNotExist();
     }
 
-    await UserModel.deleteOne({_id:id});
+    await UserModel.deleteOne({ _id: id });
+    return res.status(200).json({
+      status: 200,
+      code: "200",
+      messagee: "succes",
+      data: {
+        user,
+      },
+    });
+  }
+
+  async updateOneUserForAdmin(req:Request,res:Response){
+    if(req.tokenInfo.role_!=ROLES.ADMIN){
+      throw ErrorHelper.permissionDeny();
+    }    
+    let {id, name, phone, pass, role} = req.body;
+    let user = await UserModel.findById(id);
+    if(!user){
+      throw ErrorHelper.userNotExist();
+    }
+    user.name = name||user.name;
+    user.phone = phone || user.phone;
+    user.password = pass ||user.password;
+    user.role = role||user.role;
+
+    await user.save();
     return res.status(200).json({
       status:200,
       code:"200",
-      messagee:"succes",
+      message:"succes",
       data:{
         user
       }

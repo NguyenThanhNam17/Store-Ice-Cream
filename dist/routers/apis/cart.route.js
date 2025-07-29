@@ -112,6 +112,7 @@ var CartRoute = /** @class */ (function (_super) {
                         })];
                     case 1:
                         carts = _a.sent();
+                        console.log(req.tokenInfo._id);
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
                                 code: "200",

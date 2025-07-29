@@ -13,6 +13,7 @@ import { CartStatusEnum, OrderStatusEnum } from "../../constants/model.const";
 import { OrderModel } from "../../models/order/order.model";
 import { CartModel } from "../../models/cart/cart.model";
 import { ProductModel } from "../../models/product/product.model";
+import { WalletModel } from "../../models/wallet/wallet.model";
 
 class OrderRoute extends BaseRoute {
   constructor() {
@@ -95,12 +96,27 @@ class OrderRoute extends BaseRoute {
       })
     );
 
+    let user = await UserModel.findById(req.tokenInfo._id);
+
+    if(paymentMethod=="WALLET"){
+      let wallet = await WalletModel.findById(user.walletId);
+      if(wallet.balance <totalPrice){
+        throw ErrorHelper.forbidden("Không đủ số dư");
+      }
+      await WalletModel.updateOne({_id:wallet.id},{
+        $inc: {
+          balance:-totalPrice
+        }
+      })
+    }
+
     let order = new OrderModel({
       userId: req.tokenInfo._id,
       cartIds: cartIds,
       paymentMethod: paymentMethod,
       status: OrderStatusEnum.PENDING,
       totalPrice: totalPrice,
+      isPaid:paymentMethod=="CASH"?false:true,
     });
 
     await order.save();

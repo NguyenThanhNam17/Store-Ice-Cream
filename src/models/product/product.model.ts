@@ -7,6 +7,7 @@ export type IProduct = BaseDocument & {
   price?: number;
   image?: string;
   describe?: string;
+  slug?:string;
 };
 
 const productSchema = new mongoose.Schema(
@@ -15,6 +16,7 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, default: 0 },
     image: { type: String },
     describe: { type: String },
+    slug:{type:String}
   },
   { timestamps: true }
 );

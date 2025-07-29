@@ -27,6 +27,10 @@ class ProductRoute extends BaseRoute {
        [this.route(this.authentication)],
       this.route(this.addProductForAdmin)
     );
+
+    this.router.post("/deleteProduct",[this.route(this.authentication)],this.route(this.deleteProduct));
+    this.router.post("/updateProduct",[this.route(this.authentication)],this.route(this.updateProduct));
+    this.router.post("/getOneProductBySlug",[this.route(this.authentication)],this.route(this.getOneProductBySlug));
   }
 
   async authentication(req: Request, res: Response, next: NextFunction) {
@@ -92,6 +96,7 @@ class ProductRoute extends BaseRoute {
 
     let pro = new ProductModel({
       name: name,
+      slug: slug(name),
       price:price,
       image:image,
       describe:describe
@@ -107,6 +112,66 @@ class ProductRoute extends BaseRoute {
       }
     })
   }
+
+async deleteProduct(req:Request,res:Response,next:NextFunction){
+  console.log(req.tokenInfo);
+  let {id} = req.body;
+  let prod = await ProductModel.findById(id);
+  if(!prod){
+    throw ErrorHelper.forbidden("not product!!");
+  }
+  await ProductModel.deleteOne({ _id: id });
+  return res.status(200).json({
+    status:200,
+    code:"200",
+    message:"succes",
+    data:{
+      prod
+    }
+  })
+}
+
+async updateProduct(req:Request,res:Response,next:NextFunction){
+  let {id,name,price,image,describe} = req.body;
+  let product = await ProductModel.findById(id);
+  if(!product){
+    throw ErrorHelper.forbidden("not product!!");
+  }
+  product.name = name||product.name;
+   product.price = price||product.price;
+    product.image = image||product.image;
+     product.describe = describe||product.describe;
+     await product.save();
+     return res.status(200).json({
+      status:200,
+      code:"200",
+      message:"succes",
+      data:{
+        product
+      }
+     })
+}
+
+async getOneProductBySlug(req:Request,res:Response){
+  let {slug} = req.body;
+  let prod = (await ProductModel.findOne({slug:slug}));
+  if(!prod){
+    throw ErrorHelper.forbidden("not product!!");
+  }
+  return res.status(200).json({
+    status:200,
+    code:"200",
+    message:"succes",
+    data:{
+      prod,
+    }
+  })
+}
+
 }
 
 export default new ProductRoute().router;
+function slug(name: any): any {
+  throw new Error("Function not implemented.");
+}
+

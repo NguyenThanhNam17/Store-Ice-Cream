@@ -9,6 +9,7 @@ export type IOrder = BaseDocument & {
   paymentMethod?: string;
   status?: string;
   totalPrice?: number;
+  isPaid?:boolean;
 };
 
 const orderSchema = new mongoose.Schema(
@@ -22,6 +23,7 @@ const orderSchema = new mongoose.Schema(
       enum: Object.values(OrderStatusEnum),
     },
     totalPrice: { type: Number, default: 0 },
+    isPaid:{type:Boolean}
   },
   {
     timestamps: true,

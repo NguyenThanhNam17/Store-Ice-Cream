@@ -62,6 +62,7 @@ var role_const_1 = require("../../constants/role.const");
 var user_helper_1 = require("../../models/user/user.helper");
 var token_helper_1 = require("../../helper/token.helper");
 var model_const_1 = require("../../constants/model.const");
+var wallet_model_1 = require("../../models/wallet/wallet.model");
 var UserRoute = /** @class */ (function (_super) {
     __extends(UserRoute, _super);
     function UserRoute() {
@@ -76,6 +77,7 @@ var UserRoute = /** @class */ (function (_super) {
         this.router.post("/createUser", [this.authentication], this.route(this.createUser));
         this.router.post("/updateMe", [this.authentication], this.route(this.updateMe));
         this.router.get("/deleteOneUser", [this.authentication], this.route(this.deleteOneUser));
+        this.router.post("/updateOneUserForAdmin", [this.authentication], this.route(this.updateOneUserForAdmin));
     };
     UserRoute.prototype.authentication = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
@@ -146,13 +148,13 @@ var UserRoute = /** @class */ (function (_super) {
     };
     UserRoute.prototype.register = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, name, phoneNumber, password, user, key;
+            var _a, name, phoneNumber, password, user, key, wallet;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _a = req.body, name = _a.name, phoneNumber = _a.phoneNumber, password = _a.password;
                         return [4 /*yield*/, user_model_1.UserModel.findOne({
-                                phone: phoneNumber
+                                phone: phoneNumber,
                             })];
                     case 1:
                         user = _b.sent();
@@ -170,8 +172,16 @@ var UserRoute = /** @class */ (function (_super) {
                             role: role_const_1.ROLES.CLIENT,
                             key: key,
                         });
-                        return [4 /*yield*/, user.save()];
+                        wallet = new wallet_model_1.WalletModel({
+                            userId: user.id,
+                            balance: 0,
+                        });
+                        return [4 /*yield*/, wallet.save()];
                     case 2:
+                        _b.sent();
+                        user.walletId = wallet._id;
+                        return [4 /*yield*/, user.save()];
+                    case 3:
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({
                                 status: 200,
@@ -203,7 +213,7 @@ var UserRoute = /** @class */ (function (_super) {
                                 message: "succes",
                                 data: {
                                     user: user,
-                                }
+                                },
                             })];
                 }
             });
@@ -227,8 +237,8 @@ var UserRoute = /** @class */ (function (_super) {
                                 code: "200",
                                 message: "succes",
                                 data: {
-                                    user: user
-                                }
+                                    user: user,
+                                },
                             })];
                 }
             });
@@ -251,7 +261,7 @@ var UserRoute = /** @class */ (function (_super) {
                                 message: "succes",
                                 data: {
                                     user: user,
-                                }
+                                },
                             })];
                 }
             });
@@ -292,8 +302,8 @@ var UserRoute = /** @class */ (function (_super) {
                                 code: "200",
                                 message: "succes",
                                 data: {
-                                    user: user
-                                }
+                                    user: user,
+                                },
                             })];
                 }
             });
@@ -321,8 +331,8 @@ var UserRoute = /** @class */ (function (_super) {
                                 code: "200",
                                 message: "succes",
                                 data: {
-                                    user: user
-                                }
+                                    user: user,
+                                },
                             })];
                 }
             });
@@ -351,6 +361,41 @@ var UserRoute = /** @class */ (function (_super) {
                                 status: 200,
                                 code: "200",
                                 messagee: "succes",
+                                data: {
+                                    user: user,
+                                },
+                            })];
+                }
+            });
+        });
+    };
+    UserRoute.prototype.updateOneUserForAdmin = function (req, res) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, id, name, phone, pass, role, user;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (req.tokenInfo.role_ != role_const_1.ROLES.ADMIN) {
+                            throw error_1.ErrorHelper.permissionDeny();
+                        }
+                        _a = req.body, id = _a.id, name = _a.name, phone = _a.phone, pass = _a.pass, role = _a.role;
+                        return [4 /*yield*/, user_model_1.UserModel.findById(id)];
+                    case 1:
+                        user = _b.sent();
+                        if (!user) {
+                            throw error_1.ErrorHelper.userNotExist();
+                        }
+                        user.name = name || user.name;
+                        user.phone = phone || user.phone;
+                        user.password = pass || user.password;
+                        user.role = role || user.role;
+                        return [4 /*yield*/, user.save()];
+                    case 2:
+                        _b.sent();
+                        return [2 /*return*/, res.status(200).json({
+                                status: 200,
+                                code: "200",
+                                message: "succes",
                                 data: {
                                     user: user
                                 }

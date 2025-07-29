@@ -16,6 +16,7 @@ var orderSchema = new mongoose_1.default.Schema({
         enum: Object.values(model_const_1.OrderStatusEnum),
     },
     totalPrice: { type: Number, default: 0 },
+    isPaid: { type: Boolean }
 }, {
     timestamps: true,
 });

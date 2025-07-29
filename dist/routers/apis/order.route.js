@@ -60,6 +60,7 @@ var model_const_1 = require("../../constants/model.const");
 var order_model_1 = require("../../models/order/order.model");
 var cart_model_1 = require("../../models/cart/cart.model");
 var product_model_1 = require("../../models/product/product.model");
+var wallet_model_1 = require("../../models/wallet/wallet.model");
 var OrderRoute = /** @class */ (function (_super) {
     __extends(OrderRoute, _super);
     function OrderRoute() {
@@ -115,7 +116,7 @@ var OrderRoute = /** @class */ (function (_super) {
     };
     OrderRoute.prototype.createOrder = function (req, res, next) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, cartIds, paymentMethod, carts, totalPrice, order;
+            var _a, cartIds, paymentMethod, carts, totalPrice, user, wallet, order;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -145,19 +146,39 @@ var OrderRoute = /** @class */ (function (_super) {
                             }); }))];
                     case 2:
                         _b.sent();
+                        return [4 /*yield*/, user_model_1.UserModel.findById(req.tokenInfo._id)];
+                    case 3:
+                        user = _b.sent();
+                        if (!(paymentMethod == "WALLET")) return [3 /*break*/, 6];
+                        return [4 /*yield*/, wallet_model_1.WalletModel.findById(user.walletId)];
+                    case 4:
+                        wallet = _b.sent();
+                        if (wallet.balance < totalPrice) {
+                            throw error_1.ErrorHelper.forbidden("Không đủ số dư");
+                        }
+                        return [4 /*yield*/, wallet_model_1.WalletModel.updateOne({ _id: wallet.id }, {
+                                $inc: {
+                                    balance: -totalPrice
+                                }
+                            })];
+                    case 5:
+                        _b.sent();
+                        _b.label = 6;
+                    case 6:
                         order = new order_model_1.OrderModel({
                             userId: req.tokenInfo._id,
                             cartIds: cartIds,
                             paymentMethod: paymentMethod,
                             status: model_const_1.OrderStatusEnum.PENDING,
                             totalPrice: totalPrice,
+                            isPaid: paymentMethod == "CASH" ? false : true,
                         });
                         return [4 /*yield*/, order.save()];
-                    case 3:
+                    case 7:
                         _b.sent();
                         // Cập nhật trạng thái của các giỏ hàng đã dùng thành SUCCESS
                         return [4 /*yield*/, cart_model_1.CartModel.updateMany({ _id: { $in: cartIds } }, { $set: { status: model_const_1.CartStatusEnum.SUCCESS } })];
-                    case 4:
+                    case 8:
                         // Cập nhật trạng thái của các giỏ hàng đã dùng thành SUCCESS
                         _b.sent();
                         return [2 /*return*/, res.status(200).json({

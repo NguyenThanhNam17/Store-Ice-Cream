@@ -13,8 +13,8 @@ export type ICart = BaseDocument & {
 
 const cartSchema = new mongoose.Schema(
   {
-    productId: { type: String },
-    userId: { type: String },
+    productId: { type: Schema.Types.ObjectId,ref:"Product" },
+    userId: { type: Schema.Types.ObjectId,ref:"User" },
     quantity: { type: Number },
     status:{type:String, default:CartStatusEnum.PENDING},
   },
